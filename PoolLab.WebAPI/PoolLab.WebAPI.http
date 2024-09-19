@@ -1,0 +1,6 @@
+@PoolLab.WebAPI_HostAddress = http://localhost:5002
+
+GET {{PoolLab.WebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
