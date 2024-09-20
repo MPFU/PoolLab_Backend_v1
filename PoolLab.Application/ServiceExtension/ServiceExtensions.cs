@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PoolLab.Application.AutoMapper;
 using PoolLab.Application.Interface;
+using PoolLab.Application.Services;
 using PoolLab.Core.Interface;
-using PoolLab.Infrastructure.AutoMapper;
 using PoolLab.Infrastructure.Interface;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace PoolLab.Application.ServiceExtension
         {
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IAreaService, AreaService>();
             services.AddScoped<IBilliardPriceService, BilliardPriceService>();
