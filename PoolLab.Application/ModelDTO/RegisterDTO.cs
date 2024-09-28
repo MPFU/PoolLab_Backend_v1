@@ -16,6 +16,5 @@ namespace PoolLab.Application.ModelDTO
 
         public string? FullName { get; set; }
 
-        public Guid? RoleId { get; set; }
     }
 }

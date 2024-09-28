@@ -9,5 +9,6 @@ namespace PoolLab.Core.Interface
 {
     public interface IRoleRepo : IGenericRepo<Role>
     {
+        Task<Role?> GetRoleByName(string name);
     }
 }

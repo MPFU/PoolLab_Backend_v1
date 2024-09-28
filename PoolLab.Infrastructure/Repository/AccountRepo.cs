@@ -15,17 +15,49 @@ namespace PoolLab.Infrastructure.Interface
         {
         }
 
-        public async Task<string?> CheckDuplicateEmailvsUsername(string email, string username)
+        public async Task<string?> CheckDuplicateEmailvsUsername(Guid? id, string? email, string? username)
         {
-            var checkE = await _dbContext.Accounts.Where(x => x.Email.Equals(email)).FirstOrDefaultAsync();
-            var checkU = await _dbContext.Accounts.Where(x => x.UserName.Equals(username)).FirstOrDefaultAsync();
-            if(checkE != null && checkU != null)
+            Account? checkE = null;
+            Account? checkU = null;
+            if (!string.IsNullOrEmpty(email))
+            {
+                checkE = await _dbContext.Accounts.Where(x => x.Email.Equals(email)).FirstOrDefaultAsync();
+            }
+
+            if (!string.IsNullOrEmpty(username))
+            {
+                checkU = await _dbContext.Accounts.Where(x => x.UserName.Equals(username)).FirstOrDefaultAsync();
+            }
+
+            if (id != null)
+            {
+                if ((checkE != null && checkU != null) && (!checkE.Id.Equals(id) && !checkU.Id.Equals(id)))
+                {
+                    return "Email và Username của bạn đã bị trùng!";
+                }
+                else if(checkE != null && !checkE.Id.Equals(id))
+                {
+                    return "Email của bạn đã bị trùng!";
+                }
+                else if(checkU != null && !checkU.Id.Equals(id))
+                {
+                    return "Username của bạn đã bị trùng!";
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            if (checkE != null && checkU != null)
             {
                 return "Email và Username của bạn đã bị trùng!";
-            }else if(checkE != null)
+            }
+            else if (checkE != null)
             {
                 return "Email của bạn đã bị trùng!";
-            }else if(checkU != null)
+            }
+            else if (checkU != null)
             {
                 return "Username của bạn đã bị trùng!";
             }

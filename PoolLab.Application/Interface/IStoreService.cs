@@ -1,4 +1,5 @@
-﻿using PoolLab.Core.Models;
+﻿using PoolLab.Application.ModelDTO;
+using PoolLab.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,5 +10,10 @@ namespace PoolLab.Application.Interface
 {
     public interface IStoreService 
     {
+        Task<string?> AddNewStore(NewStoreDTO newStoreDTO);
+        Task<string?> DeleteStore(Guid Id);
+        Task<StoreDTO?> GetStoreById(Guid id);
+        Task<IEnumerable<StoreDTO>?> GetAllStore();
+        Task<string?> UpdateStore(Guid Id, NewStoreDTO newStore);
     }
 }

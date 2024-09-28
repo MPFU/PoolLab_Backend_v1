@@ -16,6 +16,20 @@ namespace PoolLab.Application.AutoMapper
             //ACCOUNT
             CreateMap<RegisterDTO,Account>().ReverseMap();
             CreateMap<LoginDTO, Account>().ReverseMap();
+            CreateMap<AccountLoginDTO, Account>().ReverseMap();
+            CreateMap<AccountDTO, Account>().ReverseMap();
+
+            //ROLE
+            CreateMap<RoleDTO, Role>().ReverseMap();
+            CreateMap<Role, NewRoleDTO>().ReverseMap();
+
+            //STORE
+            CreateMap<StoreDTO, Store>().ReverseMap();
+            CreateMap<Store, NewStoreDTO>().ReverseMap();
+
+            //AREA
+            CreateMap<AreaDTO, Area>().ReverseMap();
+            CreateMap<NewAreaDTO, Area>().ReverseMap();
         }
     }
 }

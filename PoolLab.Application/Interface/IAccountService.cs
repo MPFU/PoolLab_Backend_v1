@@ -12,5 +12,9 @@ namespace PoolLab.Application.Interface
     {
         Task<string?> AddNewUser(RegisterDTO registerDTO);
         Task<AccountLoginDTO?> GetAccountByEmailAndPasswordAsync(string email, string password);
+        Task<AccountDTO?> GetAccountById(Guid Id);
+        //Task<string?> CreateAccount()
+        Task<string?> UpdateAccountInfo(Guid Id, UpdateAccDTO updateAccDTO);
+        Task<string?> UpdatePassword(Guid Id, UpdatePassDTO password);
     }
 }
