@@ -1,4 +1,5 @@
-﻿using PoolLab.Core.Interface;
+﻿using Microsoft.EntityFrameworkCore;
+using PoolLab.Core.Interface;
 using PoolLab.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,66 @@ namespace PoolLab.Infrastructure.Interface
     {
         public AccountRepo(PoolLabDbv1Context dbContext) : base(dbContext)
         {
+        }
+
+        public async Task<string?> CheckDuplicateEmailvsUsername(Guid? id, string? email, string? username)
+        {
+            Account? checkE = null;
+            Account? checkU = null;
+            if (!string.IsNullOrEmpty(email))
+            {
+                checkE = await _dbContext.Accounts.Where(x => x.Email.Equals(email)).FirstOrDefaultAsync();
+            }
+
+            if (!string.IsNullOrEmpty(username))
+            {
+                checkU = await _dbContext.Accounts.Where(x => x.UserName.Equals(username)).FirstOrDefaultAsync();
+            }
+
+            if (id != null)
+            {
+                if ((checkE != null && checkU != null) && (!checkE.Id.Equals(id) && !checkU.Id.Equals(id)))
+                {
+                    return "Email và Username của bạn đã bị trùng!";
+                }
+                else if(checkE != null && !checkE.Id.Equals(id))
+                {
+                    return "Email của bạn đã bị trùng!";
+                }
+                else if(checkU != null && !checkU.Id.Equals(id))
+                {
+                    return "Username của bạn đã bị trùng!";
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            if (checkE != null && checkU != null)
+            {
+                return "Email và Username của bạn đã bị trùng!";
+            }
+            else if (checkE != null)
+            {
+                return "Email của bạn đã bị trùng!";
+            }
+            else if (checkU != null)
+            {
+                return "Username của bạn đã bị trùng!";
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public async Task<Account?> GetAccountByEmail(string email)
+        {
+            return await _dbContext.Accounts
+                .Where(x => x.Email.Equals(email))
+                .Include(x => x.Role)
+                .FirstOrDefaultAsync();
         }
     }
 }
