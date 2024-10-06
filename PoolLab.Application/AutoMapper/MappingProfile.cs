@@ -18,6 +18,9 @@ namespace PoolLab.Application.AutoMapper
             CreateMap<LoginDTO, Account>().ReverseMap();
             CreateMap<AccountLoginDTO, Account>().ReverseMap();
             CreateMap<AccountDTO, Account>().ReverseMap();
+            CreateMap<CreateAccDTO, Account>().ReverseMap();
+            CreateMap<GetLoginAccDTO, Account>().ReverseMap();
+            CreateMap<GetAllAccDTO, Account>().ReverseMap();
 
             //ROLE
             CreateMap<RoleDTO, Role>().ReverseMap();
@@ -30,6 +33,16 @@ namespace PoolLab.Application.AutoMapper
             //AREA
             CreateMap<AreaDTO, Area>().ReverseMap();
             CreateMap<NewAreaDTO, Area>().ReverseMap();
+
+            //BIDATYPE
+            CreateMap<BidaTypeDTO, BilliardType>().ReverseMap();
+            CreateMap<NewBidaTypeDTO, BilliardType>().ReverseMap();
+
+            //COMPANY
+            CreateMap<CompanyDTO, Company>().ReverseMap();
+
+            //SUBSCRIPTION
+            CreateMap<SubDTO, Subscription>().ReverseMap();
         }
     }
 }

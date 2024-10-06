@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PoolLab.Application.FilterModel;
 using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
+using PoolLab.Application.Services;
 using PoolLab.WebAPI.ResponseModel;
 
 namespace PoolLab.WebAPI.Controllers
@@ -35,6 +37,36 @@ namespace PoolLab.WebAPI.Controllers
                 {
                     Status = Ok().StatusCode,
                     Data = roleList
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllAccount([FromQuery] AccountFilter accountFilter)
+        {
+            try
+            {
+                var accList = await _accountService.GetAllAccount(accountFilter);
+                if (accList == null)
+                {
+                    return NotFound(new FailResponse()
+                    {
+                        Status = NotFound().StatusCode,
+                        Message = "Không có tài khoản nào !"
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Data = accList
                 });
             }
             catch (Exception ex)
@@ -102,6 +134,38 @@ namespace PoolLab.WebAPI.Controllers
                 return BadRequest(new FailResponse()
                 {
                     Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateNewAccount([FromBody] CreateAccDTO accDTO)
+        {
+            try
+            {
+
+                var requestResult = await _accountService.CreateAccount(accDTO);
+                if (requestResult != null)
+                {
+                    return StatusCode(400, new FailResponse()
+                    {
+                        Status = 400,
+                        Message = requestResult
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Tạo tài khoản thành công."
+                });
+
+            }
+            catch (Exception ex)
+            {
+                return Conflict(new FailResponse()
+                {
+                    Status = Conflict().StatusCode,
                     Message = ex.Message
                 });
             }
