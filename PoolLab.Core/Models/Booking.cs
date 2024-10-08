@@ -34,4 +34,6 @@ public partial class Booking
     public virtual Account? Customer { get; set; }
 
     public virtual Store? Store { get; set; }
+
+    public virtual ICollection<TableAvailability> TableAvailabilities { get; set; } = new List<TableAvailability>();
 }

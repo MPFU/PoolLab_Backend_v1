@@ -47,6 +47,36 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAllStore()
+        {
+            try
+            {
+                var area = await _storeService.GetAllStore();
+                if (area == null || area.Count() <= 0)
+                {
+                    return NotFound(new FailResponse()
+                    {
+                        Status = NotFound().StatusCode,
+                        Message = "Không tìm thấy !"
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Data = area
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> AddNewStore([FromBody] NewStoreDTO store)
         {

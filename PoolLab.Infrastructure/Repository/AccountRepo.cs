@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace PoolLab.Infrastructure.Interface
 {
-    public class AccountRepo : GenericRepo<Account>, IAccountRepo 
+    public class AccountRepo : GenericRepo<Account>, IAccountRepo
     {
         public AccountRepo(PoolLabDbv1Context dbContext) : base(dbContext)
         {
@@ -75,25 +75,15 @@ namespace PoolLab.Infrastructure.Interface
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<Account?> GetAccountLoginStaff(string email, string? store, string? company)
+        public async Task<Account?> GetAccountLoginStaff(string email, Guid? id)
         {
-            if (!string.IsNullOrEmpty(store))
-            {
-                return await _dbContext.Accounts
-                               .Where(x => x.Email.Equals(email) || x.UserName.Equals(email))
-                               .Where(x => x.Store.Name.Equals(store))
-                               .Include(x => x.Role)
-                               .FirstOrDefaultAsync();
-            }
-            if (!string.IsNullOrEmpty(company))
-            {
-                return await _dbContext.Accounts
-                               .Where(x => x.Email.Equals(email) || x.UserName.Equals(email))
-                               .Where(x => x.Company.Name.Equals(store))
-                               .Include(x => x.Role)
-                               .FirstOrDefaultAsync();
-            }
-            return null;
+
+            return await _dbContext.Accounts
+                           .Where(x => x.Email.Equals(email) || x.UserName.Equals(email))
+                           .Where(x => x.StoreId.Equals(id) || x.CompanyId.Equals(id))
+                           .Include(x => x.Role)
+                           .FirstOrDefaultAsync();
+
         }
 
         public async Task<IEnumerable<Account>> GetAllAccounts()

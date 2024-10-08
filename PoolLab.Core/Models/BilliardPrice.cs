@@ -15,9 +15,9 @@ public partial class BilliardPrice
 
     public decimal? NewPrice { get; set; }
 
-    public TimeOnly? TimeStart { get; set; }
+    public DateTime? TimeStart { get; set; }
 
-    public TimeOnly? TimeEnd { get; set; }
+    public DateTime? TimeEnd { get; set; }
 
     public string? Status { get; set; }
 

@@ -86,11 +86,11 @@ namespace PoolLab.Application.ModelDTO
 
         public string? PhoneNumber { get; set; }
 
-        public string? Role { get; set; }
+        public string? RoleName { get; set; }
 
-        public string? Store { get; set; }
+        public Guid? StoreId { get; set; }
 
-        public string? Company { get; set; }
+        public Guid? CompanyId { get; set; }
 
 
     }
@@ -137,9 +137,9 @@ namespace PoolLab.Application.ModelDTO
 
         public string Password { get; set; }
 
-        public string? Store { get; set; }
+        public Guid? StoreId { get; set; }
 
-        public string? Company { get; set; }
+        public Guid? CompanyId { get; set; }
     }
 
     public class GetAllAccDTO

@@ -7,19 +7,19 @@ public partial class Course
 {
     public Guid Id { get; set; }
 
-    public string? Name { get; set; }
+    public string? Title { get; set; }
 
-    public string? TeacherName { get; set; }
+    public string? Descript { get; set; }
 
     public decimal? Price { get; set; }
 
-    public string? TeacherPhone { get; set; }
+    public string? Level { get; set; }
 
-    public string? TeacherContact { get; set; }
-
-    public int? Duration { get; set; }
+    public int? Quantity { get; set; }
 
     public Guid? StoreId { get; set; }
+
+    public Guid? MentorId { get; set; }
 
     public DateTime? CreatedDate { get; set; }
 
@@ -30,4 +30,6 @@ public partial class Course
     public virtual ICollection<RegisteredCourse> RegisteredCourses { get; set; } = new List<RegisteredCourse>();
 
     public virtual Store? Store { get; set; }
+
+    public virtual MentorInfo? MentorInfo { get; set; }
 }

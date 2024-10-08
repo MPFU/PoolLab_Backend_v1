@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PoolLab.Core.Interface
 {
-    public interface IImportProductRepo : IGenericRepo<ImportProduct>
+    public interface ITableAvailability : IGenericRepo<TableAvailability>
     {
     }
 }

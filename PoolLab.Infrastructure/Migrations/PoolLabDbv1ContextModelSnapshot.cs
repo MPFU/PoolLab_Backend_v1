@@ -101,6 +101,31 @@ namespace PoolLab.Infrastructure.Migrations
                     b.ToTable("Account", (string)null);
                 });
 
+            modelBuilder.Entity("PoolLab.Core.Models.AccountVoucher", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CustomerID")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("CustomerID");
+
+                    b.Property<bool?>("IsAvailable")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("VoucherID")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("VoucherID");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerID");
+
+                    b.HasIndex("VoucherID");
+
+                    b.ToTable("AccountVoucher", (string)null);
+                });
+
             modelBuilder.Entity("PoolLab.Core.Models.Area", b =>
                 {
                     b.Property<Guid>("Id")
@@ -146,13 +171,11 @@ namespace PoolLab.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<TimeOnly?>("TimeEnd")
-                        .HasPrecision(0)
-                        .HasColumnType("time(0)");
+                    b.Property<DateTime?>("TimeEnd")
+                        .HasColumnType("datetime");
 
-                    b.Property<TimeOnly?>("TimeStart")
-                        .HasPrecision(0)
-                        .HasColumnType("time(0)");
+                    b.Property<DateTime?>("TimeStart")
+                        .HasColumnType("datetime");
 
                     b.HasKey("Id");
 
@@ -331,15 +354,21 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime");
 
-                    b.Property<int?>("Duration")
-                        .HasColumnType("int");
+                    b.Property<string>("Descript")
+                        .HasColumnType("nvarchar(MAX)");
 
-                    b.Property<string>("Name")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<string>("Level")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid?>("MentorId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal?>("Price")
                         .HasColumnType("decimal(11, 0)");
+
+                    b.Property<int?>("Quantity")
+                        .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .HasMaxLength(50)
@@ -348,22 +377,16 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Property<Guid?>("StoreId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("TeacherContact")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("TeacherName")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("TeacherPhone")
-                        .HasMaxLength(12)
-                        .HasColumnType("nvarchar(12)");
+                    b.Property<string>("Title")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MentorId");
 
                     b.HasIndex("StoreId");
 
@@ -433,67 +456,50 @@ namespace PoolLab.Infrastructure.Migrations
                     b.ToTable("GroupProduct", (string)null);
                 });
 
-            modelBuilder.Entity("PoolLab.Core.Models.ImportBill", b =>
+            modelBuilder.Entity("PoolLab.Core.Models.MentorInfo", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime");
 
+                    b.Property<DateOnly?>("DateOfBirth")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Gender")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("MentorImg")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("PaymentImg")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
+
+                    b.Property<decimal?>("Salary")
+                        .HasColumnType("decimal(11, 0)");
+
                     b.Property<string>("Status")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<Guid?>("StoreId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("StoreID");
-
-                    b.Property<int?>("TotalItems")
-                        .HasColumnType("int");
-
-                    b.Property<decimal?>("TotalPrice")
-                        .HasColumnType("decimal(11, 0)");
-
-                    b.Property<int?>("TotalQuantity")
-                        .HasColumnType("int");
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedBy");
-
-                    b.ToTable("ImportBill", (string)null);
-                });
-
-            modelBuilder.Entity("PoolLab.Core.Models.ImportProduct", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ImportBillId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("ImportBillID");
-
-                    b.Property<decimal?>("Price")
-                        .HasColumnType("decimal(11, 0)");
-
-                    b.Property<Guid?>("ProductId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("ProductID");
-
-                    b.Property<int?>("Quantity")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ImportBillId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("ImportProduct", (string)null);
+                    b.ToTable("MentorInfo", (string)null);
                 });
 
             modelBuilder.Entity("PoolLab.Core.Models.Order", b =>
@@ -731,6 +737,72 @@ namespace PoolLab.Infrastructure.Migrations
                     b.ToTable("ProductType", (string)null);
                 });
 
+            modelBuilder.Entity("PoolLab.Core.Models.RecurringBookings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("BilliardTableId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("BilliardTableID");
+
+                    b.Property<Guid?>("BilliardTypeId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("BilliardTypeID");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime");
+
+                    b.Property<Guid?>("CustomerId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("CustomerID");
+
+                    b.Property<string>("DaysOfWeek")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateOnly?>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<TimeOnly?>("EndTime")
+                        .HasPrecision(0)
+                        .HasColumnType("time(0)");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateOnly?>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<TimeOnly?>("StartTime")
+                        .HasPrecision(0)
+                        .HasColumnType("time(0)");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid?>("StoreId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("StoreID");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BilliardTableId");
+
+                    b.HasIndex("BilliardTypeId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("StoreId");
+
+                    b.ToTable("RecurringBookings", (string)null);
+                });
+
             modelBuilder.Entity("PoolLab.Core.Models.RegisteredCourse", b =>
                 {
                     b.Property<Guid>("Id")
@@ -935,6 +1007,48 @@ namespace PoolLab.Infrastructure.Migrations
                     b.ToTable("SubscriptionType", (string)null);
                 });
 
+            modelBuilder.Entity("PoolLab.Core.Models.TableAvailability", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("BilliardTableId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("BilliardTableID");
+
+                    b.Property<Guid?>("BookingId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("BookingID");
+
+                    b.Property<DateOnly?>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<TimeOnly?>("EndTime")
+                        .HasPrecision(0)
+                        .HasColumnType("time(0)");
+
+                    b.Property<bool?>("IsAvailable")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("RecurringBookingId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("RecurringBookingID");
+
+                    b.Property<TimeOnly?>("StartTime")
+                        .HasPrecision(0)
+                        .HasColumnType("time(0)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BilliardTableId");
+
+                    b.HasIndex("BookingId");
+
+                    b.HasIndex("RecurringBookingId");
+
+                    b.ToTable("TableAvailability", (string)null);
+                });
+
             modelBuilder.Entity("PoolLab.Core.Models.Unit", b =>
                 {
                     b.Property<Guid>("Id")
@@ -951,6 +1065,43 @@ namespace PoolLab.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Unit", (string)null);
+                });
+
+            modelBuilder.Entity("PoolLab.Core.Models.Voucher", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("Point")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("TypeCode")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime");
+
+                    b.Property<int?>("VouCode")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Voucher", (string)null);
                 });
 
             modelBuilder.Entity("PoolLab.Core.Models.Account", b =>
@@ -986,6 +1137,25 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Navigation("Store");
 
                     b.Navigation("Sub");
+                });
+
+            modelBuilder.Entity("PoolLab.Core.Models.AccountVoucher", b =>
+                {
+                    b.HasOne("PoolLab.Core.Models.Account", "Account")
+                        .WithMany("AccountVouchers")
+                        .HasForeignKey("CustomerID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_AccountVouchers_Account");
+
+                    b.HasOne("PoolLab.Core.Models.Voucher", "Voucher")
+                        .WithMany("AccountVouchers")
+                        .HasForeignKey("VoucherID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_AccountVouchers_Voucher");
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Voucher");
                 });
 
             modelBuilder.Entity("PoolLab.Core.Models.BilliardTable", b =>
@@ -1052,11 +1222,19 @@ namespace PoolLab.Infrastructure.Migrations
 
             modelBuilder.Entity("PoolLab.Core.Models.Course", b =>
                 {
+                    b.HasOne("PoolLab.Core.Models.MentorInfo", "MentorInfo")
+                        .WithMany("Courses")
+                        .HasForeignKey("MentorId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_Course_MentorInfo");
+
                     b.HasOne("PoolLab.Core.Models.Store", "Store")
                         .WithMany("Courses")
                         .HasForeignKey("StoreId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_Course_Store");
+
+                    b.Navigation("MentorInfo");
 
                     b.Navigation("Store");
                 });
@@ -1078,36 +1256,6 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Navigation("Manager");
 
                     b.Navigation("Store");
-                });
-
-            modelBuilder.Entity("PoolLab.Core.Models.ImportBill", b =>
-                {
-                    b.HasOne("PoolLab.Core.Models.Account", "CreatedByNavigation")
-                        .WithMany("ImportBills")
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_ImportBill_Account");
-
-                    b.Navigation("CreatedByNavigation");
-                });
-
-            modelBuilder.Entity("PoolLab.Core.Models.ImportProduct", b =>
-                {
-                    b.HasOne("PoolLab.Core.Models.ImportBill", "ImportBill")
-                        .WithMany("ImportProducts")
-                        .HasForeignKey("ImportBillId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_ImportProduct_ImportBill");
-
-                    b.HasOne("PoolLab.Core.Models.Product", "Product")
-                        .WithMany("ImportProducts")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_ImportProduct_Product");
-
-                    b.Navigation("ImportBill");
-
-                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("PoolLab.Core.Models.Order", b =>
@@ -1212,6 +1360,41 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Navigation("Unit");
                 });
 
+            modelBuilder.Entity("PoolLab.Core.Models.RecurringBookings", b =>
+                {
+                    b.HasOne("PoolLab.Core.Models.BilliardTable", "BilliardTable")
+                        .WithMany("RecurringBookings")
+                        .HasForeignKey("BilliardTableId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_RecBook_BilliardTable");
+
+                    b.HasOne("PoolLab.Core.Models.BilliardType", "BilliardType")
+                        .WithMany("RecurringBookings")
+                        .HasForeignKey("BilliardTypeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_RecBook_BilliardType");
+
+                    b.HasOne("PoolLab.Core.Models.Account", "Customer")
+                        .WithMany("RecurringBookings")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_RecBook_Account");
+
+                    b.HasOne("PoolLab.Core.Models.Store", "Store")
+                        .WithMany("RecurringBookings")
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_RecBook_Store");
+
+                    b.Navigation("BilliardTable");
+
+                    b.Navigation("BilliardType");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Store");
+                });
+
             modelBuilder.Entity("PoolLab.Core.Models.RegisteredCourse", b =>
                 {
                     b.HasOne("PoolLab.Core.Models.Course", "Course")
@@ -1266,17 +1449,46 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Navigation("SubType");
                 });
 
+            modelBuilder.Entity("PoolLab.Core.Models.TableAvailability", b =>
+                {
+                    b.HasOne("PoolLab.Core.Models.BilliardTable", "BilliardTable")
+                        .WithMany("TableAvailabilities")
+                        .HasForeignKey("BilliardTableId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_TableAvailability_BilliardTable");
+
+                    b.HasOne("PoolLab.Core.Models.Booking", "Booking")
+                        .WithMany("TableAvailabilities")
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_TableAvailability_Booking");
+
+                    b.HasOne("PoolLab.Core.Models.RecurringBookings", "RecurringBooking")
+                        .WithMany("TableAvailabilities")
+                        .HasForeignKey("RecurringBookingId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_TableAvailability_RecurringBooking");
+
+                    b.Navigation("BilliardTable");
+
+                    b.Navigation("Booking");
+
+                    b.Navigation("RecurringBooking");
+                });
+
             modelBuilder.Entity("PoolLab.Core.Models.Account", b =>
                 {
+                    b.Navigation("AccountVouchers");
+
                     b.Navigation("Bookings");
 
                     b.Navigation("Events");
 
-                    b.Navigation("ImportBills");
-
                     b.Navigation("Orders");
 
                     b.Navigation("Payments");
+
+                    b.Navigation("RecurringBookings");
 
                     b.Navigation("Reviews");
                 });
@@ -1298,6 +1510,10 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Navigation("OrderDetails");
 
                     b.Navigation("PlayTimes");
+
+                    b.Navigation("RecurringBookings");
+
+                    b.Navigation("TableAvailabilities");
                 });
 
             modelBuilder.Entity("PoolLab.Core.Models.BilliardType", b =>
@@ -1305,6 +1521,13 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Navigation("BilliardTables");
 
                     b.Navigation("Bookings");
+
+                    b.Navigation("RecurringBookings");
+                });
+
+            modelBuilder.Entity("PoolLab.Core.Models.Booking", b =>
+                {
+                    b.Navigation("TableAvailabilities");
                 });
 
             modelBuilder.Entity("PoolLab.Core.Models.Company", b =>
@@ -1324,9 +1547,9 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("PoolLab.Core.Models.ImportBill", b =>
+            modelBuilder.Entity("PoolLab.Core.Models.MentorInfo", b =>
                 {
-                    b.Navigation("ImportProducts");
+                    b.Navigation("Courses");
                 });
 
             modelBuilder.Entity("PoolLab.Core.Models.Order", b =>
@@ -1340,14 +1563,17 @@ namespace PoolLab.Infrastructure.Migrations
 
             modelBuilder.Entity("PoolLab.Core.Models.Product", b =>
                 {
-                    b.Navigation("ImportProducts");
-
                     b.Navigation("OrderDetails");
                 });
 
             modelBuilder.Entity("PoolLab.Core.Models.ProductType", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("PoolLab.Core.Models.RecurringBookings", b =>
+                {
+                    b.Navigation("TableAvailabilities");
                 });
 
             modelBuilder.Entity("PoolLab.Core.Models.Role", b =>
@@ -1364,6 +1590,8 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Navigation("Courses");
 
                     b.Navigation("Events");
+
+                    b.Navigation("RecurringBookings");
 
                     b.Navigation("RegisteredCourses");
 
@@ -1385,6 +1613,11 @@ namespace PoolLab.Infrastructure.Migrations
             modelBuilder.Entity("PoolLab.Core.Models.Unit", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("PoolLab.Core.Models.Voucher", b =>
+                {
+                    b.Navigation("AccountVouchers");
                 });
 #pragma warning restore 612, 618
         }

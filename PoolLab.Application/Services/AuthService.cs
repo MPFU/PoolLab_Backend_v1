@@ -105,9 +105,10 @@ namespace PoolLab.Application.Services
 
         private string CreateToken2(GetLoginAccDTO account)
         {
+            string company = (account.CompanyId != null && account.CompanyId != Guid.Empty) ? account.CompanyId.ToString() : "";
             var nowUtc = DateTime.UtcNow;
             var expirationDuration = TimeSpan.FromMinutes(60);
-            var expirationUtc = nowUtc.Add(expirationDuration);
+            var expirationUtc = nowUtc.Add(expirationDuration);           
 
             var claims = new List<Claim>
             {
@@ -128,9 +129,11 @@ namespace PoolLab.Application.Services
                 new Claim(ClaimTypes.Role, account.Role.Name),
                 new Claim("AccountId", account.Id.ToString()),
                 new Claim("AccountStatus", account.Status),
-                new Claim("StoreId", account.StoreId.ToString()),
+                new Claim("CompanyId", company),
+                new Claim("StoreId", account.StoreId.ToString()),              
                 new Claim("Username", account.UserName)
             };
+
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes
                 (_configuration.GetSection("JwtSecurityToken:Key").Value));

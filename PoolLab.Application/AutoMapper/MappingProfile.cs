@@ -38,6 +38,14 @@ namespace PoolLab.Application.AutoMapper
             CreateMap<BidaTypeDTO, BilliardType>().ReverseMap();
             CreateMap<NewBidaTypeDTO, BilliardType>().ReverseMap();
 
+            //BIDAPRICE
+            CreateMap<BilliardPriceDTO, BilliardPrice>().ReverseMap();
+            CreateMap<NewBilliardPriceDTO, BilliardPrice>().ReverseMap();
+
+            //BIDATABLE
+            CreateMap<BilliardTableDTO, BilliardTable>().ReverseMap();
+            CreateMap<NewBilliardTableDTO, BilliardTable>().ReverseMap();
+
             //COMPANY
             CreateMap<CompanyDTO, Company>().ReverseMap();
 

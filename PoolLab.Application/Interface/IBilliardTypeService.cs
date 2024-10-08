@@ -10,6 +10,10 @@ namespace PoolLab.Application.Interface
 {
     public interface IBilliardTypeService 
     {
-        
+        Task<string?> AddNewBidaType(NewBidaTypeDTO newBidaTypeDTO);
+        Task<string?> DeleteBidaType(Guid Id);
+        Task<BidaTypeDTO?> GetBidaTypeById(Guid id);
+        Task<IEnumerable<BidaTypeDTO?>> GetAllBidaType();
+        Task<string?> UpdateBidaTye(Guid Id, NewBidaTypeDTO newBidaTypeDTO);
     }
 }

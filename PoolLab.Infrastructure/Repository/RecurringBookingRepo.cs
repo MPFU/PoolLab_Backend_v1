@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace PoolLab.Infrastructure.Interface
 {
-    public class ImportBillRepo : GenericRepo<ImportBill> , IImportBillRepo
+    public class RecurringBookingRepo : GenericRepo<RecurringBookings>, IRecurringBookingRepo
     {
-        public ImportBillRepo(PoolLabDbv1Context dbContext) : base(dbContext)
+        public RecurringBookingRepo(PoolLabDbv1Context dbContext) : base(dbContext)
         {
         }
     }

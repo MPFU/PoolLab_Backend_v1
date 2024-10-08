@@ -1,4 +1,5 @@
-﻿using PoolLab.Core.Interface;
+﻿using Microsoft.EntityFrameworkCore;
+using PoolLab.Core.Interface;
 using PoolLab.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,11 @@ namespace PoolLab.Infrastructure.Interface
     {
         public BilliardPriceRepo(PoolLabDbv1Context dbContext) : base(dbContext)
         {
+        }
+
+        public async Task<Guid?> GetBidaPriceIdByName(string? name)
+        {
+            return await _dbContext.BilliardPrices.Where(x => x.Name.Equals(name)).Select(d => d.Id).FirstOrDefaultAsync();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using PoolLab.Application.FilterModel;
 using PoolLab.Application.FilterModel.Helper;
 using PoolLab.Application.Interface;
@@ -44,7 +45,7 @@ namespace PoolLab.Application.Interface
                 account.Tier = 0;
                 account.TotalTime = 0;
                 account.Status = "Kích hoạt";
-                var role1 = await _unitOfWork.RoleRepo.GetRoleByName("Customer");
+                var role1 = await _unitOfWork.RoleRepo.GetRoleByName("Member");
                 account.RoleId = role1.Id;
                 await _unitOfWork.AccountRepo.AddAsync(account);
                 var result = await _unitOfWork.SaveAsync() > 0;
@@ -82,22 +83,24 @@ namespace PoolLab.Application.Interface
                 account.Balance = 0;
                 account.Tier = 0;
                 account.TotalTime = 0;
-                account.Status = "Kích hoạt";
-                if(!string.IsNullOrEmpty(createAccDTO.Store))
-                {
-                    var storeid = await _unitOfWork.StoreRepo.GetStoreByName(createAccDTO.Store);
-                    if (storeid == null)
-                    {
-                        return "Không tìm thấy cơ sở này !";
-                    }
-                    account.StoreId = storeid.Id;
-                }               
-                var roleId = await _unitOfWork.RoleRepo.GetRoleByName(createAccDTO.Role);
+                account.Status = "Kích hoạt";                              
+                var roleId = await _unitOfWork.RoleRepo.GetRoleByName(createAccDTO.RoleName);
                 if (roleId == null)
                 {
                     return "Không tìm thấy chức vụ này !";
-                }
+                }              
                 account.RoleId = roleId.Id;
+                if(createAccDTO.RoleName.Equals("Super Manager"))
+                {
+                    account.StoreId = null;
+                    account.CompanyId = createAccDTO.CompanyId;
+                }
+                else
+                {
+                    account.StoreId = createAccDTO.StoreId;
+                    account.CompanyId = null;
+                }
+               
                 await _unitOfWork.AccountRepo.AddAsync(_mapper.Map<Account>(account));
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)
@@ -210,7 +213,8 @@ namespace PoolLab.Application.Interface
         //Login of Manager, Staff,...
         public async Task<GetLoginAccDTO?> GetLoginAcc(LoginAccDTO loginAccDTO)
         {
-            var acc = await _unitOfWork.AccountRepo.GetAccountLoginStaff(loginAccDTO.Email, loginAccDTO.Store, loginAccDTO.Company);
+            var id = (loginAccDTO.StoreId != null && loginAccDTO.StoreId != Guid.Empty) ? loginAccDTO.StoreId : loginAccDTO.CompanyId;
+            var acc = await _unitOfWork.AccountRepo.GetAccountLoginStaff(loginAccDTO.Email, id);
             if(acc != null)
             {
                 if(BCrypt.Net.BCrypt.Verify(loginAccDTO.Password, acc.PasswordHash))
