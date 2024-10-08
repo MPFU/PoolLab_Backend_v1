@@ -45,6 +45,7 @@ namespace PoolLab.Application.ServiceExtension
             services.AddScoped<ISubscriptionService, SubscriptionService>();
             services.AddScoped<ISubscriptionTypeService, SubscriptionTypeService>();
             services.AddScoped<IUnitService, UnitService>();
+            services.AddScoped<IQRCodeGenerate, QRCodeService>();
 
             services.AddAutoMapper(typeof(MappingProfile).Assembly);
 

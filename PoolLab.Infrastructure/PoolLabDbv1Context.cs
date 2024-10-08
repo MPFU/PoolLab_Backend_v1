@@ -37,10 +37,6 @@ public partial class PoolLabDbv1Context : DbContext
 
     public virtual DbSet<GroupProduct> GroupProducts { get; set; }
 
-    public virtual DbSet<ImportBill> ImportBills { get; set; }
-
-    public virtual DbSet<ImportProduct> ImportProducts { get; set; }
-
     public virtual DbSet<Order> Orders { get; set; }
 
     public virtual DbSet<OrderDetail> OrderDetails { get; set; }
@@ -66,6 +62,16 @@ public partial class PoolLabDbv1Context : DbContext
     public virtual DbSet<SubscriptionType> SubscriptionTypes { get; set; }
 
     public virtual DbSet<Unit> Units { get; set; }
+
+    public virtual DbSet<RecurringBookings> RecurringBookings { get; set; }
+
+    public virtual DbSet<TableAvailability> TableAvailability { get; set; }
+
+    public virtual DbSet<Voucher> Voucher { get; set; }
+
+    public virtual DbSet<AccountVoucher> AccountVoucher { get; set; }
+
+    public virtual DbSet<MentorInfo> MentorInfos { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -145,8 +151,8 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.NewPrice).HasColumnType("decimal(11, 0)");
             entity.Property(e => e.OldPrice).HasColumnType("decimal(11, 0)");
             entity.Property(e => e.Status).HasMaxLength(50);
-            entity.Property(e => e.TimeEnd).HasPrecision(0);
-            entity.Property(e => e.TimeStart).HasPrecision(0);
+            entity.Property(e => e.TimeEnd).HasColumnType("datetime");
+            entity.Property(e => e.TimeStart).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<BilliardTable>(entity =>
@@ -229,6 +235,72 @@ public partial class PoolLabDbv1Context : DbContext
                 .OnDelete(DeleteBehavior.NoAction);
         });
 
+        modelBuilder.Entity<RecurringBookings>(entity =>
+        {
+            entity.ToTable("RecurringBookings");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.BilliardTableId).HasColumnName("BilliardTableID");
+            entity.Property(e => e.BilliardTypeId).HasColumnName("BilliardTypeID");
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+            entity.Property(e => e.CustomerId).HasColumnName("CustomerID");
+            entity.Property(e => e.Message).HasMaxLength(500);
+            entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.DaysOfWeek).HasMaxLength(50);
+            entity.Property(e => e.StoreId).HasColumnName("StoreID");
+            entity.Property(e => e.StartTime).HasPrecision(0);
+            entity.Property(e => e.EndTime).HasPrecision(0);
+
+            entity.HasOne(d => d.BilliardTable).WithMany(p => p.RecurringBookings)
+                .HasForeignKey(d => d.BilliardTableId)
+                .HasConstraintName("FK_RecBook_BilliardTable")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(d => d.BilliardType).WithMany(p => p.RecurringBookings)
+                .HasForeignKey(d => d.BilliardTypeId)
+                .HasConstraintName("FK_RecBook_BilliardType")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(d => d.Customer).WithMany(p => p.RecurringBookings)
+                .HasForeignKey(d => d.CustomerId)
+                .HasConstraintName("FK_RecBook_Account")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(d => d.Store).WithMany(p => p.RecurringBookings)
+                .HasForeignKey(d => d.StoreId)
+                .HasConstraintName("FK_RecBook_Store")
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        modelBuilder.Entity<TableAvailability>(entity =>
+        {
+            entity.ToTable("TableAvailability");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.BilliardTableId).HasColumnName("BilliardTableID");
+            entity.Property(e => e.BookingId).HasColumnName("BookingID");
+            entity.Property(e => e.RecurringBookingId).HasColumnName("RecurringBookingID");
+            entity.Property(e => e.StartTime).HasPrecision(0);
+            entity.Property(e => e.EndTime).HasPrecision(0);
+            entity.Property(e => e.IsAvailable).HasColumnType("bit");
+
+            entity.HasOne(d => d.BilliardTable).WithMany(p => p.TableAvailabilities)
+                  .HasForeignKey(d => d.BilliardTableId)
+                  .HasConstraintName("FK_TableAvailability_BilliardTable")
+                  .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(d => d.Booking).WithMany(p => p.TableAvailabilities)
+                  .HasForeignKey(d => d.BookingId)
+                  .HasConstraintName("FK_TableAvailability_Booking")
+                  .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(d => d.RecurringBooking).WithMany(p => p.TableAvailabilities)
+                  .HasForeignKey(d => d.RecurringBookingId)
+                  .HasConstraintName("FK_TableAvailability_RecurringBooking")
+                  .OnDelete(DeleteBehavior.NoAction);
+        });
+
         modelBuilder.Entity<Company>(entity =>
         {
             entity.ToTable("Company");
@@ -247,17 +319,23 @@ public partial class PoolLabDbv1Context : DbContext
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CreatedDate).HasColumnType("datetime");
-            entity.Property(e => e.Name).HasMaxLength(100);
+            entity.Property(e => e.Title).HasMaxLength(100);
             entity.Property(e => e.Price).HasColumnType("decimal(11, 0)");
             entity.Property(e => e.Status).HasMaxLength(50);
-            entity.Property(e => e.TeacherContact).HasMaxLength(200);
-            entity.Property(e => e.TeacherName).HasMaxLength(50);
-            entity.Property(e => e.TeacherPhone).HasMaxLength(12);
+            entity.Property(e => e.Descript).HasColumnType("nvarchar(MAX)");
+            entity.Property(e => e.Level).HasMaxLength(50);
             entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
 
             entity.HasOne(d => d.Store).WithMany(p => p.Courses)
                 .HasForeignKey(d => d.StoreId)
                 .HasConstraintName("FK_Course_Store")
+                .OnDelete(DeleteBehavior.NoAction);
+
+
+            entity.HasOne(d => d.MentorInfo).WithMany(p => p.Courses)
+                .HasForeignKey(d => d.MentorId)
+                .HasConstraintName("FK_Course_MentorInfo")
                 .OnDelete(DeleteBehavior.NoAction);
         });
 
@@ -293,43 +371,7 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Descript).HasMaxLength(400);
             entity.Property(e => e.Name).HasMaxLength(50);
-        });
-
-        modelBuilder.Entity<ImportBill>(entity =>
-        {
-            entity.ToTable("ImportBill");
-
-            entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
-            entity.Property(e => e.Status).HasMaxLength(50);
-            entity.Property(e => e.StoreId).HasColumnName("StoreID");
-            entity.Property(e => e.TotalPrice).HasColumnType("decimal(11, 0)");
-
-            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.ImportBills)
-                .HasForeignKey(d => d.CreatedBy)
-                .HasConstraintName("FK_ImportBill_Account")
-                .OnDelete(DeleteBehavior.NoAction);
-        });
-
-        modelBuilder.Entity<ImportProduct>(entity =>
-        {
-            entity.ToTable("ImportProduct");
-
-            entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.ImportBillId).HasColumnName("ImportBillID");
-            entity.Property(e => e.Price).HasColumnType("decimal(11, 0)");
-            entity.Property(e => e.ProductId).HasColumnName("ProductID");
-
-            entity.HasOne(d => d.ImportBill).WithMany(p => p.ImportProducts)
-                .HasForeignKey(d => d.ImportBillId)
-                .HasConstraintName("FK_ImportProduct_ImportBill")
-                .OnDelete(DeleteBehavior.NoAction);
-
-            entity.HasOne(d => d.Product).WithMany(p => p.ImportProducts)
-                .HasForeignKey(d => d.ProductId)
-                .HasConstraintName("FK_ImportProduct_Product")
-                .OnDelete(DeleteBehavior.NoAction);
-        });
+        });   
 
         modelBuilder.Entity<Order>(entity =>
         {
@@ -573,6 +615,54 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.Name).HasMaxLength(50);
         });
 
+        modelBuilder.Entity<Voucher>(entity =>
+        {
+            entity.ToTable("Voucher");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Description).HasMaxLength(400);
+            entity.Property(e => e.Name).HasMaxLength(100);
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+            entity.Property(e => e.Status).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<AccountVoucher>(entity =>
+        {
+            entity.ToTable("AccountVoucher");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.VoucherID).HasColumnName("VoucherID");
+            entity.Property(e => e.CustomerID).HasColumnName("CustomerID");
+            entity.Property(e => e.IsAvailable).HasColumnType("bit");
+
+            entity.HasOne(d => d.Voucher).WithMany(p => p.AccountVouchers)
+                .HasForeignKey(d => d.VoucherID)
+                .OnDelete(DeleteBehavior.NoAction)
+                .HasConstraintName("FK_AccountVouchers_Voucher");
+
+            entity.HasOne(d => d.Account).WithMany(p => p.AccountVouchers)
+              .HasForeignKey(d => d.CustomerID)
+              .OnDelete(DeleteBehavior.NoAction)
+              .HasConstraintName("FK_AccountVouchers_Account");
+        });
+
+        modelBuilder.Entity<MentorInfo>(entity =>
+        {
+            entity.ToTable("MentorInfo");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Name).HasMaxLength(50);
+            entity.Property(e => e.PhoneNumber).HasMaxLength(15);
+            entity.Property(e => e.Gender).HasMaxLength(10);
+            entity.Property(e => e.MentorImg).HasMaxLength(100);
+            entity.Property(e => e.PaymentImg).HasMaxLength(100);
+            entity.Property(e => e.Salary).HasColumnType("decimal(11, 0)");
+            entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+
+        });
         OnModelCreatingPartial(modelBuilder);
     }
 

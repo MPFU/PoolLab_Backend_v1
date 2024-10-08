@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PoolLab.Core.Interface
 {
-    public interface IImportBillRepo : IGenericRepo<ImportBill>
+    public interface IRecurringBookingRepo : IGenericRepo<RecurringBookings>
     {
     }
 }

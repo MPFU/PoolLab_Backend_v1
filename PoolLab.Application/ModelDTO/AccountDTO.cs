@@ -13,6 +13,8 @@ namespace PoolLab.Application.ModelDTO
 
         public string? Email { get; set; }
 
+        public string? PasswordHash { get; set; }
+
         public string? AvatarUrl { get; set; }
 
         public string? UserName { get; set; }
@@ -45,7 +47,7 @@ namespace PoolLab.Application.ModelDTO
 
         public AccountDTO()
         {
-            
+
         }
     }
 
@@ -61,7 +63,7 @@ namespace PoolLab.Application.ModelDTO
 
         public string? Status { get; set; }
 
-        public virtual Role? Role { get; set; }
+        public Role? Role { get; set; }
     }
 
     public class LoginDTO
@@ -72,6 +74,24 @@ namespace PoolLab.Application.ModelDTO
 
     public class CreateAccDTO
     {
+        public string? Email { get; set; }
+
+        public string? PasswordHash { get; set; }
+
+        public string? AvatarUrl { get; set; }
+
+        public string? UserName { get; set; }
+
+        public string? FullName { get; set; }
+
+        public string? PhoneNumber { get; set; }
+
+        public string? RoleName { get; set; }
+
+        public Guid? StoreId { get; set; }
+
+        public Guid? CompanyId { get; set; }
+
 
     }
 
@@ -92,5 +112,72 @@ namespace PoolLab.Application.ModelDTO
     {
         public string? OldPassword { get; set; }
         public string? NewPassword { get; set; }
+    }
+
+    public class GetLoginAccDTO
+    {
+        public Guid Id { get; set; }
+
+        public string? UserName { get; set; }
+
+        public string? FullName { get; set; }
+
+        public string? Status { get; set; }
+
+        public Role? Role { get; set; }
+
+        public Guid? StoreId { get; set; }
+
+        public Guid? CompanyId { get; set; }
+    }
+
+    public class LoginAccDTO
+    {
+        public string Email { get; set; }
+
+        public string Password { get; set; }
+
+        public Guid? StoreId { get; set; }
+
+        public Guid? CompanyId { get; set; }
+    }
+
+    public class GetAllAccDTO
+    {
+        public Guid Id { get; set; }
+
+        public string? Email { get; set; }
+
+        public string? PasswordHash { get; set; }
+
+        public string? AvatarUrl { get; set; }
+
+        public string? UserName { get; set; }
+
+        public string? FullName { get; set; }
+
+        public string? PhoneNumber { get; set; }
+
+        public RoleDTO? Role { get; set; }
+
+        public StoreDTO? Store { get; set; }
+
+        public int? Point { get; set; }
+
+        public decimal? Balance { get; set; }
+
+        public int? TotalTime { get; set; }
+
+        public string? Rank { get; set; }
+
+        public int? Tier { get; set; }
+
+        public SubDTO? Sub { get; set; }
+
+        public CompanyDTO? Company { get; set; }
+
+        public DateTime? JoinDate { get; set; }
+
+        public string? Status { get; set; }
     }
 }

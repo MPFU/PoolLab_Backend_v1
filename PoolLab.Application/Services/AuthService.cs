@@ -37,6 +37,16 @@ namespace PoolLab.Application.Services
             return CreateToken(acc);           
         }
 
+        public async Task<string> LoginStaffAsync(LoginAccDTO loginAccDTO)
+        {
+            var acc = await _accountService.GetLoginAcc(loginAccDTO);
+            if(acc == null)
+            {
+                return null;
+            }
+            return CreateToken2(acc);
+        }
+
         public async Task<string> RegisterAsync(RegisterDTO registerData)
         {
             try
@@ -73,8 +83,57 @@ namespace PoolLab.Application.Services
                                   _configuration.GetSection("JwtSecurityToken:Audience").Value),
                 new Claim(ClaimTypes.Role, account.Role.Name),
                 new Claim("AccountId", account.Id.ToString()),
-                new Claim("AccountStatus", account.Status),               
+                new Claim("AccountStatus", account.Status),
+                new Claim("Username", account.UserName)
             };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes
+                (_configuration.GetSection("JwtSecurityToken:Key").Value));
+            var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
+            var token = new JwtSecurityToken(
+                        issuer: _configuration.GetSection("JwtSecurityToken:Issuer").Value,
+                        audience: _configuration.GetSection("JwtSecurityToken:Audience").Value,
+                        claims: claims,
+                        expires: expirationUtc,
+                        signingCredentials: signIn);
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenString = tokenHandler.WriteToken(token);
+
+            return tokenString;
+        }
+
+        private string CreateToken2(GetLoginAccDTO account)
+        {
+            string company = (account.CompanyId != null && account.CompanyId != Guid.Empty) ? account.CompanyId.ToString() : "";
+            var nowUtc = DateTime.UtcNow;
+            var expirationDuration = TimeSpan.FromMinutes(60);
+            var expirationUtc = nowUtc.Add(expirationDuration);           
+
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub,
+                        _configuration.GetSection("JwtSecurityToken:Subject").Value),
+                new Claim(JwtRegisteredClaimNames.Jti,
+                                  Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Iat,
+                                  EpochTime.GetIntDate(nowUtc).ToString(),
+                                  ClaimValueTypes.Integer64),
+                new Claim(JwtRegisteredClaimNames.Exp,
+                                  EpochTime.GetIntDate(expirationUtc).ToString(),
+                                  ClaimValueTypes.Integer64),
+                new Claim(JwtRegisteredClaimNames.Iss,
+                                  _configuration.GetSection("JwtSecurityToken:Issuer").Value),
+                new Claim(JwtRegisteredClaimNames.Aud,
+                                  _configuration.GetSection("JwtSecurityToken:Audience").Value),
+                new Claim(ClaimTypes.Role, account.Role.Name),
+                new Claim("AccountId", account.Id.ToString()),
+                new Claim("AccountStatus", account.Status),
+                new Claim("CompanyId", company),
+                new Claim("StoreId", account.StoreId.ToString()),              
+                new Claim("Username", account.UserName)
+            };
+
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes
                 (_configuration.GetSection("JwtSecurityToken:Key").Value));

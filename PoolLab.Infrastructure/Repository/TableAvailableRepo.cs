@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace PoolLab.Infrastructure.Interface
 {
-    public class ImportProductRepo : GenericRepo<ImportProduct>, IImportProductRepo
+    public class TableAvailableRepo : GenericRepo<TableAvailability> , ITableAvailability
     {
-        public ImportProductRepo(PoolLabDbv1Context dbContext) : base(dbContext)
+        public TableAvailableRepo(PoolLabDbv1Context dbContext) : base(dbContext)
         {
         }
     }

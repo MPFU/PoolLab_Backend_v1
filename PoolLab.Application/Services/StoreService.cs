@@ -69,9 +69,9 @@ namespace PoolLab.Application.Interface
             }
         }
 
-        public Task<IEnumerable<StoreDTO>?> GetAllStore()
+        public async Task<IEnumerable<StoreDTO>?> GetAllStore()
         {
-            throw new NotImplementedException();
+            return _mapper.Map<IEnumerable<StoreDTO>?>(await _unitOfWork.StoreRepo.GetAllAsync());
         }
 
         public async Task<StoreDTO?> GetStoreById(Guid id)

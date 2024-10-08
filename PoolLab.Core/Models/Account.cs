@@ -43,11 +43,11 @@ public partial class Account
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
+    public virtual ICollection<RecurringBookings> RecurringBookings { get; set; } = new List<RecurringBookings>();
+
     public virtual Company? Company { get; set; }
 
     public virtual ICollection<Event> Events { get; set; } = new List<Event>();
-
-    public virtual ICollection<ImportBill> ImportBills { get; set; } = new List<ImportBill>();
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 
@@ -60,4 +60,6 @@ public partial class Account
     public virtual Store? Store { get; set; }
 
     public virtual Subscription? Sub { get; set; }
+
+    public virtual ICollection<AccountVoucher> AccountVouchers { get; set; } = new List<AccountVoucher>();
 }

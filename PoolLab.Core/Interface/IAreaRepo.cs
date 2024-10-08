@@ -9,5 +9,6 @@ namespace PoolLab.Core.Interface
 {
     public interface IAreaRepo : IGenericRepo<Area>
     {
+        Task<Guid?> GetAreaIdByName (string? name); 
     }
 }

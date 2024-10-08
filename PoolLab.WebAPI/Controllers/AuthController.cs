@@ -51,6 +51,37 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> LoginStaff(LoginAccDTO loginData)
+        {
+            try
+            {
+                var loginRequest = await _authService.LoginStaffAsync(loginData);
+                if (loginRequest == null)
+                {
+                    return Ok(new SucceededRespone()
+                    {
+                        Status = NotFound().StatusCode,
+                        Message = "Sai email hoặc password!"
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Đăng nhập thành công.",
+                    Data = loginRequest
+                });
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(new FailResponse()
+                {
+                    Status = NotFound().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegisterDTO registerRequest)
         {
             try
@@ -59,9 +90,9 @@ namespace PoolLab.WebAPI.Controllers
                 var requestResult = await _authService.RegisterAsync(registerRequest);
                 if (requestResult != null)
                 {
-                    return StatusCode(500, new FailResponse()
+                    return StatusCode(400, new FailResponse()
                     {
-                        Status = 500,
+                        Status = 400,
                         Message = requestResult
                     });
                 }

@@ -9,5 +9,7 @@ namespace PoolLab.Core.Interface
 {
     public interface IStoreRepo : IGenericRepo<Store>
     {
+
+        Task<Store?> GetStoreByName(string name);
     }
 }

@@ -15,5 +15,7 @@ public partial class BilliardType
 
     public virtual ICollection<BilliardTable> BilliardTables { get; set; } = new List<BilliardTable>();
 
+    public virtual ICollection<RecurringBookings> RecurringBookings { get; set; } = new List<RecurringBookings>();
+
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 }

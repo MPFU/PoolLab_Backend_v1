@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PoolLab.Application.FilterModel;
 using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
 using PoolLab.WebAPI.ResponseModel;
@@ -8,22 +9,22 @@ namespace PoolLab.WebAPI.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class AreaController : ControllerBase
+    public class BilliardPriceController : ControllerBase
     {
-        private readonly IAreaService _areaService;
+        private readonly IBilliardPriceService _billiardPriceService;
 
-        public AreaController(IAreaService areaService)
+        public BilliardPriceController(IBilliardPriceService billiardPriceService)
         {
-            _areaService = areaService;
+            _billiardPriceService = billiardPriceService;
         }
 
         [HttpGet("id")]
-        public async Task<IActionResult> GetAreaByID(Guid id)
+        public async Task<IActionResult> GetBilliardPriceByID(Guid id)
         {
             try
             {
-                var area = await _areaService.GetAreaById(id);
-                if (area == null)
+                var area = await _billiardPriceService.GetBidaPriceById(id);
+                if (area == null )
                 {
                     return NotFound(new FailResponse()
                     {
@@ -48,11 +49,11 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllArea()
+        public async Task<IActionResult> GetAllBilliardPrice([FromQuery]BidaPriceFilter bidaPriceFilter)
         {
             try
             {
-                var area = await _areaService.GetAllArea();
+                var area = await _billiardPriceService.GetAllBidaPrice(bidaPriceFilter);
                 if (area == null || area.Count() <= 0)
                 {
                     return NotFound(new FailResponse()
@@ -78,11 +79,11 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddNewArea([FromBody] NewAreaDTO areaDTO)
+        public async Task<IActionResult> AddNewBilliardPrice([FromBody] NewBilliardPriceDTO areaDTO)
         {
             try
             {
-                var newRole = await _areaService.AddNewArea(areaDTO);
+                var newRole = await _billiardPriceService.AddNewBidaPrice(areaDTO);
                 if (newRole != null)
                 {
                     return BadRequest(new FailResponse()
@@ -108,11 +109,41 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpPut("id")]
-        public async Task<IActionResult> UpdateArea(Guid id, [FromBody] NewAreaDTO areaDTO)
+        public async Task<IActionResult> UpdateBilliardPrice(Guid id, [FromBody] NewBilliardPriceDTO areaDTO)
         {
             try
             {
-                var newRole = await _areaService.UpdateArea(id, areaDTO);
+                var newRole = await _billiardPriceService.UpdateBilliardPrice(id, areaDTO);
+                if (newRole != null)
+                {
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = newRole
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Cập nhật thành công."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPut("id")]
+        public async Task<IActionResult> UpdateBilliardPriceStatus(Guid id, [FromQuery] string status)
+        {
+            try
+            {
+                var newRole = await _billiardPriceService.UpdateBilliardPriceStatus(id, status);
                 if (newRole != null)
                 {
                     return BadRequest(new FailResponse()
@@ -138,11 +169,11 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpDelete("id")]
-        public async Task<IActionResult> DeleteRole(Guid id)
+        public async Task<IActionResult> DeleteBilliardPrice(Guid id)
         {
             try
             {
-                var newRole = await _areaService.DeleteArea(id);
+                var newRole = await _billiardPriceService.DeleteBidaPrice(id);
                 if (newRole != null)
                 {
                     return BadRequest(new FailResponse()
@@ -166,5 +197,7 @@ namespace PoolLab.WebAPI.Controllers
                 });
             }
         }
+
+
     }
 }

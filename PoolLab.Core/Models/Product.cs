@@ -33,8 +33,6 @@ public partial class Product
 
     public string? Status { get; set; }
 
-    public virtual ICollection<ImportProduct> ImportProducts { get; set; } = new List<ImportProduct>();
-
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
     public virtual GroupProduct? ProductGroup { get; set; }

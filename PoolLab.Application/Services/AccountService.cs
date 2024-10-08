@@ -1,5 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using PoolLab.Application.FilterModel;
+using PoolLab.Application.FilterModel.Helper;
 using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
 using PoolLab.Core.Interface;
@@ -42,7 +45,7 @@ namespace PoolLab.Application.Interface
                 account.Tier = 0;
                 account.TotalTime = 0;
                 account.Status = "Kích hoạt";
-                var role1 = await _unitOfWork.RoleRepo.GetRoleByName("Customer");
+                var role1 = await _unitOfWork.RoleRepo.GetRoleByName("Member");
                 account.RoleId = role1.Id;
                 await _unitOfWork.AccountRepo.AddAsync(account);
                 var result = await _unitOfWork.SaveAsync() > 0;
@@ -58,9 +61,63 @@ namespace PoolLab.Application.Interface
             }
         }
 
+        public async Task<string?> CreateAccount(CreateAccDTO createAccDTO)
+        {
+            try
+            {
+                AccountDTO account = new AccountDTO();
+                var check = await _unitOfWork.AccountRepo.CheckDuplicateEmailvsUsername(null, createAccDTO.Email, createAccDTO.UserName);
+                if (check != null)
+                {
+                    return check;
+                }
+                account.Id = Guid.NewGuid();
+                account.Email = createAccDTO.Email;
+                account.AvatarUrl = createAccDTO.AvatarUrl;
+                account.PhoneNumber = createAccDTO.PhoneNumber;
+                account.PasswordHash = BCrypt.Net.BCrypt.HashPassword(createAccDTO.PasswordHash);
+                account.UserName = createAccDTO.UserName;   
+                account.FullName = createAccDTO.FullName;
+                account.JoinDate = DateTime.UtcNow;
+                account.Point = 0;
+                account.Balance = 0;
+                account.Tier = 0;
+                account.TotalTime = 0;
+                account.Status = "Kích hoạt";                              
+                var roleId = await _unitOfWork.RoleRepo.GetRoleByName(createAccDTO.RoleName);
+                if (roleId == null)
+                {
+                    return "Không tìm thấy chức vụ này !";
+                }              
+                account.RoleId = roleId.Id;
+                if(createAccDTO.RoleName.Equals("Super Manager"))
+                {
+                    account.StoreId = null;
+                    account.CompanyId = createAccDTO.CompanyId;
+                }
+                else
+                {
+                    account.StoreId = createAccDTO.StoreId;
+                    account.CompanyId = null;
+                }
+               
+                await _unitOfWork.AccountRepo.AddAsync(_mapper.Map<Account>(account));
+                var result = await _unitOfWork.SaveAsync() > 0;
+                if (!result)
+                {
+                    return "Tạo tài khoản thất bại.";
+                }
+                return null;
+            }
+            catch (DbUpdateException)
+            {
+                throw;
+            }
+        }
+
         public async Task<AccountLoginDTO?> GetAccountByEmailAndPasswordAsync(string email, string password)
         {
-            var acc = await _unitOfWork.AccountRepo.GetAccountByEmail(email);
+            var acc = await _unitOfWork.AccountRepo.GetAccountByEmailOrUsername(email);
             if (acc != null)
             {
                 if (BCrypt.Net.BCrypt.Verify(password, acc.PasswordHash))
@@ -74,6 +131,98 @@ namespace PoolLab.Application.Interface
         public async Task<AccountDTO?> GetAccountById(Guid Id)
         {
             return _mapper.Map<AccountDTO?>(await _unitOfWork.AccountRepo.GetByIdAsync(Id));
+        }
+
+        public async Task<PageResult<GetAllAccDTO>> GetAllAccount(AccountFilter accountFilter)
+        {
+            var accList = _mapper.Map<IEnumerable<GetAllAccDTO>>(await _unitOfWork.AccountRepo.GetAllAccounts());
+            IQueryable<GetAllAccDTO> result = accList.AsQueryable();
+
+            //Filter
+            if (!string.IsNullOrEmpty(accountFilter.UserName))
+                result = result.Where(x => x.UserName.Contains(accountFilter.UserName, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(accountFilter.FullName))
+                result = result.Where(x => x.FullName.Contains(accountFilter.FullName, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(accountFilter.PhoneNumber))
+                result = result.Where(x => x.PhoneNumber.Contains(accountFilter.PhoneNumber, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(accountFilter.Rank))
+                result = result.Where(x => x.Rank.Contains(accountFilter.Rank, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(accountFilter.Status))
+                result = result.Where(x => x.Status.Contains(accountFilter.Status, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(accountFilter.RoleName))
+                result = result.Where(x => x.Role.Name.Contains(accountFilter.RoleName, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(accountFilter.StoreName))
+                result = result.Where(x => x.Store.Name.Contains(accountFilter.StoreName, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(accountFilter.ComapanyName))
+                result = result.Where(x => x.Company.Name.Contains(accountFilter.ComapanyName, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(accountFilter.SubName))
+                result = result.Where(x => x.Sub.Name.Contains(accountFilter.SubName, StringComparison.OrdinalIgnoreCase));
+
+            //Sorting
+            if (!string.IsNullOrEmpty(accountFilter.SortBy))
+            {
+                switch (accountFilter.SortBy)
+                {
+                    case "joinDate":
+                        result = accountFilter.SortAscending ?
+                            result.OrderBy(x => x.JoinDate) :
+                            result.OrderByDescending(x => x.JoinDate);
+                        break;
+                    case "point":
+                        result = accountFilter.SortAscending ? 
+                            result.OrderBy(x => x.Point) :
+                            result.OrderByDescending(x => x.Point);
+                        break;
+                    case "balance":
+                        result = accountFilter.SortAscending ?
+                            result.OrderBy(x => x.Balance) :
+                            result.OrderByDescending(x => x.Balance);
+                        break;
+                    case "totalTime":
+                        result = accountFilter.SortAscending ?
+                            result.OrderBy(x => x.TotalTime) :
+                            result.OrderByDescending(x => x.TotalTime);
+                        break;
+                }
+            }
+
+            //Paging
+            var pageItems = result
+                .Skip((accountFilter.PageNumber - 1) * accountFilter.PageSize)
+                .Take(accountFilter.PageSize)
+                .ToList();
+
+            return new PageResult<GetAllAccDTO>
+            {
+                Items = pageItems,
+                PageNumber = accountFilter.PageNumber,
+                PageSize = accountFilter.PageSize,
+                TotalItem = result.Count(),
+                TotalPages = (int)Math.Ceiling((decimal)result.Count() / (decimal)accountFilter.PageSize)
+            };
+        }
+
+        //Login of Manager, Staff,...
+        public async Task<GetLoginAccDTO?> GetLoginAcc(LoginAccDTO loginAccDTO)
+        {
+            var id = (loginAccDTO.StoreId != null && loginAccDTO.StoreId != Guid.Empty) ? loginAccDTO.StoreId : loginAccDTO.CompanyId;
+            var acc = await _unitOfWork.AccountRepo.GetAccountLoginStaff(loginAccDTO.Email, id);
+            if(acc != null)
+            {
+                if(BCrypt.Net.BCrypt.Verify(loginAccDTO.Password, acc.PasswordHash))
+                {
+                    return _mapper.Map<GetLoginAccDTO>(acc);
+                }
+            }
+            return null;
         }
 
         public async Task<string?> UpdateAccountInfo(Guid Id, UpdateAccDTO updateAccDTO)

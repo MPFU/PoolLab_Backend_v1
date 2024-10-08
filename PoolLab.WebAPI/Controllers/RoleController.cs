@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
+using PoolLab.Core.Models;
 using PoolLab.WebAPI.ResponseModel;
 
 namespace PoolLab.WebAPI.Controllers
@@ -23,7 +24,7 @@ namespace PoolLab.WebAPI.Controllers
             try
             {
                 var roleList = await _roleService.GetAllRole();
-                if (roleList == null)
+                if (roleList == null || roleList.Count() <= 0)
                 {
                     return NotFound(new FailResponse()
                     {

@@ -35,11 +35,11 @@ namespace PoolLab.Infrastructure.Interface
                 {
                     return "Email và Username của bạn đã bị trùng!";
                 }
-                else if(checkE != null && !checkE.Id.Equals(id))
+                else if (checkE != null && !checkE.Id.Equals(id))
                 {
                     return "Email của bạn đã bị trùng!";
                 }
-                else if(checkU != null && !checkU.Id.Equals(id))
+                else if (checkU != null && !checkU.Id.Equals(id))
                 {
                     return "Username của bạn đã bị trùng!";
                 }
@@ -67,12 +67,33 @@ namespace PoolLab.Infrastructure.Interface
             }
         }
 
-        public async Task<Account?> GetAccountByEmail(string email)
+        public async Task<Account?> GetAccountByEmailOrUsername(string email)
         {
             return await _dbContext.Accounts
-                .Where(x => x.Email.Equals(email))
+                .Where(x => x.Email.Equals(email) || x.UserName.Equals(email))
                 .Include(x => x.Role)
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<Account?> GetAccountLoginStaff(string email, Guid? id)
+        {
+
+            return await _dbContext.Accounts
+                           .Where(x => x.Email.Equals(email) || x.UserName.Equals(email))
+                           .Where(x => x.StoreId.Equals(id) || x.CompanyId.Equals(id))
+                           .Include(x => x.Role)
+                           .FirstOrDefaultAsync();
+
+        }
+
+        public async Task<IEnumerable<Account>> GetAllAccounts()
+        {
+            return await _dbContext.Accounts
+                .Include(x => x.Role)
+                .Include(x => x.Store)
+                .Include(x => x.Company)
+                .Include(x => x.Sub)
+                .ToListAsync();
         }
     }
 }

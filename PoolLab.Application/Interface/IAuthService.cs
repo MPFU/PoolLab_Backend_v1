@@ -11,5 +11,6 @@ namespace PoolLab.Application.Interface
     {
         Task<string> LoginAsync(LoginDTO loginData);
         Task<string> RegisterAsync(RegisterDTO registerData);
+        Task<string> LoginStaffAsync(LoginAccDTO loginAccDTO);
     }
 }

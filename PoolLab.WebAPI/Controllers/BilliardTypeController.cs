@@ -8,21 +8,22 @@ namespace PoolLab.WebAPI.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class AreaController : ControllerBase
+    public class BilliardTypeController : ControllerBase
     {
-        private readonly IAreaService _areaService;
 
-        public AreaController(IAreaService areaService)
+        private readonly IBilliardTypeService _billiardTypeService;
+
+        public BilliardTypeController(IBilliardTypeService billiardTypeService)
         {
-            _areaService = areaService;
+            _billiardTypeService = billiardTypeService;
         }
 
         [HttpGet("id")]
-        public async Task<IActionResult> GetAreaByID(Guid id)
+        public async Task<IActionResult> GetBilliardTypeByID(Guid id)
         {
             try
             {
-                var area = await _areaService.GetAreaById(id);
+                var area = await _billiardTypeService.GetBidaTypeById(id);
                 if (area == null)
                 {
                     return NotFound(new FailResponse()
@@ -48,11 +49,11 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllArea()
+        public async Task<IActionResult> GetAllBilliardType()
         {
             try
             {
-                var area = await _areaService.GetAllArea();
+                var area = await _billiardTypeService.GetAllBidaType();
                 if (area == null || area.Count() <= 0)
                 {
                     return NotFound(new FailResponse()
@@ -78,11 +79,11 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddNewArea([FromBody] NewAreaDTO areaDTO)
+        public async Task<IActionResult> AddNewBilliardType([FromBody] NewBidaTypeDTO areaDTO)
         {
             try
             {
-                var newRole = await _areaService.AddNewArea(areaDTO);
+                var newRole = await _billiardTypeService.AddNewBidaType(areaDTO);
                 if (newRole != null)
                 {
                     return BadRequest(new FailResponse()
@@ -108,11 +109,11 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpPut("id")]
-        public async Task<IActionResult> UpdateArea(Guid id, [FromBody] NewAreaDTO areaDTO)
+        public async Task<IActionResult> UpdateBilliardType(Guid id, [FromBody] NewBidaTypeDTO areaDTO)
         {
             try
             {
-                var newRole = await _areaService.UpdateArea(id, areaDTO);
+                var newRole = await _billiardTypeService.UpdateBidaTye(id, areaDTO);
                 if (newRole != null)
                 {
                     return BadRequest(new FailResponse()
@@ -138,11 +139,11 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpDelete("id")]
-        public async Task<IActionResult> DeleteRole(Guid id)
+        public async Task<IActionResult> DeleteBilliardType(Guid id)
         {
             try
             {
-                var newRole = await _areaService.DeleteArea(id);
+                var newRole = await _billiardTypeService.DeleteBidaType(id);
                 if (newRole != null)
                 {
                     return BadRequest(new FailResponse()

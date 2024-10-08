@@ -10,6 +10,8 @@ namespace PoolLab.Core.Interface
     public interface IAccountRepo : IGenericRepo<Account>
     {
         Task<string?> CheckDuplicateEmailvsUsername(Guid? id,string? email, string? username);
-        Task<Account?> GetAccountByEmail(string email);
+        Task<Account?> GetAccountByEmailOrUsername(string email);
+        Task<Account?> GetAccountLoginStaff(string email, Guid? id);
+        Task<IEnumerable<Account>> GetAllAccounts();
     }
 }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PoolLab.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateDB : Migration
+    public partial class CreatedbPoolLab : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -34,8 +34,8 @@ namespace PoolLab.Infrastructure.Migrations
                     Descript = table.Column<string>(type: "nvarchar(400)", maxLength: 400, nullable: true),
                     OldPrice = table.Column<decimal>(type: "decimal(11,0)", nullable: true),
                     NewPrice = table.Column<decimal>(type: "decimal(11,0)", nullable: true),
-                    TimeStart = table.Column<TimeOnly>(type: "time(0)", precision: 0, nullable: true),
-                    TimeEnd = table.Column<TimeOnly>(type: "time(0)", precision: 0, nullable: true),
+                    TimeStart = table.Column<DateTime>(type: "datetime", nullable: true),
+                    TimeEnd = table.Column<DateTime>(type: "datetime", nullable: true),
                     Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
@@ -87,6 +87,27 @@ namespace PoolLab.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "MentorInfo",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: true),
+                    MentorImg = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Gender = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
+                    DateOfBirth = table.Column<DateOnly>(type: "date", nullable: true),
+                    Salary = table.Column<decimal>(type: "decimal(11,0)", nullable: true),
+                    PaymentImg = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime", nullable: true),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MentorInfo", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ProductType",
                 columns: table => new
                 {
@@ -135,6 +156,25 @@ namespace PoolLab.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Unit", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Voucher",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(400)", maxLength: 400, nullable: true),
+                    Point = table.Column<int>(type: "int", nullable: true),
+                    VouCode = table.Column<int>(type: "int", nullable: true),
+                    TypeCode = table.Column<int>(type: "int", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime", nullable: true),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Voucher", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -272,13 +312,13 @@ namespace PoolLab.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    TeacherName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Descript = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
                     Price = table.Column<decimal>(type: "decimal(11,0)", nullable: true),
-                    TeacherPhone = table.Column<string>(type: "nvarchar(12)", maxLength: 12, nullable: true),
-                    TeacherContact = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    Duration = table.Column<int>(type: "int", nullable: true),
+                    Level = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Quantity = table.Column<int>(type: "int", nullable: true),
                     StoreId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    MentorId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime", nullable: true),
                     UpdatedDate = table.Column<DateTime>(type: "datetime", nullable: true),
                     Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
@@ -286,6 +326,11 @@ namespace PoolLab.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Course", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Course_MentorInfo",
+                        column: x => x.MentorId,
+                        principalTable: "MentorInfo",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Course_Store",
                         column: x => x.StoreId,
@@ -369,6 +414,30 @@ namespace PoolLab.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AccountVoucher",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CustomerID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    VoucherID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsAvailable = table.Column<bool>(type: "bit", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AccountVoucher", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AccountVouchers_Account",
+                        column: x => x.CustomerID,
+                        principalTable: "Account",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_AccountVouchers_Voucher",
+                        column: x => x.VoucherID,
+                        principalTable: "Voucher",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Booking",
                 columns: table => new
                 {
@@ -440,29 +509,6 @@ namespace PoolLab.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ImportBill",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    TotalItems = table.Column<int>(type: "int", nullable: true),
-                    TotalQuantity = table.Column<int>(type: "int", nullable: true),
-                    TotalPrice = table.Column<decimal>(type: "decimal(11,0)", nullable: true),
-                    StoreID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "datetime", nullable: true),
-                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ImportBill", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ImportBill_Account",
-                        column: x => x.CreatedBy,
-                        principalTable: "Account",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Order",
                 columns: table => new
                 {
@@ -481,6 +527,50 @@ namespace PoolLab.Infrastructure.Migrations
                         name: "FK_Order_Account",
                         column: x => x.CustomerID,
                         principalTable: "Account",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RecurringBookings",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CustomerID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    BilliardTypeID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    StoreID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    BilliardTableID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Message = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    DaysOfWeek = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    StartDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    EndDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    StartTime = table.Column<TimeOnly>(type: "time(0)", precision: 0, nullable: true),
+                    EndTime = table.Column<TimeOnly>(type: "time(0)", precision: 0, nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime", nullable: true),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RecurringBookings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RecBook_Account",
+                        column: x => x.CustomerID,
+                        principalTable: "Account",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_RecBook_BilliardTable",
+                        column: x => x.BilliardTableID,
+                        principalTable: "BilliardTable",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_RecBook_BilliardType",
+                        column: x => x.BilliardTypeID,
+                        principalTable: "BilliardType",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_RecBook_Store",
+                        column: x => x.StoreID,
+                        principalTable: "Store",
                         principalColumn: "Id");
                 });
 
@@ -507,31 +597,6 @@ namespace PoolLab.Infrastructure.Migrations
                         name: "FK_Review_Store",
                         column: x => x.StoreID,
                         principalTable: "Store",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ImportProduct",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ImportBillID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ProductID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Quantity = table.Column<int>(type: "int", nullable: true),
-                    Price = table.Column<decimal>(type: "decimal(11,0)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ImportProduct", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ImportProduct_ImportBill",
-                        column: x => x.ImportBillID,
-                        principalTable: "ImportBill",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_ImportProduct_Product",
-                        column: x => x.ProductID,
-                        principalTable: "Product",
                         principalColumn: "Id");
                 });
 
@@ -629,6 +694,39 @@ namespace PoolLab.Infrastructure.Migrations
                         principalColumn: "Id");
                 });
 
+            migrationBuilder.CreateTable(
+                name: "TableAvailability",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BilliardTableID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    RecurringBookingID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    BookingID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Date = table.Column<DateOnly>(type: "date", nullable: true),
+                    StartTime = table.Column<TimeOnly>(type: "time(0)", precision: 0, nullable: true),
+                    EndTime = table.Column<TimeOnly>(type: "time(0)", precision: 0, nullable: true),
+                    IsAvailable = table.Column<bool>(type: "bit", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TableAvailability", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TableAvailability_BilliardTable",
+                        column: x => x.BilliardTableID,
+                        principalTable: "BilliardTable",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_TableAvailability_Booking",
+                        column: x => x.BookingID,
+                        principalTable: "Booking",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_TableAvailability_RecurringBooking",
+                        column: x => x.RecurringBookingID,
+                        principalTable: "RecurringBookings",
+                        principalColumn: "Id");
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Account_CompanyID",
                 table: "Account",
@@ -648,6 +746,16 @@ namespace PoolLab.Infrastructure.Migrations
                 name: "IX_Account_SubID",
                 table: "Account",
                 column: "SubID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AccountVoucher_CustomerID",
+                table: "AccountVoucher",
+                column: "CustomerID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AccountVoucher_VoucherID",
+                table: "AccountVoucher",
+                column: "VoucherID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BilliardTable_AreaID",
@@ -685,6 +793,11 @@ namespace PoolLab.Infrastructure.Migrations
                 column: "StoreID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Course_MentorId",
+                table: "Course",
+                column: "MentorId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Course_StoreId",
                 table: "Course",
                 column: "StoreId");
@@ -698,21 +811,6 @@ namespace PoolLab.Infrastructure.Migrations
                 name: "IX_Event_StoreID",
                 table: "Event",
                 column: "StoreID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ImportBill_CreatedBy",
-                table: "ImportBill",
-                column: "CreatedBy");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ImportProduct_ImportBillID",
-                table: "ImportProduct",
-                column: "ImportBillID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ImportProduct_ProductID",
-                table: "ImportProduct",
-                column: "ProductID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Order_CustomerID",
@@ -775,6 +873,26 @@ namespace PoolLab.Infrastructure.Migrations
                 column: "UnitID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_RecurringBookings_BilliardTableID",
+                table: "RecurringBookings",
+                column: "BilliardTableID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RecurringBookings_BilliardTypeID",
+                table: "RecurringBookings",
+                column: "BilliardTypeID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RecurringBookings_CustomerID",
+                table: "RecurringBookings",
+                column: "CustomerID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RecurringBookings_StoreID",
+                table: "RecurringBookings",
+                column: "StoreID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RegisteredCourse_CourseID",
                 table: "RegisteredCourse",
                 column: "CourseID");
@@ -803,19 +921,31 @@ namespace PoolLab.Infrastructure.Migrations
                 name: "IX_Subscription_SubTypeID",
                 table: "Subscription",
                 column: "SubTypeID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TableAvailability_BilliardTableID",
+                table: "TableAvailability",
+                column: "BilliardTableID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TableAvailability_BookingID",
+                table: "TableAvailability",
+                column: "BookingID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TableAvailability_RecurringBookingID",
+                table: "TableAvailability",
+                column: "RecurringBookingID");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Booking");
+                name: "AccountVoucher");
 
             migrationBuilder.DropTable(
                 name: "Event");
-
-            migrationBuilder.DropTable(
-                name: "ImportProduct");
 
             migrationBuilder.DropTable(
                 name: "OrderDetail");
@@ -833,19 +963,25 @@ namespace PoolLab.Infrastructure.Migrations
                 name: "Review");
 
             migrationBuilder.DropTable(
-                name: "ImportBill");
+                name: "TableAvailability");
+
+            migrationBuilder.DropTable(
+                name: "Voucher");
 
             migrationBuilder.DropTable(
                 name: "Product");
-
-            migrationBuilder.DropTable(
-                name: "BilliardTable");
 
             migrationBuilder.DropTable(
                 name: "Order");
 
             migrationBuilder.DropTable(
                 name: "Course");
+
+            migrationBuilder.DropTable(
+                name: "Booking");
+
+            migrationBuilder.DropTable(
+                name: "RecurringBookings");
 
             migrationBuilder.DropTable(
                 name: "GroupProduct");
@@ -857,16 +993,13 @@ namespace PoolLab.Infrastructure.Migrations
                 name: "Unit");
 
             migrationBuilder.DropTable(
-                name: "Area");
-
-            migrationBuilder.DropTable(
-                name: "BilliardPrice");
-
-            migrationBuilder.DropTable(
-                name: "BilliardType");
+                name: "MentorInfo");
 
             migrationBuilder.DropTable(
                 name: "Account");
+
+            migrationBuilder.DropTable(
+                name: "BilliardTable");
 
             migrationBuilder.DropTable(
                 name: "Role");
@@ -876,6 +1009,15 @@ namespace PoolLab.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Subscription");
+
+            migrationBuilder.DropTable(
+                name: "Area");
+
+            migrationBuilder.DropTable(
+                name: "BilliardPrice");
+
+            migrationBuilder.DropTable(
+                name: "BilliardType");
 
             migrationBuilder.DropTable(
                 name: "Company");
