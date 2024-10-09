@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Azure.Storage.Blobs;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PoolLab.Application.AutoMapper;
 using PoolLab.Application.Interface;
@@ -19,6 +20,7 @@ namespace PoolLab.Application.ServiceExtension
         {
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            services.AddScoped<IAzureBlobService, AzureBlobService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IAreaService, AreaService>();
@@ -46,6 +48,8 @@ namespace PoolLab.Application.ServiceExtension
             services.AddScoped<ISubscriptionTypeService, SubscriptionTypeService>();
             services.AddScoped<IUnitService, UnitService>();
             services.AddScoped<IQRCodeGenerate, QRCodeService>();
+
+            services.AddScoped(x => new BlobServiceClient(configuration.GetConnectionString("BlobStorage")));
 
             services.AddAutoMapper(typeof(MappingProfile).Assembly);
 

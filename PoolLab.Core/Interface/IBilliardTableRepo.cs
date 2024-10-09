@@ -9,5 +9,6 @@ namespace PoolLab.Core.Interface
 {
     public interface IBilliardTableRepo : IGenericRepo<BilliardTable>
     {
+        Task<BilliardTable?> GetBidaTableByID(Guid id);  
     }
 }

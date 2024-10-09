@@ -86,7 +86,7 @@ public partial class PoolLabDbv1Context : DbContext
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", true, true)
             .Build();
-        connectionString = config.GetConnectionString("PhucDatabase");
+        connectionString = config.GetConnectionString("AzureDB");
         return connectionString;
     }
 
@@ -185,6 +185,11 @@ public partial class PoolLabDbv1Context : DbContext
             entity.HasOne(d => d.Price).WithMany(p => p.BilliardTables)
                 .HasForeignKey(d => d.PriceId)
                 .HasConstraintName("FK_BilliardTable_BilliardPrice")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(d => d.Store).WithMany(p => p.BilliardTables)
+                .HasForeignKey(d => d.StoreId)
+                .HasConstraintName("FK_BilliardTable_Store")
                 .OnDelete(DeleteBehavior.NoAction);
         });
 

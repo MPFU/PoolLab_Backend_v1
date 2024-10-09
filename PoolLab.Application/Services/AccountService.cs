@@ -212,7 +212,7 @@ namespace PoolLab.Application.Interface
 
         //Login of Manager, Staff,...
         public async Task<GetLoginAccDTO?> GetLoginAcc(LoginAccDTO loginAccDTO)
-        {
+        {           
             var id = (loginAccDTO.StoreId != null && loginAccDTO.StoreId != Guid.Empty) ? loginAccDTO.StoreId : loginAccDTO.CompanyId;
             var acc = await _unitOfWork.AccountRepo.GetAccountLoginStaff(loginAccDTO.Email, id);
             if(acc != null)

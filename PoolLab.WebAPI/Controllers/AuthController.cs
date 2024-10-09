@@ -55,6 +55,14 @@ namespace PoolLab.WebAPI.Controllers
         {
             try
             {
+                if (loginData.StoreId != Guid.Empty && loginData.CompanyId != Guid.Empty)
+                {
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = "Chỉ được phép nhập 1 trong 2 (store hoặc company)!"
+                    });
+                }
                 var loginRequest = await _authService.LoginStaffAsync(loginData);
                 if (loginRequest == null)
                 {
