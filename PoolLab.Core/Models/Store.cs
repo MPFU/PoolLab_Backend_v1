@@ -45,5 +45,7 @@ public partial class Store
 
     public virtual ICollection<RegisteredCourse> RegisteredCourses { get; set; } = new List<RegisteredCourse>();
 
+    public virtual ICollection<BilliardTable> BilliardTables { get; set; } = new List<BilliardTable>();
+
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 }

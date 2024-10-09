@@ -10,7 +10,7 @@ namespace PoolLab.Application.Services
 {
     public class QRCodeService : IQRCodeGenerate
     {
-        public byte[] GenerateQRCode(Guid guid)
+        public async Task<byte[]> GenerateQRCode(Guid guid)
         {
             string guidString = guid.ToString();
 

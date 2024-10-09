@@ -44,4 +44,6 @@ public partial class BilliardTable
     public virtual ICollection<TableAvailability> TableAvailabilities { get; set; } = new List<TableAvailability>();
 
     public virtual BilliardPrice? Price { get; set; }
+
+    public virtual Store? Store { get; set; }
 }

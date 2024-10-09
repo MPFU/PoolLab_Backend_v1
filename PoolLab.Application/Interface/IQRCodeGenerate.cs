@@ -8,6 +8,6 @@ namespace PoolLab.Application.Interface
 {
     public interface IQRCodeGenerate
     {
-        byte[] GenerateQRCode(Guid guid);
+        Task<byte[]> GenerateQRCode(Guid guid);
     }
 }

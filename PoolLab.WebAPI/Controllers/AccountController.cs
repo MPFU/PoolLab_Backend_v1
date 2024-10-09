@@ -13,10 +13,12 @@ namespace PoolLab.WebAPI.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
+        private readonly IAzureBlobService _azureBlobService;
 
-        public AccountController(IAccountService accountService)
+        public AccountController(IAccountService accountService, IAzureBlobService azureBlobService)
         {
             _accountService = accountService;
+            _azureBlobService = azureBlobService;
         }
 
         [HttpGet("id")]
@@ -167,6 +169,47 @@ namespace PoolLab.WebAPI.Controllers
                 {
                     Status = Conflict().StatusCode,
                     Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadFileAvatar(IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = "Tệp không được chọn hoặc trống."
+                    });
+
+                var imageExtensions = new[] { ".jpg", ".png" };
+                if (imageExtensions.Any(e => file.FileName.EndsWith(e, StringComparison.OrdinalIgnoreCase)) == false)
+                {
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = "Tệp không phải là hình ảnh."
+                    });
+                }
+                var containerName = "avatar"; // replace with your container name
+                var uri = await _azureBlobService.UploadFileImageAsync(containerName, file);
+
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Tệp được tải lên thành công.",
+                    Data = uri
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new FailResponse()
+                {
+                    Status = 500,
+                    Message = $"An error occurred while uploading the file: {ex.Message}"
                 });
             }
         }
