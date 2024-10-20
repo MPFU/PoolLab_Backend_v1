@@ -43,8 +43,6 @@ public partial class Account
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
-    public virtual ICollection<RecurringBookings> RecurringBookings { get; set; } = new List<RecurringBookings>();
-
     public virtual Company? Company { get; set; }
 
     public virtual ICollection<Event> Events { get; set; } = new List<Event>();

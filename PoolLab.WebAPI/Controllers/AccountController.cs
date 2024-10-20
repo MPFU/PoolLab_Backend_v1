@@ -21,7 +21,7 @@ namespace PoolLab.WebAPI.Controllers
             _azureBlobService = azureBlobService;
         }
 
-        [HttpGet("id")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetAccountByID(Guid id)
         {
             try
@@ -57,7 +57,7 @@ namespace PoolLab.WebAPI.Controllers
             try
             {
                 var accList = await _accountService.GetAllAccount(accountFilter);
-                if (accList == null)
+                if (accList == null || accList.Items.Count() <= 0)
                 {
                     return NotFound(new FailResponse()
                     {
@@ -81,7 +81,7 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
-        [HttpPut("id")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateInfoUser(Guid id, [FromBody] UpdateAccDTO updateAcc)
         {
             try
@@ -111,7 +111,7 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
-        [HttpPut("id")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePassword(Guid id, [FromBody] UpdatePassDTO updatePass)
         {
             try

@@ -27,7 +27,7 @@ namespace PoolLab.WebAPI.Controllers
                 var loginRequest = await _authService.LoginAsync(loginData);
                 if (loginRequest == null)
                 {
-                    return Ok(new SucceededRespone()
+                    return NotFound(new FailResponse()
                     {
                         Status = NotFound().StatusCode,
                         Message = "Sai email hoặc password!"
@@ -66,7 +66,7 @@ namespace PoolLab.WebAPI.Controllers
                 var loginRequest = await _authService.LoginStaffAsync(loginData);
                 if (loginRequest == null)
                 {
-                    return Ok(new SucceededRespone()
+                    return NotFound(new FailResponse()
                     {
                         Status = NotFound().StatusCode,
                         Message = "Sai email hoặc password!"

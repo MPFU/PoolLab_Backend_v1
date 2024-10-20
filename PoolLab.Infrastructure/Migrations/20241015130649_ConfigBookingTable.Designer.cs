@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PoolLab.Infrastructure;
 
@@ -11,9 +12,11 @@ using PoolLab.Infrastructure;
 namespace PoolLab.Infrastructure.Migrations
 {
     [DbContext(typeof(PoolLabDbv1Context))]
-    partial class PoolLabDbv1ContextModelSnapshot : ModelSnapshot
+    [Migration("20241015130649_ConfigBookingTable")]
+    partial class ConfigBookingTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -264,34 +267,9 @@ namespace PoolLab.Infrastructure.Migrations
                     b.ToTable("BilliardType", (string)null);
                 });
 
-            modelBuilder.Entity("PoolLab.Core.Models.BilliardTypeArea", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("AreaID")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("AreaID");
-
-                    b.Property<Guid?>("BilliardTypeID")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("BilliardTypeID");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AreaID");
-
-                    b.HasIndex("BilliardTypeID");
-
-                    b.ToTable("BilliardTypeArea", (string)null);
-                });
-
             modelBuilder.Entity("PoolLab.Core.Models.Booking", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("AreaId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("BilliardTableId")
@@ -304,9 +282,6 @@ namespace PoolLab.Infrastructure.Migrations
 
                     b.Property<DateOnly?>("BookingDate")
                         .HasColumnType("date");
-
-                    b.Property<Guid?>("ConfigId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime");
@@ -350,13 +325,9 @@ namespace PoolLab.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AreaId");
-
                     b.HasIndex("BilliardTableId");
 
                     b.HasIndex("BilliardTypeId");
-
-                    b.HasIndex("ConfigId");
 
                     b.HasIndex("CustomerId");
 
@@ -1167,33 +1138,8 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Navigation("Store");
                 });
 
-            modelBuilder.Entity("PoolLab.Core.Models.BilliardTypeArea", b =>
-                {
-                    b.HasOne("PoolLab.Core.Models.Area", "Area")
-                        .WithMany("BilliardTypeAreas")
-                        .HasForeignKey("AreaID")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_BilliardTypeArea_Area");
-
-                    b.HasOne("PoolLab.Core.Models.BilliardType", "BilliardType")
-                        .WithMany("BilliardTypeAreas")
-                        .HasForeignKey("BilliardTypeID")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_BilliardTypeArea_BilliardType");
-
-                    b.Navigation("Area");
-
-                    b.Navigation("BilliardType");
-                });
-
             modelBuilder.Entity("PoolLab.Core.Models.Booking", b =>
                 {
-                    b.HasOne("PoolLab.Core.Models.Area", "Area")
-                        .WithMany("Bookings")
-                        .HasForeignKey("AreaId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_Booking_Area");
-
                     b.HasOne("PoolLab.Core.Models.BilliardTable", "BilliardTable")
                         .WithMany("Bookings")
                         .HasForeignKey("BilliardTableId")
@@ -1205,12 +1151,6 @@ namespace PoolLab.Infrastructure.Migrations
                         .HasForeignKey("BilliardTypeId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_Booking_BilliardType");
-
-                    b.HasOne("PoolLab.Core.Models.ConfigTable", "ConfigTable")
-                        .WithMany("Bookings")
-                        .HasForeignKey("ConfigId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_Booking_ConfigTable");
 
                     b.HasOne("PoolLab.Core.Models.Account", "Customer")
                         .WithMany("Bookings")
@@ -1224,13 +1164,9 @@ namespace PoolLab.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_Booking_Store");
 
-                    b.Navigation("Area");
-
                     b.Navigation("BilliardTable");
 
                     b.Navigation("BilliardType");
-
-                    b.Navigation("ConfigTable");
 
                     b.Navigation("Customer");
 
@@ -1449,10 +1385,6 @@ namespace PoolLab.Infrastructure.Migrations
             modelBuilder.Entity("PoolLab.Core.Models.Area", b =>
                 {
                     b.Navigation("BilliardTables");
-
-                    b.Navigation("BilliardTypeAreas");
-
-                    b.Navigation("Bookings");
                 });
 
             modelBuilder.Entity("PoolLab.Core.Models.BilliardPrice", b =>
@@ -1473,8 +1405,6 @@ namespace PoolLab.Infrastructure.Migrations
                 {
                     b.Navigation("BilliardTables");
 
-                    b.Navigation("BilliardTypeAreas");
-
                     b.Navigation("Bookings");
                 });
 
@@ -1483,11 +1413,6 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Navigation("Accounts");
 
                     b.Navigation("Stores");
-                });
-
-            modelBuilder.Entity("PoolLab.Core.Models.ConfigTable", b =>
-                {
-                    b.Navigation("Bookings");
                 });
 
             modelBuilder.Entity("PoolLab.Core.Models.Course", b =>

@@ -18,8 +18,7 @@ namespace PoolLab.Core.Interface
         ICourseRepo CourseRepo { get; }
         IEventRepo EventRepo { get; }
         IGroupProductRepo GroupProductRepo { get; }
-        ITableAvailability TableAvailabilityRepo { get; }
-        IRecurringBookingRepo RecurringBookingRepo { get; }
+        IConfigTableRepo ConfigTableRepo { get; }
         IOrderDetailRepo OrderDetailRepo { get; }
         IOrderRepo OrderRepo { get; }
         IPaymentRepo PaymentRepo { get; }

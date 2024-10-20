@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PoolLab.Core\PoolLab.Core.csproj" />
     <ProjectReference Include="..\PoolLab.Infrastructure\PoolLab.Infrastructure.csproj" />
   </ItemGroup>
 

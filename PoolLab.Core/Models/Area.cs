@@ -14,4 +14,8 @@ public partial class Area
     public Guid? StoreId { get; set; }
 
     public virtual ICollection<BilliardTable> BilliardTables { get; set; } = new List<BilliardTable>();
+
+    public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+
+    public virtual ICollection<BilliardTypeArea> BilliardTypeAreas { get; set; } = new List<BilliardTypeArea>();
 }

@@ -21,8 +21,7 @@ namespace PoolLab.Infrastructure.Interface
         private readonly ICourseRepo _courseRepo;
         private readonly IEventRepo _eventRepo;
         private readonly IGroupProductRepo _groupProductRepo;
-        private readonly ITableAvailability _tableAvailability;
-        private readonly IRecurringBookingRepo _recurringBookingRepo;
+        private readonly IConfigTableRepo _configTableRepo;
         private readonly IOrderDetailRepo _orderDetailRepo;
         private readonly IOrderRepo _orderRepo;
         private readonly IPaymentRepo _paymentRepo;
@@ -50,8 +49,7 @@ namespace PoolLab.Infrastructure.Interface
             _courseRepo = new CourseRepo(_dbContext);
             _eventRepo = new EventRepo(_dbContext);
             _groupProductRepo = new GroupProductRepo(_dbContext);
-            _tableAvailability = new TableAvailableRepo(_dbContext);
-            _recurringBookingRepo = new RecurringBookingRepo(_dbContext);
+            _configTableRepo = new ConfigTableRepo(_dbContext);
             _orderDetailRepo = new OrderDetailRepo(_dbContext);
             _orderRepo = new OrderRepo(_dbContext);
             _paymentRepo = new PaymentRepo(_dbContext);
@@ -87,9 +85,7 @@ namespace PoolLab.Infrastructure.Interface
 
         public IGroupProductRepo GroupProductRepo => _groupProductRepo;
 
-        public ITableAvailability TableAvailabilityRepo => _tableAvailability;
-
-        public IRecurringBookingRepo RecurringBookingRepo => _recurringBookingRepo;
+        public IConfigTableRepo ConfigTableRepo => _configTableRepo;
 
         public IOrderDetailRepo OrderDetailRepo => _orderDetailRepo;
 

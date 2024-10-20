@@ -10,5 +10,11 @@ namespace PoolLab.Core.Interface
     public interface IBilliardTableRepo : IGenericRepo<BilliardTable>
     {
         Task<BilliardTable?> GetBidaTableByID(Guid id);  
+
+        Task<bool> CheckDuplicateName(Guid? id, string name, Guid? storeID);
+
+        Task<string?> CheckTableAvailable(Guid id, Guid? CusID, DateTime dateTime);
+
+
     }
 }

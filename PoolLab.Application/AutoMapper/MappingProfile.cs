@@ -45,12 +45,33 @@ namespace PoolLab.Application.AutoMapper
             //BIDATABLE
             CreateMap<BilliardTableDTO, BilliardTable>().ReverseMap();
             CreateMap<NewBilliardTableDTO, BilliardTable>().ReverseMap();
+            CreateMap<BilliardTable, GetBilliardTableDTO>()
+                .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.Name))
+                .ForMember(dest => dest.AreaName, opt => opt.MapFrom(src => src.Area.Name))
+                .ForMember(dest => dest.BilliardTypeName, opt => opt.MapFrom(src => src.BilliardType.Name))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Store.Address))
+                .ReverseMap();
 
             //COMPANY
             CreateMap<CompanyDTO, Company>().ReverseMap();
 
             //SUBSCRIPTION
             CreateMap<SubDTO, Subscription>().ReverseMap();
+
+            //CONFIGTABLE
+            CreateMap<NewTableAvailableDTO, ConfigTable>().ReverseMap();
+            CreateMap<TableAvailableDTO, ConfigTable>().ReverseMap();            
+
+            //BOOKING
+            CreateMap<NewBookingDTO, Booking>().ReverseMap();
+            CreateMap<BookingDTO, Booking>().ReverseMap();
+            CreateMap<Booking, GetBookingDTO > ()
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Customer.UserName))
+                .ForMember(dest => dest.TableName, opt => opt.MapFrom(src => src.BilliardTable.Name))
+                .ReverseMap();
+
+            //PAYMENT
+            CreateMap<PaymentBookingDTO, Payment>().ReverseMap();
         }
     }
 }

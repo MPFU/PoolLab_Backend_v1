@@ -17,7 +17,7 @@ namespace PoolLab.WebAPI.Controllers
             _storeService = store;
         }
 
-        [HttpGet("id")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetStoreByID(Guid id)
         {
             try
@@ -107,7 +107,7 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
-        [HttpPut("id")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateInfoStore(Guid id, [FromBody] NewStoreDTO newStoreDTO)
         {
             try
@@ -137,7 +137,7 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
-        [HttpDelete("id")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStore(Guid id)
         {
             try

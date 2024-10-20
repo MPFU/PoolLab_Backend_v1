@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PoolLab.Core.Models
+namespace PoolLab.Application.ModelDTO
 {
-    public partial class TableAvailability
+    public class TableAvailableDTO
     {
         public Guid Id { get; set; }
 
@@ -23,11 +23,20 @@ namespace PoolLab.Core.Models
         public TimeOnly? EndTime { get; set; }
 
         public bool? IsAvailable { get; set; }
+    }
 
-        public virtual BilliardTable? BilliardTable { get; set; }
+    public class NewTableAvailableDTO
+    {
+        public Guid? BilliardTableId { get; set; }
 
-        public virtual RecurringBookings? RecurringBooking { get; set; }
+        public Guid? RecurringBookingId { get; set; }
 
-        public virtual Booking? Booking { get; set;}
+        public Guid? BookingId { get; set; }
+
+        public DateOnly? Date { get; set; }
+
+        public TimeOnly? StartTime { get; set; }
+
+        public TimeOnly? EndTime { get; set; }
     }
 }

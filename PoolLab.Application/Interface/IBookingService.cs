@@ -1,4 +1,7 @@
-﻿using PoolLab.Core.Models;
+﻿using PoolLab.Application.FilterModel;
+using PoolLab.Application.FilterModel.Helper;
+using PoolLab.Application.ModelDTO;
+using PoolLab.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,5 +12,10 @@ namespace PoolLab.Application.Interface
 {
     public interface IBookingService 
     {
+        Task<string?> AddNewBooking (NewBookingDTO newBookingDTO);
+
+        Task<GetBookingDTO?> GetBookingById (Guid id);
+
+        Task<PageResult<GetBookingDTO>> GetAllBooking(BookingFilter bookingFilter);
     }
 }

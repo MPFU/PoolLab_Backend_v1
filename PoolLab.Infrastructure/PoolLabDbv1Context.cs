@@ -63,15 +63,15 @@ public partial class PoolLabDbv1Context : DbContext
 
     public virtual DbSet<Unit> Units { get; set; }
 
-    public virtual DbSet<RecurringBookings> RecurringBookings { get; set; }
-
-    public virtual DbSet<TableAvailability> TableAvailability { get; set; }
+    public virtual DbSet<ConfigTable> ConfigTable { get; set; }
 
     public virtual DbSet<Voucher> Voucher { get; set; }
 
     public virtual DbSet<AccountVoucher> AccountVoucher { get; set; }
 
     public virtual DbSet<MentorInfo> MentorInfos { get; set; }
+
+    public virtual DbSet<BilliardTypeArea> BilliardTypeAreas { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -86,7 +86,7 @@ public partial class PoolLabDbv1Context : DbContext
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", true, true)
             .Build();
-        connectionString = config.GetConnectionString("AzureDB");
+        connectionString = config.GetConnectionString("PhucDatabase");
         return connectionString;
     }
 
@@ -214,10 +214,13 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.CustomerId).HasColumnName("CustomerID");
             entity.Property(e => e.Message).HasMaxLength(500);
             entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.DayOfWeek).HasMaxLength(20);
             entity.Property(e => e.StoreId).HasColumnName("StoreID");
-            entity.Property(e => e.TimeEnd).HasColumnType("datetime");
-            entity.Property(e => e.TimeStart).HasColumnType("datetime");
+            entity.Property(e => e.DateStart).HasColumnType("datetime");
+            entity.Property(e => e.DateEnd).HasColumnType("datetime");
             entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+            entity.Property(e => e.TimeStart).HasPrecision(0);
+            entity.Property(e => e.TimeEnd).HasPrecision(0);
 
             entity.HasOne(d => d.BilliardTable).WithMany(p => p.Bookings)
                 .HasForeignKey(d => d.BilliardTableId)
@@ -238,72 +241,48 @@ public partial class PoolLabDbv1Context : DbContext
                 .HasForeignKey(d => d.StoreId)
                 .HasConstraintName("FK_Booking_Store")
                 .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(d => d.ConfigTable).WithMany(p => p.Bookings)
+               .HasForeignKey(d => d.ConfigId)
+               .HasConstraintName("FK_Booking_ConfigTable")
+               .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(d => d.Area).WithMany(p => p.Bookings)
+               .HasForeignKey(d => d.AreaId)
+               .HasConstraintName("FK_Booking_Area")
+               .OnDelete(DeleteBehavior.NoAction);
         });
 
-        modelBuilder.Entity<RecurringBookings>(entity =>
+        modelBuilder.Entity<BilliardTypeArea>(entity =>
         {
-            entity.ToTable("RecurringBookings");
+            entity.ToTable("BilliardTypeArea");
+            entity.Property(e => e.AreaID).HasColumnName("AreaID");
+            entity.Property(e => e.BilliardTypeID).HasColumnName("BilliardTypeID");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.BilliardTableId).HasColumnName("BilliardTableID");
-            entity.Property(e => e.BilliardTypeId).HasColumnName("BilliardTypeID");
-            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
-            entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
-            entity.Property(e => e.CustomerId).HasColumnName("CustomerID");
-            entity.Property(e => e.Message).HasMaxLength(500);
+
+            entity.HasOne(d => d.Area).WithMany(p => p.BilliardTypeAreas)
+               .HasForeignKey(d => d.AreaID)
+               .HasConstraintName("FK_BilliardTypeArea_Area")
+               .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(d => d.BilliardType).WithMany(p => p.BilliardTypeAreas)
+               .HasForeignKey(d => d.BilliardTypeID)
+               .HasConstraintName("FK_BilliardTypeArea_BilliardType")
+               .OnDelete(DeleteBehavior.NoAction);
+
+        });
+
+        modelBuilder.Entity<ConfigTable>(entity =>
+        {
+            entity.ToTable("ConfigTable");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Name).HasMaxLength(50);
             entity.Property(e => e.Status).HasMaxLength(50);
-            entity.Property(e => e.DaysOfWeek).HasMaxLength(50);
-            entity.Property(e => e.StoreId).HasColumnName("StoreID");
-            entity.Property(e => e.StartTime).HasPrecision(0);
-            entity.Property(e => e.EndTime).HasPrecision(0);
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.UpdateDate).HasColumnType("datetime");
 
-            entity.HasOne(d => d.BilliardTable).WithMany(p => p.RecurringBookings)
-                .HasForeignKey(d => d.BilliardTableId)
-                .HasConstraintName("FK_RecBook_BilliardTable")
-                .OnDelete(DeleteBehavior.NoAction);
-
-            entity.HasOne(d => d.BilliardType).WithMany(p => p.RecurringBookings)
-                .HasForeignKey(d => d.BilliardTypeId)
-                .HasConstraintName("FK_RecBook_BilliardType")
-                .OnDelete(DeleteBehavior.NoAction);
-
-            entity.HasOne(d => d.Customer).WithMany(p => p.RecurringBookings)
-                .HasForeignKey(d => d.CustomerId)
-                .HasConstraintName("FK_RecBook_Account")
-                .OnDelete(DeleteBehavior.NoAction);
-
-            entity.HasOne(d => d.Store).WithMany(p => p.RecurringBookings)
-                .HasForeignKey(d => d.StoreId)
-                .HasConstraintName("FK_RecBook_Store")
-                .OnDelete(DeleteBehavior.NoAction);
-        });
-
-        modelBuilder.Entity<TableAvailability>(entity =>
-        {
-            entity.ToTable("TableAvailability");
-
-            entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.BilliardTableId).HasColumnName("BilliardTableID");
-            entity.Property(e => e.BookingId).HasColumnName("BookingID");
-            entity.Property(e => e.RecurringBookingId).HasColumnName("RecurringBookingID");
-            entity.Property(e => e.StartTime).HasPrecision(0);
-            entity.Property(e => e.EndTime).HasPrecision(0);
-            entity.Property(e => e.IsAvailable).HasColumnType("bit");
-
-            entity.HasOne(d => d.BilliardTable).WithMany(p => p.TableAvailabilities)
-                  .HasForeignKey(d => d.BilliardTableId)
-                  .HasConstraintName("FK_TableAvailability_BilliardTable")
-                  .OnDelete(DeleteBehavior.NoAction);
-
-            entity.HasOne(d => d.Booking).WithMany(p => p.TableAvailabilities)
-                  .HasForeignKey(d => d.BookingId)
-                  .HasConstraintName("FK_TableAvailability_Booking")
-                  .OnDelete(DeleteBehavior.NoAction);
-
-            entity.HasOne(d => d.RecurringBooking).WithMany(p => p.TableAvailabilities)
-                  .HasForeignKey(d => d.RecurringBookingId)
-                  .HasConstraintName("FK_TableAvailability_RecurringBooking")
-                  .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<Company>(entity =>

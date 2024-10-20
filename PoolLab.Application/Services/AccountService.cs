@@ -128,10 +128,12 @@ namespace PoolLab.Application.Interface
             return null;
         }
 
+
         public async Task<AccountDTO?> GetAccountById(Guid Id)
         {
             return _mapper.Map<AccountDTO?>(await _unitOfWork.AccountRepo.GetByIdAsync(Id));
         }
+
 
         public async Task<PageResult<GetAllAccDTO>> GetAllAccount(AccountFilter accountFilter)
         {
@@ -253,6 +255,33 @@ namespace PoolLab.Application.Interface
                 return null;
             }
             catch (DbUpdateException)
+            {
+                throw;
+            }
+        }
+
+        public async Task<string?> UpdateBalance(Guid Id, decimal amount)
+        {
+            try
+            {
+                var acc = await _unitOfWork.AccountRepo.GetByIdAsync(Id);
+                if (acc == null)
+                {
+                    return "Không tìm thấy tài khoản này!";
+                }
+                if(amount < 0)
+                {
+                    amount = 0;
+                }
+                acc.Balance = amount;
+                var result = await _unitOfWork.SaveAsync() > 0;
+                if (!result)
+                {
+                    return "Cập nhật mật khẩu thất bại!";
+                }
+                return null;
+            }
+            catch (DbUpdateException) 
             {
                 throw;
             }
