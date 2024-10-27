@@ -20,8 +20,10 @@ namespace PoolLab.Application.Interface
 
         Task<string?> UpdateInfoTable(Guid Id, UpdateInfoTableDTO updateInfoTableDTO);
 
-        Task<string?> UpdateStatusTable(Guid Id, string statusTableDTO);
+        Task<string?> UpdateStatusTable(Guid Id, UpdateStatusTableDTO statusTableDTO);
 
         Task<string?> DeleteTable(Guid Id);
+
+        Task<string?> ActivateTable(ActiveTable activeTable);
     }
 }

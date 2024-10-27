@@ -135,10 +135,10 @@ namespace PoolLab.Application.Interface
         }
 
 
-        public async Task<PageResult<GetAllAccDTO>> GetAllAccount(AccountFilter accountFilter)
+        public async Task<PageResult<AccountDTO>> GetAllAccount(AccountFilter accountFilter)
         {
-            var accList = _mapper.Map<IEnumerable<GetAllAccDTO>>(await _unitOfWork.AccountRepo.GetAllAccounts());
-            IQueryable<GetAllAccDTO> result = accList.AsQueryable();
+            var accList = _mapper.Map<IEnumerable<AccountDTO>>(await _unitOfWork.AccountRepo.GetAllAsync());
+            IQueryable<AccountDTO> result = accList.AsQueryable();
 
             //Filter
             if (!string.IsNullOrEmpty(accountFilter.UserName))
@@ -156,17 +156,17 @@ namespace PoolLab.Application.Interface
             if (!string.IsNullOrEmpty(accountFilter.Status))
                 result = result.Where(x => x.Status.Contains(accountFilter.Status, StringComparison.OrdinalIgnoreCase));
 
-            if (!string.IsNullOrEmpty(accountFilter.RoleName))
-                result = result.Where(x => x.Role.Name.Contains(accountFilter.RoleName, StringComparison.OrdinalIgnoreCase));
+            if (accountFilter.RoleId != null)
+                result = result.Where(x => x.RoleId == accountFilter.RoleId);
 
-            if (!string.IsNullOrEmpty(accountFilter.StoreName))
-                result = result.Where(x => x.Store.Name.Contains(accountFilter.StoreName, StringComparison.OrdinalIgnoreCase));
+            if (accountFilter.StoreId != null)
+                result = result.Where(x => x.StoreId == accountFilter.StoreId);
 
-            if (!string.IsNullOrEmpty(accountFilter.ComapanyName))
-                result = result.Where(x => x.Company.Name.Contains(accountFilter.ComapanyName, StringComparison.OrdinalIgnoreCase));
+            if (accountFilter.CompanyId != null)
+                result = result.Where(x => x.CompanyId == accountFilter.CompanyId);
 
-            if (!string.IsNullOrEmpty(accountFilter.SubName))
-                result = result.Where(x => x.Sub.Name.Contains(accountFilter.SubName, StringComparison.OrdinalIgnoreCase));
+            if (accountFilter.SubId != null)
+                result = result.Where(x => x.SubId == accountFilter.SubId);
 
             //Sorting
             if (!string.IsNullOrEmpty(accountFilter.SortBy))
@@ -202,7 +202,7 @@ namespace PoolLab.Application.Interface
                 .Take(accountFilter.PageSize)
                 .ToList();
 
-            return new PageResult<GetAllAccDTO>
+            return new PageResult<AccountDTO>
             {
                 Items = pageItems,
                 PageNumber = accountFilter.PageNumber,

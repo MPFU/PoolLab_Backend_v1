@@ -46,4 +46,6 @@ public partial class Store
     public virtual ICollection<BilliardTable> BilliardTables { get; set; } = new List<BilliardTable>();
 
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+
+    public virtual ICollection<BilliardTypeArea> BilliardTypeAreas { get; set; } = new List<BilliardTypeArea>();
 }

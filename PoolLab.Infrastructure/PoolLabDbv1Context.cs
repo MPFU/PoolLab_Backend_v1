@@ -41,7 +41,7 @@ public partial class PoolLabDbv1Context : DbContext
 
     public virtual DbSet<OrderDetail> OrderDetails { get; set; }
 
-    public virtual DbSet<Payment> Payments { get; set; }
+    public virtual DbSet<Transaction> Payments { get; set; }
 
     public virtual DbSet<PlayTime> PlayTimes { get; set; }
 
@@ -258,6 +258,7 @@ public partial class PoolLabDbv1Context : DbContext
             entity.ToTable("BilliardTypeArea");
             entity.Property(e => e.AreaID).HasColumnName("AreaID");
             entity.Property(e => e.BilliardTypeID).HasColumnName("BilliardTypeID");
+            entity.Property(e => e.StoreID).HasColumnName("StoreID");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
 
@@ -270,6 +271,11 @@ public partial class PoolLabDbv1Context : DbContext
                .HasForeignKey(d => d.BilliardTypeID)
                .HasConstraintName("FK_BilliardTypeArea_BilliardType")
                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(d => d.Store).WithMany(p => p.BilliardTypeAreas)
+              .HasForeignKey(d => d.StoreID)
+              .HasConstraintName("FK_BilliardTypeArea_Store")
+              .OnDelete(DeleteBehavior.NoAction);
 
         });
 
@@ -400,9 +406,9 @@ public partial class PoolLabDbv1Context : DbContext
                 .OnDelete(DeleteBehavior.NoAction);
         });
 
-        modelBuilder.Entity<Payment>(entity =>
+        modelBuilder.Entity<Transaction>(entity =>
         {
-            entity.ToTable("Payment");
+            entity.ToTable("Transaction");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.AccountId).HasColumnName("AccountID");
@@ -417,15 +423,15 @@ public partial class PoolLabDbv1Context : DbContext
 
             entity.HasOne(d => d.Account).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.AccountId)
-                .HasConstraintName("FK_Payment_Account");
+                .HasConstraintName("FK_Transaction_Account");
 
             entity.HasOne(d => d.Order).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.OrderId)
-                .HasConstraintName("FK_Payment_Order");
+                .HasConstraintName("FK_Transaction_Order");
 
             entity.HasOne(d => d.Sub).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.SubId)
-                .HasConstraintName("FK_Payment_Subscription");
+                .HasConstraintName("FK_Transaction_Subscription");
         });
 
         modelBuilder.Entity<PlayTime>(entity =>

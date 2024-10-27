@@ -14,8 +14,12 @@ namespace PoolLab.Core.Models
 
         public Guid? AreaID { get; set; }
 
+        public Guid? StoreID { get; set; }
+
         public virtual Area? Area { get; set; }
 
         public virtual BilliardType? BilliardType { get; set; }
+
+        public virtual Store? Store { get; set; }
     }
 }

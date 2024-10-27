@@ -49,8 +49,6 @@ namespace PoolLab.Application.ModelDTO
 
         public Guid? StoreId { get; set; }
 
-        public Guid? BilliardTableId { get; set; }
-
         public Guid? AreaId { get; set; }
 
         public string? Message { get; set; }

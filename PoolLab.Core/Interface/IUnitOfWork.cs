@@ -32,6 +32,7 @@ namespace PoolLab.Core.Interface
         ISubscriptionRepo SubscriptionRepo { get; }
         ISubscriptionTypeRepo SubscriptionTypeRepo { get; }
         IUnitRepo UnitRepo { get; }
+        IBidaTypeAreRepo BidaTypeAreaRepo { get; }
 
         Task<int> SaveAsync();
     }

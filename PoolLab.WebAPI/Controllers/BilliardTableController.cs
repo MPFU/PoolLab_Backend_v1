@@ -14,11 +14,13 @@ namespace PoolLab.WebAPI.Controllers
     {
         private readonly IBilliardTableService _billiardTableService;
         private readonly IAzureBlobService _azureBlobService;
+        private readonly IBidaTypeAreaService _bidaTypeAreaService;
 
-        public BilliardTableController(IBilliardTableService billiardTableService, IAzureBlobService azureBlobService)
+        public BilliardTableController(IBilliardTableService billiardTableService, IAzureBlobService azureBlobService, IBidaTypeAreaService bidaTypeAreaService)
         {
             _billiardTableService = billiardTableService;
             _azureBlobService = azureBlobService;
+            _bidaTypeAreaService = bidaTypeAreaService;
         }
 
         [HttpGet("{id}")]
@@ -69,6 +71,36 @@ namespace PoolLab.WebAPI.Controllers
                 {
                     Status = Ok().StatusCode,
                     Data = accList
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllBilliardTypeArea([FromQuery] BidaTypeAreFilter filter)
+        {
+            try
+            {
+                var bidaList = await _bidaTypeAreaService.GetAllBidaTypeAre(filter);
+                if (bidaList == null || bidaList.Count() <= 0)
+                {
+                    return NotFound(new FailResponse()
+                    {
+                        Status = NotFound().StatusCode,
+                        Message = "Không tìm thấy !"
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Data = bidaList
                 });
             }
             catch (Exception ex)
@@ -187,11 +219,11 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpPatch("{id}")]
-        public async Task<IActionResult> UpdateStatusTable(Guid id, [FromBody] string status)
+        public async Task<IActionResult> UpdateStatusTable(Guid id, [FromBody] UpdateStatusTableDTO status)
         {
             try
             {
-                if (string.IsNullOrEmpty(status))
+                if (string.IsNullOrEmpty(status.Status))
                 {
                     return BadRequest(new FailResponse ()
                     {
@@ -225,6 +257,47 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
+        [HttpPut]
+        public async Task<IActionResult> ActivateTable([FromBody] ActiveTable tableDTO)
+        {
+            try
+            {
+
+                var requestResult = await _billiardTableService.ActivateTable(tableDTO);
+                if (requestResult != null)
+                {
+                    if(TimeOnly.TryParse(requestResult, out TimeOnly time))
+                    {
+                        return Ok(new SucceededRespone()
+                        {
+                            Status = Ok().StatusCode,
+                            Message = $"Thời điểm đặt bàn sắp tới là {requestResult}",
+                            Data = requestResult
+                        });
+                    }
+
+                    return StatusCode(400, new FailResponse()
+                    {
+                        Status = 400,
+                        Message = requestResult
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Kích hoạt thành công."
+                });
+
+            }
+            catch (Exception ex)
+            {
+                return Conflict(new FailResponse()
+                {
+                    Status = Conflict().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTable(Guid id)

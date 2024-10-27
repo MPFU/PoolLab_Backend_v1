@@ -106,4 +106,15 @@ namespace PoolLab.Application.ModelDTO
 
         public Guid? PriceId { get; set; }
     }
+
+    public class UpdateStatusTableDTO
+    {
+        public string? Status { get; set;}
+    }
+
+    public class ActiveTable
+    {
+        public Guid BilliardTableID { get; set; }
+        public Guid CustomerID { get; set; }
+    }
 }

@@ -19,7 +19,7 @@ namespace PoolLab.Application.Interface
         Task<string?> UpdateAccountInfo(Guid Id, UpdateAccDTO updateAccDTO);
         Task<string?> UpdatePassword(Guid Id, UpdatePassDTO password);
         Task<GetLoginAccDTO?> GetLoginAcc(LoginAccDTO loginAccDTO);
-        Task<PageResult<GetAllAccDTO>> GetAllAccount(AccountFilter accountFilter);
+        Task<PageResult<AccountDTO>> GetAllAccount(AccountFilter accountFilter);
         Task<string?> UpdateBalance(Guid Id, decimal amount);
     }
 }

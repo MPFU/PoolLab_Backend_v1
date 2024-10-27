@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PoolLab.Core.Interface;
+using PoolLab.Infrastructure.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,6 +36,7 @@ namespace PoolLab.Infrastructure.Interface
         private readonly ISubscriptionRepo _subscriptionRepo;
         private readonly ISubscriptionTypeRepo _subscriptionTypeRepo;
         private readonly IUnitRepo _unitRepo;
+        private readonly IBidaTypeAreRepo _bidaTypeAreaRepo;
 
         public UnitOfWork()
         {
@@ -63,6 +65,7 @@ namespace PoolLab.Infrastructure.Interface
             _subscriptionRepo = new SubscriptionRepo(_dbContext);
             _subscriptionTypeRepo = new SubscriptionTypeRepo(_dbContext);
             _unitRepo = new UnitRepo(_dbContext);
+            _bidaTypeAreaRepo = new BidaTypeAreaRepo(_dbContext);
 
         }
         public IAccountRepo AccountRepo => _accountRepo;
@@ -112,6 +115,8 @@ namespace PoolLab.Infrastructure.Interface
         public ISubscriptionTypeRepo SubscriptionTypeRepo => _subscriptionTypeRepo;
 
         public IUnitRepo UnitRepo => _unitRepo;
+
+        public IBidaTypeAreRepo BidaTypeAreaRepo => _bidaTypeAreaRepo;
 
         public void Dispose()
         {

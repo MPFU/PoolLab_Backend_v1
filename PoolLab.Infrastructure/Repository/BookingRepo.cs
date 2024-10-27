@@ -15,6 +15,17 @@ namespace PoolLab.Infrastructure.Interface
         {
         }
 
+        public async Task<bool> CheckAccountHasBooking(Booking booking)
+        {
+            var bookings = await _dbContext.Bookings
+                          .Where(x => x.BookingDate == booking.BookingDate &&
+                          ((x.TimeStart < booking.TimeEnd && x.TimeStart >= booking.TimeStart) || (x.TimeEnd > booking.TimeStart && x.TimeEnd <= booking.TimeEnd)))
+                          .Where(x => x.Status.Equals("Đã đặt") && x.CustomerId == booking.CustomerId)
+                          .Select(x => x.Id)
+                          .FirstOrDefaultAsync();
+            return (bookings != Guid.Empty && booking != null) ? true : false;
+        }
+
         public async Task<IEnumerable<Booking>> GetAllBooking()
         {
             return await _dbContext.Bookings.Include(x => x.Customer).Include(x => x.BilliardTable).ToListAsync();
@@ -29,7 +40,7 @@ namespace PoolLab.Infrastructure.Interface
         {
             var bookings = await _dbContext.Bookings
                           .Where(x => x.BookingDate == booking.BookingDate &&
-                          (x.TimeStart < booking.TimeEnd && x.TimeStart >= booking.TimeStart) || (x.TimeEnd > booking.TimeStart && x.TimeEnd <= booking.TimeEnd))
+                          ((x.TimeStart < booking.TimeEnd && x.TimeStart >= booking.TimeStart) || (x.TimeEnd > booking.TimeStart && x.TimeEnd <= booking.TimeEnd)))
                           .Where(x => x.Status.Equals("Đã đặt"))
                           .Select(x => x.BilliardTableId)
                           .Distinct()

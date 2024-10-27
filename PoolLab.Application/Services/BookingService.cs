@@ -33,7 +33,34 @@ namespace PoolLab.Application.Interface
         {
             try
             {
+                DateTime dateTime = DateTime.UtcNow;
+                var date = DateOnly.FromDateTime(dateTime);
+                var time = TimeOnly.FromDateTime(dateTime);
+
+                if(newBookingDTO.TimeStart >= newBookingDTO.TimeEnd)
+                {
+                    return "Giờ chơi của bạn không hợp lệ!";
+                }
+      
+                if(newBookingDTO.BookingDate == date)
+                {
+                    if (newBookingDTO.TimeStart <= time || newBookingDTO.TimeStart <= time.AddHours(1))
+                    { 
+                        return "Giờ chơi của bạn không hợp lệ!";
+                    }
+                }else if(newBookingDTO.BookingDate < date)
+                {
+                    return "Ngày đặt của bạn không hợp lệ!";
+                }
+               
                 var book = _mapper.Map<Booking>(newBookingDTO);
+
+                var check = await _unitOfWork.BookingRepo.CheckAccountHasBooking(book);
+                if (check)
+                {
+                    return "Bạn đã có lịch đặt bàn trong thời gian này!";
+                }
+
                 var table = await _unitOfWork.BookingRepo.GetTableNotBooking(book);
                 if (table == null)
                 {
@@ -46,7 +73,16 @@ namespace PoolLab.Application.Interface
                 }
 
                 TimeSpan timePlay = (TimeSpan)(book.TimeEnd - book.TimeStart);
-                var bookPrice = (decimal)Math.Abs(timePlay.TotalHours) * table.Price.OldPrice * (decimal)(config.Deposit / 100);
+
+                var bookTime = (decimal)Math.Abs(timePlay.TotalHours) ;
+
+                var bookPrice = bookTime <= 2 
+                    ? bookTime * table.Price.OldPrice * (decimal)(config.Deposit / 100)
+                    : bookTime <= 3 
+                    ? bookTime * table.Price.OldPrice * (decimal)(config.Deposit / 100) * 2 
+                    : bookTime <= 4 
+                    ? bookTime * table.Price.OldPrice * (decimal)(config.Deposit / 100) * 3
+                    : bookTime * table.Price.OldPrice * (decimal)(config.Deposit / 100) * 5;
 
                 var customer = await _unitOfWork.AccountRepo.GetAccountBalanceByID((Guid)book.CustomerId);
 
@@ -176,6 +212,29 @@ namespace PoolLab.Application.Interface
                 TotalItem = result.Count(),
                 TotalPages = (int)Math.Ceiling((decimal)result.Count() / (decimal)bookingFilter.PageSize)
             };
+        }
+
+        public async Task<string?> UpdateStatusBooking(Guid Id, string status)
+        {
+            try
+            {
+                var book = await _unitOfWork.BookingRepo.GetByIdAsync(Id);
+                if (book == null)
+                {
+                    return "Không tìm thấy lịch đặt này!";
+                }
+                book.Status = status;
+                _unitOfWork.BookingRepo.Update(book);
+                var result = await _unitOfWork.SaveAsync() > 0;
+                if(!result)
+                {
+                    return "Cập nhật thất bại!";
+                }
+                return null;
+            }catch(DbUpdateException)
+            {
+                throw;
+            }
         }
     }
 }

@@ -26,13 +26,20 @@ namespace PoolLab.Application.Interface
         public async Task<string?> AddNewStore(NewStoreDTO newStoreDTO)
         {
             try
-            {
-                var store = _mapper.Map<Store>(newStoreDTO);
+            {               
+                StoreDTO store = new StoreDTO();
+                store.Name = newStoreDTO.Name;
+                store.PhoneNumber = newStoreDTO.PhoneNumber;
+                store.Descript = newStoreDTO.Descript;
+                store.Address = newStoreDTO.Address;
+                store.StoreImg = newStoreDTO.StoreImg;
+                store.TimeStart = newStoreDTO.TimeStart != null ? TimeOnly.Parse(newStoreDTO.TimeStart) : null;
+                store.TimeEnd = newStoreDTO.TimeEnd != null ? TimeOnly.Parse(newStoreDTO.TimeEnd) : null;
                 store.Id = Guid.NewGuid();
                 store.Rated = 5;
                 store.CreatedDate = DateTime.UtcNow;
                 store.Status = "Đang hoạt động";
-                await _unitOfWork.StoreRepo.AddAsync(store);
+                await _unitOfWork.StoreRepo.AddAsync(_mapper.Map<Store>(store));
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)
                 {
@@ -93,8 +100,8 @@ namespace PoolLab.Application.Interface
                 store.StoreImg = newStore.StoreImg != null ? newStore .StoreImg : store.StoreImg;
                 store.PhoneNumber = newStore.PhoneNumber != null ? newStore .PhoneNumber : store.PhoneNumber;
                 store.Descript = newStore.Descript != null ? newStore.Descript : store.Descript;
-                store.TimeStart = newStore.TimeStart != null ? newStore.TimeStart : store.TimeStart;
-                store.TimeEnd = newStore.TimeEnd != null ? newStore.TimeEnd : store.TimeEnd;
+                store.TimeStart = newStore.TimeStart != null ? TimeOnly.Parse(newStore.TimeStart) : store.TimeStart;
+                store.TimeEnd = newStore.TimeEnd != null ? TimeOnly.Parse(newStore.TimeEnd) : store.TimeEnd;
                 _unitOfWork.StoreRepo.Update(store);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)

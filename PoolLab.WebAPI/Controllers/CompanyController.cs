@@ -9,35 +9,36 @@ namespace PoolLab.WebAPI.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class StoreController : ControllerBase
-    {
-        private readonly IStoreService _storeService;
+    public class CompanyController : ControllerBase
+    { 
+        private readonly ICompanyService _companyService;
         private readonly IAzureBlobService _azureBlobService;
 
-        public StoreController(IStoreService store, IAzureBlobService azureBlobService)
+        public CompanyController(ICompanyService companyService, IAzureBlobService azureBlobService)
         {
-            _storeService = store;
+            _companyService = companyService;
             _azureBlobService = azureBlobService;
+
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetStoreByID(Guid id)
+        public async Task<IActionResult> GetCompanyByID(Guid id)
         {
             try
             {
-                var roleList = await _storeService.GetStoreById(id);
-                if (roleList == null)
+                var company = await _companyService.GetCompanyById(id);
+                if (company == null)
                 {
                     return NotFound(new FailResponse()
                     {
                         Status = NotFound().StatusCode,
-                        Message = "Không tìm thấy cửa tiệm này trong danh sách!"
+                        Message = "Không tìm thấy !"
                     });
                 }
                 return Ok(new SucceededRespone()
                 {
                     Status = Ok().StatusCode,
-                    Data = roleList
+                    Data = company
                 });
             }
             catch (Exception ex)
@@ -51,12 +52,12 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllStore()
+        public async Task<IActionResult> GetAllCompany()
         {
             try
             {
-                var area = await _storeService.GetAllStore();
-                if (area == null || area.Count() <= 0)
+                var company = await _companyService.GetAllCompany();
+                if (company == null || company.Count() <= 0)
                 {
                     return NotFound(new FailResponse()
                     {
@@ -67,7 +68,7 @@ namespace PoolLab.WebAPI.Controllers
                 return Ok(new SucceededRespone()
                 {
                     Status = Ok().StatusCode,
-                    Data = area
+                    Data = company
                 });
             }
             catch (Exception ex)
@@ -81,23 +82,23 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddNewStore([FromBody] NewStoreDTO store)
+        public async Task<IActionResult> AddNewCompany([FromBody] CreateCompanyDTO companyDTO)
         {
             try
             {
-                var newStore = await _storeService.AddNewStore(store);
-                if (newStore != null)
+                var newCom = await _companyService.AddNewCompany(companyDTO);
+                if (newCom != null)
                 {
                     return BadRequest(new FailResponse()
                     {
                         Status = BadRequest().StatusCode,
-                        Message = newStore
+                        Message = newCom
                     });
                 }
                 return Ok(new SucceededRespone()
                 {
                     Status = Ok().StatusCode,
-                    Message = "Tạo thành công"
+                    Message = "Tạo mới thành công."
                 });
             }
             catch (Exception ex)
@@ -111,7 +112,7 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UploadStoreImg(IFormFile file)
+        public async Task<IActionResult> UploadCompanyImg(IFormFile file)
         {
             try
             {
@@ -151,57 +152,24 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
-
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateInfoStore(Guid id, [FromBody] NewStoreDTO newStoreDTO)
+        public async Task<IActionResult> UpdateCompany(Guid id, [FromBody] CreateCompanyDTO companyDTO)
         {
             try
             {
-                var newStore = await _storeService.UpdateStore(id, newStoreDTO);
-                if (newStore != null)
+                var newCom = await _companyService.UpdateCompany(id, companyDTO);
+                if (newCom != null)
                 {
                     return BadRequest(new FailResponse()
                     {
                         Status = BadRequest().StatusCode,
-                        Message = newStore
+                        Message = newCom
                     });
                 }
                 return Ok(new SucceededRespone()
                 {
                     Status = Ok().StatusCode,
-                    Message = "Cập nhật thành công!"
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new FailResponse()
-                {
-                    Status = BadRequest().StatusCode,
-                    Message = ex.Message
-                });
-            }
-        }
-
-        
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteStore(Guid id)
-        {
-            try
-            {
-                var newStore = await _storeService.DeleteStore(id);
-                if (newStore != null)
-                {
-                    return BadRequest(new FailResponse()
-                    {
-                        Status = BadRequest().StatusCode,
-                        Message = newStore
-                    });
-                }
-                return Ok(new SucceededRespone()
-                {
-                    Status = Ok().StatusCode,
-                    Message = "Xoá thành công."
+                    Message = "Cập nhật thành công."
                 });
             }
             catch (Exception ex)

@@ -32,39 +32,47 @@ namespace PoolLab.Infrastructure.Interface
             return  false;
         }
 
-        public async Task<string?> CheckTableAvailable(Guid id, Guid? CusID, DateTime dateTime)
+        public async Task<Booking?> CheckTableAvailable(Guid id, Guid CusID, DateTime dateTime)
         {
             var Time = TimeOnly.FromDateTime(dateTime);
-            var booking = await _dbContext.Bookings
+            return await _dbContext.Bookings
                                 .Where(x => x.BilliardTableId.Equals(id) && x.BookingDate == DateOnly.FromDateTime(dateTime))
-                                .Where(x => x.TimeStart >= Time && x.Status.Equals("Đã đặt",StringComparison.OrdinalIgnoreCase))
+                                .Where(x => x.TimeStart >= Time && x.Status.ToLower().Equals("đã đặt"))
                                 .OrderBy(x => x.TimeStart)
                                 .FirstOrDefaultAsync();
-            if(booking != null)
-            {
-                TimeSpan difference = (TimeSpan)(booking.TimeStart - Time);
 
-                double minutesDifference = Math.Abs(difference.TotalMinutes);
+            //var config = await _dbContext.ConfigTable.Where(x => x.Name.ToLower().Equals("cài Đặt")).FirstOrDefaultAsync();
+            
+            //if(booking != null)
+            //{               
 
-                if (CusID != null && booking.CustomerId.Equals(CusID))
-                {
-                    if (booking.TimeStart == Time)
-                    {
-
-                    }
+            //    if ( booking.CustomerId.Equals(CusID))
+            //    {
+            //        return (Time >= booking.TimeStart && Time <= booking.TimeStart.Value.AddMinutes((double)config.TimeDelay)) 
+            //            ? null
+            //            : "Bạn đã tới trễ!";
                     
-                }
-                return "Bàn chơi này đã được đặt trước!";
-            }
-            else if(booking != null)
-            {
-               
-            }
-            else
-            {
-                return null;
-            }
-            return null;
+            //    }
+            //    else
+            //    {
+            //       return  Time <= booking.TimeStart && Time >= booking.TimeStart.Value.AddMinutes((double)-config.TimeHold)
+            //            ? "Bàn chơi này đã được đặt trước!"
+            //            : booking.TimeStart.ToString();                    
+            //    }
+                
+            //}
+            //else
+            //{
+            //    return null;
+            //}
+        }
+
+        public async Task<int> CountTableTypeArea(Guid? typeID, Guid? areaID, Guid? storeID)
+        {
+            return await _dbContext.BilliardTables
+                .Where(x => x.BilliardTypeId == typeID && x.AreaId == areaID)
+                .Where(x => x.StoreId == storeID)
+                .CountAsync();
         }
 
         public async Task<BilliardTable?> GetBidaTableByID(Guid id)
