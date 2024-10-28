@@ -51,6 +51,10 @@ namespace PoolLab.Application.AutoMapper
 
             //SUBSCRIPTION
             CreateMap<SubDTO, Subscription>().ReverseMap();
+
+            //PRODUCT TYPE
+            CreateMap<ProductTypeDTO, ProductType>().ReverseMap();
+            CreateMap<CreateProductTypeDTO, CreateProductTypeDTO>().ReverseMap();
         }
     }
 }
