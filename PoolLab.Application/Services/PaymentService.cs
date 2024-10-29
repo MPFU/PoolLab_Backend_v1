@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
 using PoolLab.Core.Interface;
@@ -30,7 +31,9 @@ namespace PoolLab.Application.Interface
                 var pay =  _mapper.Map<Transaction>(paymentBookingDTO);
                 pay.Id = Guid.NewGuid();
                 pay.Status = "Hoàn tất";
-                pay.PaymentDate = DateTime.Now;
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                pay.PaymentDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                 await _unitOfWork.PaymentRepo.AddAsync(pay);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)

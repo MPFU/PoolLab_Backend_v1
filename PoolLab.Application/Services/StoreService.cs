@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
 using PoolLab.Core.Interface;
@@ -30,7 +31,9 @@ namespace PoolLab.Application.Interface
                 var store = _mapper.Map<Store>(newStoreDTO);
                 store.Id = Guid.NewGuid();
                 store.Rated = 5;
-                store.CreatedDate = DateTime.Now;
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                store.CreatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                 store.Status = "Đang hoạt động";
                 await _unitOfWork.StoreRepo.AddAsync(_mapper.Map<Store>(store));
                 var result = await _unitOfWork.SaveAsync() > 0;
@@ -95,6 +98,9 @@ namespace PoolLab.Application.Interface
                 store.Descript = newStore.Descript != null ? newStore.Descript : store.Descript;
                 store.TimeStart = newStore.TimeStart != null ? TimeOnly.Parse(newStore.TimeStart) : store.TimeStart;
                 store.TimeEnd = newStore.TimeEnd != null ? TimeOnly.Parse(newStore.TimeEnd) : store.TimeEnd;
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                store.UpdatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                 _unitOfWork.StoreRepo.Update(store);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)

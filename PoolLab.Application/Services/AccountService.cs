@@ -39,7 +39,11 @@ namespace PoolLab.Application.Interface
                 var account = _mapper.Map<Account>(registerDTO);
                 account.Id = Guid.NewGuid();
                 account.PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDTO.Password);
-                account.JoinDate = DateTime.Now;
+
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                account.JoinDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+                 
                 account.Point = 0;
                 account.Balance = 0;
                 account.Tier = 0;
@@ -78,7 +82,9 @@ namespace PoolLab.Application.Interface
                 account.PasswordHash = BCrypt.Net.BCrypt.HashPassword(createAccDTO.PasswordHash);
                 account.UserName = createAccDTO.UserName;   
                 account.FullName = createAccDTO.FullName;
-                account.JoinDate = DateTime.Now;
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                account.JoinDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                 account.Point = 0;
                 account.Balance = 0;
                 account.Tier = 0;
