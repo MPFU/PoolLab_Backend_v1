@@ -36,7 +36,10 @@ namespace PoolLab.Infrastructure.Repository
 
         public async Task<BilliardTypeArea?> GetBidaTypeArea(Guid? typeID, Guid? areaID, Guid? storeID)
         {
-            return await _dbContext.BilliardTypeAreas.Where(x => x.BilliardTypeID == typeID && x.AreaID == areaID && x.StoreID == storeID).FirstOrDefaultAsync();
+            return await _dbContext.BilliardTypeAreas
+                .Where(x => x.BilliardTypeID == typeID && x.AreaID == areaID )
+                .Where(x => x.StoreID == storeID)
+                .FirstOrDefaultAsync();
         }
     }
 }

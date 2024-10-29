@@ -221,6 +221,7 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
             entity.Property(e => e.TimeStart).HasPrecision(0);
             entity.Property(e => e.TimeEnd).HasPrecision(0);
+            entity.Property(e => e.Deposit).HasColumnType("decimal(11, 0)");
 
             entity.HasOne(d => d.BilliardTable).WithMany(p => p.Bookings)
                 .HasForeignKey(d => d.BilliardTableId)

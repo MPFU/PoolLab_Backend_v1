@@ -53,11 +53,11 @@ namespace PoolLab.Application.ModelDTO
 
         public string? Message { get; set; }
 
-        public DateOnly? BookingDate { get; set; }
+        public string? BookingDate { get; set; }
 
-        public TimeOnly? TimeStart { get; set; }
+        public string? TimeStart { get; set; }
 
-        public TimeOnly? TimeEnd { get; set; }
+        public string? TimeEnd { get; set; }
     }
 
     public class GetBookingDTO

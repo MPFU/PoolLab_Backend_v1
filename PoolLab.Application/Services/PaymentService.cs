@@ -28,8 +28,9 @@ namespace PoolLab.Application.Interface
             try
             {
                 var pay =  _mapper.Map<Transaction>(paymentBookingDTO);
+                pay.Id = Guid.NewGuid();
                 pay.Status = "Hoàn tất";
-                pay.PaymentDate = DateTime.UtcNow;
+                pay.PaymentDate = DateTime.Now;
                 await _unitOfWork.PaymentRepo.AddAsync(pay);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)

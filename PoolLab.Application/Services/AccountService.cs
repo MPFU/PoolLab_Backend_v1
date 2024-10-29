@@ -39,7 +39,7 @@ namespace PoolLab.Application.Interface
                 var account = _mapper.Map<Account>(registerDTO);
                 account.Id = Guid.NewGuid();
                 account.PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDTO.Password);
-                account.JoinDate = DateTime.UtcNow;
+                account.JoinDate = DateTime.Now;
                 account.Point = 0;
                 account.Balance = 0;
                 account.Tier = 0;
@@ -78,7 +78,7 @@ namespace PoolLab.Application.Interface
                 account.PasswordHash = BCrypt.Net.BCrypt.HashPassword(createAccDTO.PasswordHash);
                 account.UserName = createAccDTO.UserName;   
                 account.FullName = createAccDTO.FullName;
-                account.JoinDate = DateTime.UtcNow;
+                account.JoinDate = DateTime.Now;
                 account.Point = 0;
                 account.Balance = 0;
                 account.Tier = 0;
@@ -135,10 +135,10 @@ namespace PoolLab.Application.Interface
         }
 
 
-        public async Task<PageResult<AccountDTO>> GetAllAccount(AccountFilter accountFilter)
+        public async Task<PageResult<GetAllAccDTO>> GetAllAccount(AccountFilter accountFilter)
         {
-            var accList = _mapper.Map<IEnumerable<AccountDTO>>(await _unitOfWork.AccountRepo.GetAllAsync());
-            IQueryable<AccountDTO> result = accList.AsQueryable();
+            var accList = _mapper.Map<IEnumerable<GetAllAccDTO>>(await _unitOfWork.AccountRepo.GetAllAccounts());
+            IQueryable<GetAllAccDTO> result = accList.AsQueryable();
 
             //Filter
             if (!string.IsNullOrEmpty(accountFilter.UserName))
@@ -202,7 +202,7 @@ namespace PoolLab.Application.Interface
                 .Take(accountFilter.PageSize)
                 .ToList();
 
-            return new PageResult<AccountDTO>
+            return new PageResult<GetAllAccDTO>
             {
                 Items = pageItems,
                 PageNumber = accountFilter.PageNumber,
@@ -215,7 +215,7 @@ namespace PoolLab.Application.Interface
         //Login of Manager, Staff,...
         public async Task<GetLoginAccDTO?> GetLoginAcc(LoginAccDTO loginAccDTO)
         {           
-            var id = (loginAccDTO.StoreId != null && loginAccDTO.StoreId != Guid.Empty) ? loginAccDTO.StoreId : loginAccDTO.CompanyId;
+            var id = loginAccDTO.StoreId != null  ? loginAccDTO.StoreId : loginAccDTO.CompanyId ;
             var acc = await _unitOfWork.AccountRepo.GetAccountLoginStaff(loginAccDTO.Email, id);
             if(acc != null)
             {

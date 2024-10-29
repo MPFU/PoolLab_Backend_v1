@@ -33,27 +33,29 @@ namespace PoolLab.Application.Interface
         {
             try
             {
-                DateTime dateTime = DateTime.UtcNow;
+                var book = _mapper.Map<Booking>(newBookingDTO);
+
+                DateTime dateTime = DateTime.Now;
                 var date = DateOnly.FromDateTime(dateTime);
                 var time = TimeOnly.FromDateTime(dateTime);
 
-                if(newBookingDTO.TimeStart >= newBookingDTO.TimeEnd)
+                if(book.TimeStart >= book.TimeEnd)
                 {
                     return "Giờ chơi của bạn không hợp lệ!";
                 }
       
-                if(newBookingDTO.BookingDate == date)
+                if(book.BookingDate == date)
                 {
-                    if (newBookingDTO.TimeStart <= time || newBookingDTO.TimeStart <= time.AddHours(1))
+                    if (book.TimeStart <= time || book.TimeStart <= time.AddHours(1))
                     { 
                         return "Giờ chơi của bạn không hợp lệ!";
                     }
-                }else if(newBookingDTO.BookingDate < date)
+                }else if(book.BookingDate < date)
                 {
                     return "Ngày đặt của bạn không hợp lệ!";
                 }
                
-                var book = _mapper.Map<Booking>(newBookingDTO);
+                
 
                 var check = await _unitOfWork.BookingRepo.CheckAccountHasBooking(book);
                 if (check)
@@ -77,21 +79,21 @@ namespace PoolLab.Application.Interface
                 var bookTime = (decimal)Math.Abs(timePlay.TotalHours) ;
 
                 var bookPrice = bookTime <= 2 
-                    ? bookTime * table.Price.OldPrice * (decimal)(config.Deposit / 100)
+                    ? ((bookTime * table.Price.OldPrice) / 100) * config.Deposit
                     : bookTime <= 3 
-                    ? bookTime * table.Price.OldPrice * (decimal)(config.Deposit / 100) * 2 
+                    ? ((bookTime * table.Price.OldPrice) / 100) * config.Deposit * 2 
                     : bookTime <= 4 
-                    ? bookTime * table.Price.OldPrice * (decimal)(config.Deposit / 100) * 3
-                    : bookTime * table.Price.OldPrice * (decimal)(config.Deposit / 100) * 5;
+                    ? ((bookTime * table.Price.OldPrice) / 100) * config.Deposit * 3
+                    : ((bookTime * table.Price.OldPrice) / 100) * config.Deposit * 5;
 
                 var customer = await _unitOfWork.AccountRepo.GetAccountBalanceByID((Guid)book.CustomerId);
 
                 if (customer != null && customer < bookPrice)
                 {
                     return "Số dư của bạn không đủ!";
-                }else if (bookPrice > customer)
+                }else if (customer != null && bookPrice <= customer)
                 {
-                    var price = bookPrice - customer;
+                    var price = customer - bookPrice;
                     var up = await _accountService.UpdateBalance((Guid)book.CustomerId, (decimal)price);
                     if (up != null)
                     {
@@ -116,7 +118,8 @@ namespace PoolLab.Application.Interface
                 book.ConfigId = config.Id;
                 book.BilliardTableId = table.Id;
                 book.Id = Guid.NewGuid();
-                book.CreatedDate = DateTime.UtcNow;
+                book.CreatedDate = DateTime.Now;
+                book.Deposit = bookPrice;
                 book.Status = "Đã đặt";
                 await _unitOfWork.BookingRepo.AddAsync(book);
                 var result = await _unitOfWork.SaveAsync() > 0;

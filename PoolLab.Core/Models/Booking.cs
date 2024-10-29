@@ -21,6 +21,8 @@ public partial class Booking
 
     public string? Message { get; set; }
 
+    public decimal? Deposit {  get; set; }
+
     public DateOnly? BookingDate { get; set; }
 
     public TimeOnly? TimeStart { get; set; }

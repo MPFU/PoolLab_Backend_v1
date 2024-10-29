@@ -218,7 +218,7 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
-        [HttpPatch("{id}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateStatusTable(Guid id, [FromBody] UpdateStatusTableDTO status)
         {
             try
@@ -272,6 +272,48 @@ namespace PoolLab.WebAPI.Controllers
                         {
                             Status = Ok().StatusCode,
                             Message = $"Thời điểm đặt bàn sắp tới là {requestResult}",
+                            Data = requestResult
+                        });
+                    }
+
+                    return StatusCode(400, new FailResponse()
+                    {
+                        Status = 400,
+                        Message = requestResult
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Kích hoạt thành công."
+                });
+
+            }
+            catch (Exception ex)
+            {
+                return Conflict(new FailResponse()
+                {
+                    Status = Conflict().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> ActivateTableForGuest(Guid id)
+        {
+            try
+            {
+
+                var requestResult = await _billiardTableService.ActivateTableForGuest(id);
+                if (requestResult != null)
+                {
+                    if (TimeOnly.TryParse(requestResult, out TimeOnly time))
+                    {
+                        return Ok(new SucceededRespone()
+                        {
+                            Status = Ok().StatusCode,
+                            Message = $"Còn {requestResult} tới thời gian đặt bàn!",
                             Data = requestResult
                         });
                     }

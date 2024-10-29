@@ -117,4 +117,6 @@ namespace PoolLab.Application.ModelDTO
         public Guid BilliardTableID { get; set; }
         public Guid CustomerID { get; set; }
     }
+
+   
 }

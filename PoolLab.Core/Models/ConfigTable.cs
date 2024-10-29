@@ -16,6 +16,8 @@ namespace PoolLab.Core.Models
 
         public int? TimeHold { get; set; }
 
+        public int? TimeCancelBook { get; set; }
+
         public int? Deposit { get; set; }
 
         public DateTime? CreatedDate { get; set; }

@@ -27,17 +27,10 @@ namespace PoolLab.Application.Interface
         {
             try
             {               
-                StoreDTO store = new StoreDTO();
-                store.Name = newStoreDTO.Name;
-                store.PhoneNumber = newStoreDTO.PhoneNumber;
-                store.Descript = newStoreDTO.Descript;
-                store.Address = newStoreDTO.Address;
-                store.StoreImg = newStoreDTO.StoreImg;
-                store.TimeStart = newStoreDTO.TimeStart != null ? TimeOnly.Parse(newStoreDTO.TimeStart) : null;
-                store.TimeEnd = newStoreDTO.TimeEnd != null ? TimeOnly.Parse(newStoreDTO.TimeEnd) : null;
+                var store = _mapper.Map<Store>(newStoreDTO);
                 store.Id = Guid.NewGuid();
                 store.Rated = 5;
-                store.CreatedDate = DateTime.UtcNow;
+                store.CreatedDate = DateTime.Now;
                 store.Status = "Đang hoạt động";
                 await _unitOfWork.StoreRepo.AddAsync(_mapper.Map<Store>(store));
                 var result = await _unitOfWork.SaveAsync() > 0;

@@ -36,7 +36,7 @@ namespace PoolLab.Application.Services
                 config.Id = Guid.NewGuid();
                 config.Name = "Cài Đặt";
                 config.Status = "Hoạt Động";
-                config.CreatedDate = DateTime.UtcNow;
+                config.CreatedDate = DateTime.Now;
                 await _unitOfWork.ConfigTableRepo.AddAsync(config);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if(!result)
@@ -72,7 +72,7 @@ namespace PoolLab.Application.Services
                 check.TimeDelay = configDTO.TimeDelay != null ? configDTO.TimeDelay : check.TimeDelay;
                 check.TimeHold = configDTO.TimeHold != null ? configDTO.TimeHold : check.TimeHold;
                 check.Deposit = configDTO.Deposit != null ? configDTO.Deposit : check.Deposit;
-                check.UpdateDate = DateTime.UtcNow;
+                check.UpdateDate = DateTime.Now;
                  _unitOfWork.ConfigTableRepo.Update(check);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)

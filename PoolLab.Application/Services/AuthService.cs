@@ -62,7 +62,7 @@ namespace PoolLab.Application.Services
 
         private string CreateToken(AccountLoginDTO account)
         {
-            var nowUtc = DateTime.UtcNow;
+            var nowUtc = DateTime.Now;
             var expirationDuration = TimeSpan.FromMinutes(60);
             var expirationUtc = nowUtc.Add(expirationDuration);
 
@@ -107,7 +107,7 @@ namespace PoolLab.Application.Services
         private string CreateToken2(GetLoginAccDTO account)
         {
             string company = (account.CompanyId != null && account.CompanyId != Guid.Empty) ? account.CompanyId.ToString() : "";
-            var nowUtc = DateTime.UtcNow;
+            var nowUtc = DateTime.Now;
             var expirationDuration = TimeSpan.FromMinutes(60);
             var expirationUtc = nowUtc.Add(expirationDuration);           
 

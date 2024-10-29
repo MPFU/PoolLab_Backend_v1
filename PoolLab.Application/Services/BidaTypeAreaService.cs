@@ -32,15 +32,19 @@ namespace PoolLab.Application.Services
                 var type =  _mapper.Map<BilliardTypeArea>(newType);
                 if(await _unitOfWork.BidaTypeAreaRepo.CheckDuplicate(type.AreaID, newType.BilliardTypeID))
                 {
-                    return "Đã có tồn tại";
+                    return null;
                 }
-                type.Id = Guid.NewGuid();
-                await _unitOfWork.BidaTypeAreaRepo.AddAsync(type);
-                var result = await _unitOfWork.SaveAsync() > 0;
-                if(!result)
+                else
                 {
-                    return "Thất bại";
+                    type.Id = Guid.NewGuid();
+                    await _unitOfWork.BidaTypeAreaRepo.AddAsync(type);
+                    var result = await _unitOfWork.SaveAsync() > 0;
+                    if (!result)
+                    {
+                        return "Thất bại";
+                    }
                 }
+                
                 return null;
             }
             catch (DbUpdateException)

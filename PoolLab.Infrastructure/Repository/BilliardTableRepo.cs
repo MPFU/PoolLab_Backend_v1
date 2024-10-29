@@ -32,7 +32,7 @@ namespace PoolLab.Infrastructure.Interface
             return  false;
         }
 
-        public async Task<Booking?> CheckTableAvailable(Guid id, Guid CusID, DateTime dateTime)
+        public async Task<Booking?> CheckTableAvailable(Guid id, DateTime dateTime)
         {
             var Time = TimeOnly.FromDateTime(dateTime);
             return await _dbContext.Bookings

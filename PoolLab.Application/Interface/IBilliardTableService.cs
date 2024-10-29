@@ -25,5 +25,7 @@ namespace PoolLab.Application.Interface
         Task<string?> DeleteTable(Guid Id);
 
         Task<string?> ActivateTable(ActiveTable activeTable);
+
+        Task<string?> ActivateTableForGuest(Guid activeTable);
     }
 }
