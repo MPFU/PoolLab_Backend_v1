@@ -35,8 +35,6 @@ public partial class Store
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
-    public virtual ICollection<RecurringBookings> RecurringBookings { get; set; } = new List<RecurringBookings>();
-
     public virtual Company? Company { get; set; }
 
     public virtual ICollection<Course> Courses { get; set; } = new List<Course>();
@@ -48,4 +46,6 @@ public partial class Store
     public virtual ICollection<BilliardTable> BilliardTables { get; set; } = new List<BilliardTable>();
 
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+
+    public virtual ICollection<BilliardTypeArea> BilliardTypeAreas { get; set; } = new List<BilliardTypeArea>();
 }

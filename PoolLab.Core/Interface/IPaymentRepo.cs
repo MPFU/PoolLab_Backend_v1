@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PoolLab.Core.Interface
 {
-    public interface IPaymentRepo : IGenericRepo<Payment>
+    public interface IPaymentRepo : IGenericRepo<Transaction>
     {
     }
 }

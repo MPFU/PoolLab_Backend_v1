@@ -18,7 +18,7 @@ namespace PoolLab.WebAPI.Controllers
             _billiardPriceService = billiardPriceService;
         }
 
-        [HttpGet("id")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetBilliardPriceByID(Guid id)
         {
             try
@@ -108,7 +108,7 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
-        [HttpPut("id")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBilliardPrice(Guid id, [FromBody] NewBilliardPriceDTO areaDTO)
         {
             try
@@ -138,7 +138,7 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
-        [HttpPut("id")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBilliardPriceStatus(Guid id, [FromQuery] string status)
         {
             try
@@ -168,7 +168,7 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
-        [HttpDelete("id")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBilliardPrice(Guid id)
         {
             try

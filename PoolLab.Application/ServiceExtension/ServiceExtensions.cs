@@ -32,7 +32,6 @@ namespace PoolLab.Application.ServiceExtension
             services.AddScoped<ICourseService, CourseService>();
             services.AddScoped<IEventService, EventService>();
             services.AddScoped<IGroupProductService, GroupProductService>();
-            services.AddScoped<IImportBillService, ImportBillService>();
             services.AddScoped<IImportProductService, ImportProductService>();
             services.AddScoped<IOrderDetailService, OrderDetailService>();
             services.AddScoped<IOrderService, OrderService>();
@@ -48,6 +47,8 @@ namespace PoolLab.Application.ServiceExtension
             services.AddScoped<ISubscriptionTypeService, SubscriptionTypeService>();
             services.AddScoped<IUnitService, UnitService>();
             services.AddScoped<IQRCodeGenerate, QRCodeService>();
+            services.AddScoped<IConfigTableService, ConfigTableService>();
+            services.AddScoped<IBidaTypeAreaService, BidaTypeAreaService>();
 
             services.AddScoped(x => new BlobServiceClient(configuration.GetConnectionString("BlobStorage")));
 

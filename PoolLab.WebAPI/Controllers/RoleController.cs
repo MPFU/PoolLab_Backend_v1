@@ -47,7 +47,7 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
-        [HttpGet("id")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetRoleByID(Guid id)
         {
             try
@@ -106,7 +106,7 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
-        [HttpPut("id")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateRole(Guid id, [FromBody] NewRoleDTO role)
         {
             try
@@ -136,7 +136,7 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
-        [HttpDelete("id")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRole(Guid id)
         {
             try

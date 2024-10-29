@@ -62,7 +62,9 @@ namespace PoolLab.Application.Services
 
         private string CreateToken(AccountLoginDTO account)
         {
-            var nowUtc = DateTime.UtcNow;
+            DateTime utcNow = DateTime.UtcNow;
+            TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            var nowUtc = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
             var expirationDuration = TimeSpan.FromMinutes(60);
             var expirationUtc = nowUtc.Add(expirationDuration);
 
@@ -107,7 +109,10 @@ namespace PoolLab.Application.Services
         private string CreateToken2(GetLoginAccDTO account)
         {
             string company = (account.CompanyId != null && account.CompanyId != Guid.Empty) ? account.CompanyId.ToString() : "";
-            var nowUtc = DateTime.UtcNow;
+            DateTime utcNow = DateTime.UtcNow;
+            TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            var nowUtc = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+
             var expirationDuration = TimeSpan.FromMinutes(60);
             var expirationUtc = nowUtc.Add(expirationDuration);           
 

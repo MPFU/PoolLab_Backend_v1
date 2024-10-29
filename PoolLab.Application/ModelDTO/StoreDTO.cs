@@ -33,6 +33,11 @@ namespace PoolLab.Application.ModelDTO
         public DateTime? UpdatedDate { get; set; }
 
         public string? Status { get; set; }
+
+        public StoreDTO()
+        {
+            
+        }
     }
 
     public class NewStoreDTO
@@ -47,8 +52,8 @@ namespace PoolLab.Application.ModelDTO
 
         public string? PhoneNumber { get; set; }
 
-        public TimeOnly? TimeStart { get; set; }
+        public string? TimeStart { get; set; }
 
-        public TimeOnly? TimeEnd { get; set; }
+        public string? TimeEnd { get; set; }
     }
 }

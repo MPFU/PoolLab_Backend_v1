@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
+using PoolLab.Application.Services;
 using PoolLab.WebAPI.ResponseModel;
 
 namespace PoolLab.WebAPI.Controllers
@@ -11,13 +12,15 @@ namespace PoolLab.WebAPI.Controllers
     public class StoreController : ControllerBase
     {
         private readonly IStoreService _storeService;
+        private readonly IAzureBlobService _azureBlobService;
 
-        public StoreController(IStoreService store)
+        public StoreController(IStoreService store, IAzureBlobService azureBlobService)
         {
             _storeService = store;
+            _azureBlobService = azureBlobService;
         }
 
-        [HttpGet("id")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetStoreByID(Guid id)
         {
             try
@@ -107,7 +110,49 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
-        [HttpPut("id")]
+        [HttpPost]
+        public async Task<IActionResult> UploadStoreImg(IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = "Tệp không được chọn hoặc trống."
+                    });
+
+                var imageExtensions = new[] { ".jpg", ".png" };
+                if (imageExtensions.Any(e => file.FileName.EndsWith(e, StringComparison.OrdinalIgnoreCase)) == false)
+                {
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = "Tệp không phải là hình ảnh."
+                    });
+                }
+                var containerName = "store"; // replace with your container name
+                var uri = await _azureBlobService.UploadFileImageAsync(containerName, file);
+
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Tệp được tải lên thành công.",
+                    Data = uri
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new FailResponse()
+                {
+                    Status = 500,
+                    Message = $"An error occurred while uploading the file: {ex.Message}"
+                });
+            }
+        }
+
+
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateInfoStore(Guid id, [FromBody] NewStoreDTO newStoreDTO)
         {
             try
@@ -137,7 +182,9 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
-        [HttpDelete("id")]
+        
+
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStore(Guid id)
         {
             try

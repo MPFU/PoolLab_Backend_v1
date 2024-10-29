@@ -39,7 +39,11 @@ namespace PoolLab.Application.Interface
                 var account = _mapper.Map<Account>(registerDTO);
                 account.Id = Guid.NewGuid();
                 account.PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDTO.Password);
-                account.JoinDate = DateTime.UtcNow;
+
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                account.JoinDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+                 
                 account.Point = 0;
                 account.Balance = 0;
                 account.Tier = 0;
@@ -78,7 +82,9 @@ namespace PoolLab.Application.Interface
                 account.PasswordHash = BCrypt.Net.BCrypt.HashPassword(createAccDTO.PasswordHash);
                 account.UserName = createAccDTO.UserName;   
                 account.FullName = createAccDTO.FullName;
-                account.JoinDate = DateTime.UtcNow;
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                account.JoinDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                 account.Point = 0;
                 account.Balance = 0;
                 account.Tier = 0;
@@ -128,10 +134,12 @@ namespace PoolLab.Application.Interface
             return null;
         }
 
+
         public async Task<AccountDTO?> GetAccountById(Guid Id)
         {
             return _mapper.Map<AccountDTO?>(await _unitOfWork.AccountRepo.GetByIdAsync(Id));
         }
+
 
         public async Task<PageResult<GetAllAccDTO>> GetAllAccount(AccountFilter accountFilter)
         {
@@ -154,17 +162,17 @@ namespace PoolLab.Application.Interface
             if (!string.IsNullOrEmpty(accountFilter.Status))
                 result = result.Where(x => x.Status.Contains(accountFilter.Status, StringComparison.OrdinalIgnoreCase));
 
-            if (!string.IsNullOrEmpty(accountFilter.RoleName))
-                result = result.Where(x => x.Role.Name.Contains(accountFilter.RoleName, StringComparison.OrdinalIgnoreCase));
+            if (accountFilter.RoleId != null)
+                result = result.Where(x => x.RoleId == accountFilter.RoleId);
 
-            if (!string.IsNullOrEmpty(accountFilter.StoreName))
-                result = result.Where(x => x.Store.Name.Contains(accountFilter.StoreName, StringComparison.OrdinalIgnoreCase));
+            if (accountFilter.StoreId != null)
+                result = result.Where(x => x.StoreId == accountFilter.StoreId);
 
-            if (!string.IsNullOrEmpty(accountFilter.ComapanyName))
-                result = result.Where(x => x.Company.Name.Contains(accountFilter.ComapanyName, StringComparison.OrdinalIgnoreCase));
+            if (accountFilter.CompanyId != null)
+                result = result.Where(x => x.CompanyId == accountFilter.CompanyId);
 
-            if (!string.IsNullOrEmpty(accountFilter.SubName))
-                result = result.Where(x => x.Sub.Name.Contains(accountFilter.SubName, StringComparison.OrdinalIgnoreCase));
+            if (accountFilter.SubId != null)
+                result = result.Where(x => x.SubId == accountFilter.SubId);
 
             //Sorting
             if (!string.IsNullOrEmpty(accountFilter.SortBy))
@@ -213,7 +221,7 @@ namespace PoolLab.Application.Interface
         //Login of Manager, Staff,...
         public async Task<GetLoginAccDTO?> GetLoginAcc(LoginAccDTO loginAccDTO)
         {           
-            var id = (loginAccDTO.StoreId != null && loginAccDTO.StoreId != Guid.Empty) ? loginAccDTO.StoreId : loginAccDTO.CompanyId;
+            var id = loginAccDTO.StoreId != null  ? loginAccDTO.StoreId : loginAccDTO.CompanyId ;
             var acc = await _unitOfWork.AccountRepo.GetAccountLoginStaff(loginAccDTO.Email, id);
             if(acc != null)
             {
@@ -253,6 +261,33 @@ namespace PoolLab.Application.Interface
                 return null;
             }
             catch (DbUpdateException)
+            {
+                throw;
+            }
+        }
+
+        public async Task<string?> UpdateBalance(Guid Id, decimal amount)
+        {
+            try
+            {
+                var acc = await _unitOfWork.AccountRepo.GetByIdAsync(Id);
+                if (acc == null)
+                {
+                    return "Không tìm thấy tài khoản này!";
+                }
+                if(amount < 0)
+                {
+                    amount = 0;
+                }
+                acc.Balance = amount;
+                var result = await _unitOfWork.SaveAsync() > 0;
+                if (!result)
+                {
+                    return "Cập nhật mật khẩu thất bại!";
+                }
+                return null;
+            }
+            catch (DbUpdateException) 
             {
                 throw;
             }

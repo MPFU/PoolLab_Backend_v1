@@ -67,6 +67,14 @@ namespace PoolLab.Infrastructure.Interface
             }
         }
 
+        public async Task<decimal?> GetAccountBalanceByID(Guid id)
+        {
+            return await _dbContext.Accounts
+                .Where(x => x.Id.Equals(id))
+                .Select(x => x.Balance)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<Account?> GetAccountByEmailOrUsername(string email)
         {
             return await _dbContext.Accounts
@@ -90,9 +98,6 @@ namespace PoolLab.Infrastructure.Interface
         {
             return await _dbContext.Accounts
                 .Include(x => x.Role)
-                .Include(x => x.Store)
-                .Include(x => x.Company)
-                .Include(x => x.Sub)
                 .ToListAsync();
         }
     }

@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace PoolLab.Core.Interface
 {
-    public interface IRecurringBookingRepo : IGenericRepo<RecurringBookings>
+    public interface IConfigTableRepo : IGenericRepo<ConfigTable>
     {
+        Task<ConfigTable?> GetConfigTableByNameAsync(string name);
     }
 }

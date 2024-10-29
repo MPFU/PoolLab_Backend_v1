@@ -17,7 +17,7 @@ namespace PoolLab.WebAPI.Controllers
             _areaService = areaService;
         }
 
-        [HttpGet("id")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetAreaByID(Guid id)
         {
             try
@@ -107,7 +107,7 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
-        [HttpPut("id")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateArea(Guid id, [FromBody] NewAreaDTO areaDTO)
         {
             try
@@ -137,7 +137,7 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
-        [HttpDelete("id")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRole(Guid id)
         {
             try
