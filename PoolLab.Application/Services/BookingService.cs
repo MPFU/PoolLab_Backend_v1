@@ -35,7 +35,9 @@ namespace PoolLab.Application.Interface
             {
                 var book = _mapper.Map<Booking>(newBookingDTO);
 
-                DateTime dateTime = DateTime.Now;
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                var dateTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                 var date = DateOnly.FromDateTime(dateTime);
                 var time = TimeOnly.FromDateTime(dateTime);
 
@@ -118,7 +120,7 @@ namespace PoolLab.Application.Interface
                 book.ConfigId = config.Id;
                 book.BilliardTableId = table.Id;
                 book.Id = Guid.NewGuid();
-                book.CreatedDate = DateTime.Now;
+                book.CreatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                 book.Deposit = bookPrice;
                 book.Status = "Đã đặt";
                 await _unitOfWork.BookingRepo.AddAsync(book);
@@ -227,6 +229,9 @@ namespace PoolLab.Application.Interface
                     return "Không tìm thấy lịch đặt này!";
                 }
                 book.Status = status;
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                book.UpdatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                 _unitOfWork.BookingRepo.Update(book);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if(!result)

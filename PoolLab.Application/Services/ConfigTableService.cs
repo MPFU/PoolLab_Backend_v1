@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
 using PoolLab.Core.Interface;
@@ -36,7 +37,9 @@ namespace PoolLab.Application.Services
                 config.Id = Guid.NewGuid();
                 config.Name = "Cài Đặt";
                 config.Status = "Hoạt Động";
-                config.CreatedDate = DateTime.Now;
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                config.CreatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                 await _unitOfWork.ConfigTableRepo.AddAsync(config);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if(!result)
@@ -72,8 +75,10 @@ namespace PoolLab.Application.Services
                 check.TimeDelay = configDTO.TimeDelay != null ? configDTO.TimeDelay : check.TimeDelay;
                 check.TimeHold = configDTO.TimeHold != null ? configDTO.TimeHold : check.TimeHold;
                 check.Deposit = configDTO.Deposit != null ? configDTO.Deposit : check.Deposit;
-                check.UpdateDate = DateTime.Now;
-                 _unitOfWork.ConfigTableRepo.Update(check);
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                check.UpdateDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+                _unitOfWork.ConfigTableRepo.Update(check);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)
                 {

@@ -41,7 +41,9 @@ namespace PoolLab.Application.Interface
         {
             try
             {
-                var now = DateTime.Now;
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                var now = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                 var Time = TimeOnly.FromDateTime(now);
                 var check = await _unitOfWork.BilliardTableRepo.CheckTableAvailable(activeTable.BilliardTableID, now);
                 if (check != null)
@@ -92,7 +94,7 @@ namespace PoolLab.Application.Interface
                     return "Không tìm thấy bàn chơi này!";
                 }
                 table.Status = "Có Khách";
-                table.UpdatedDate = DateTime.Now;
+                table.UpdatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                 _unitOfWork.BilliardTableRepo.Update(table);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)
@@ -112,7 +114,9 @@ namespace PoolLab.Application.Interface
         {
             try
             {
-                var now = DateTime.Now;
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                var now = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                 var Time = TimeOnly.FromDateTime(now);
                 var check = await _unitOfWork.BilliardTableRepo.CheckTableAvailable(activeTable, now);
                 if(check != null)
@@ -140,7 +144,7 @@ namespace PoolLab.Application.Interface
                     return "Không tìm thấy bàn chơi này!";
                 }
                 table.Status = "Có Khách";
-                table.UpdatedDate = DateTime.Now;
+                table.UpdatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                 _unitOfWork.BilliardTableRepo.Update(table);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)
@@ -170,7 +174,9 @@ namespace PoolLab.Application.Interface
                 }
                 var bida = _mapper.Map<BilliardTable>(newBilliardTableDTO);
                 bida.Id = Guid.NewGuid();
-                bida.CreatedDate = DateTime.Now;
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                bida.CreatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                 bida.Status = "Bàn trống";
                 NewTypeAreaDTO bidaTypeDTO = new NewTypeAreaDTO();
                 bidaTypeDTO.AreaID = bida.AreaId;
@@ -320,7 +326,9 @@ namespace PoolLab.Application.Interface
                 table.AreaId = updateInfoTableDTO.AreaId != null && updateInfoTableDTO.AreaId != Guid.Empty ? updateInfoTableDTO.AreaId : table.AreaId;
                 table.PriceId = updateInfoTableDTO.PriceId != null && updateInfoTableDTO.PriceId != Guid.Empty ? updateInfoTableDTO.PriceId : table.PriceId;
                 table.BilliardTypeId = updateInfoTableDTO.BilliardTypeId != null && updateInfoTableDTO.BilliardTypeId != Guid.Empty ? updateInfoTableDTO.BilliardTypeId : table.AreaId;
-                table.UpdatedDate = DateTime.Now;
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                table.UpdatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                 _unitOfWork.BilliardTableRepo.Update(table);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)
