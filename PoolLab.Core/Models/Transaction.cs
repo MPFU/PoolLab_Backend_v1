@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace PoolLab.Core.Models;
 
-public partial class Payment
+public partial class Transaction
 {
     public Guid Id { get; set; }
 

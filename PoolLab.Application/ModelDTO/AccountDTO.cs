@@ -148,8 +148,6 @@ namespace PoolLab.Application.ModelDTO
 
         public string? Email { get; set; }
 
-        public string? PasswordHash { get; set; }
-
         public string? AvatarUrl { get; set; }
 
         public string? UserName { get; set; }
@@ -158,9 +156,11 @@ namespace PoolLab.Application.ModelDTO
 
         public string? PhoneNumber { get; set; }
 
-        public RoleDTO? Role { get; set; }
+        public Guid? RoleId { get; set; }
 
-        public StoreDTO? Store { get; set; }
+        public string? RoleName { get; set; }
+
+        public Guid? StoreId { get; set; }
 
         public int? Point { get; set; }
 
@@ -172,9 +172,9 @@ namespace PoolLab.Application.ModelDTO
 
         public int? Tier { get; set; }
 
-        public SubDTO? Sub { get; set; }
+        public Guid? SubId { get; set; }
 
-        public CompanyDTO? Company { get; set; }
+        public Guid? CompanyId { get; set; }
 
         public DateTime? JoinDate { get; set; }
 

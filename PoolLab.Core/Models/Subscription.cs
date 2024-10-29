@@ -29,7 +29,7 @@ public partial class Subscription
 
     public virtual ICollection<Account> Accounts { get; set; } = new List<Account>();
 
-    public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+    public virtual ICollection<Transaction> Payments { get; set; } = new List<Transaction>();
 
     public virtual SubscriptionType? SubType { get; set; }
 }

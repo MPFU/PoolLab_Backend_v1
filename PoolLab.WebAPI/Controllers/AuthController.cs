@@ -27,7 +27,7 @@ namespace PoolLab.WebAPI.Controllers
                 var loginRequest = await _authService.LoginAsync(loginData);
                 if (loginRequest == null)
                 {
-                    return Ok(new SucceededRespone()
+                    return NotFound(new FailResponse()
                     {
                         Status = NotFound().StatusCode,
                         Message = "Sai email hoặc password!"
@@ -55,21 +55,28 @@ namespace PoolLab.WebAPI.Controllers
         {
             try
             {
-                if (loginData.StoreId != Guid.Empty && loginData.CompanyId != Guid.Empty)
+                if (loginData.StoreId != null && loginData.CompanyId != null)
                 {
                     return BadRequest(new FailResponse()
                     {
                         Status = BadRequest().StatusCode,
-                        Message = "Chỉ được phép nhập 1 trong 2 (store hoặc company)!"
+                        Message = "Chỉ được phép nhập 1 trong 2 (chi nhánh hoặc công ty)!"
+                    });
+                }else if(loginData.StoreId == null && loginData.CompanyId == null)
+                {
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = "Bạn phải chọn chi nhánh hoặc công ty!"
                     });
                 }
                 var loginRequest = await _authService.LoginStaffAsync(loginData);
                 if (loginRequest == null)
                 {
-                    return Ok(new SucceededRespone()
+                    return NotFound(new FailResponse()
                     {
                         Status = NotFound().StatusCode,
-                        Message = "Sai email hoặc password!"
+                        Message = "Sai email hoặc mật khẩu!"
                     });
                 }
                 return Ok(new SucceededRespone()

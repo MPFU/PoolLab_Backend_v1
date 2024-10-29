@@ -35,13 +35,9 @@ public partial class BilliardTable
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
-    public virtual ICollection<RecurringBookings> RecurringBookings { get; set; } = new List<RecurringBookings>();
-
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
     public virtual ICollection<PlayTime> PlayTimes { get; set; } = new List<PlayTime>();
-
-    public virtual ICollection<TableAvailability> TableAvailabilities { get; set; } = new List<TableAvailability>();
 
     public virtual BilliardPrice? Price { get; set; }
 

@@ -18,7 +18,7 @@ namespace PoolLab.WebAPI.Controllers
             _billiardTypeService = billiardTypeService;
         }
 
-        [HttpGet("id")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetBilliardTypeByID(Guid id)
         {
             try
@@ -108,7 +108,7 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
-        [HttpPut("id")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBilliardType(Guid id, [FromBody] NewBidaTypeDTO areaDTO)
         {
             try
@@ -138,7 +138,7 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
-        [HttpDelete("id")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBilliardType(Guid id)
         {
             try

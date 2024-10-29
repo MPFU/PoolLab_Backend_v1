@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PoolLab.Infrastructure.Interface
 {
-    public class PaymentRepo : GenericRepo<Payment>, IPaymentRepo
+    public class PaymentRepo : GenericRepo<Transaction>, IPaymentRepo
     {
         public PaymentRepo(PoolLabDbv1Context dbContext) : base(dbContext)
         {

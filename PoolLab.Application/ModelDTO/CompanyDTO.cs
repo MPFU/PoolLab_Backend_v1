@@ -20,4 +20,15 @@ namespace PoolLab.Application.ModelDTO
 
         public string? Status { get; set; }
     }
+
+    public class CreateCompanyDTO
+    {
+        public string? Name { get; set; }
+
+        public string? Address { get; set; }
+
+        public string? CompanyImg { get; set; }
+
+        public string? Descript { get; set; }
+    }
 }

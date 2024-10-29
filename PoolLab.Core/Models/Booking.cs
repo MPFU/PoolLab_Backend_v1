@@ -15,11 +15,25 @@ public partial class Booking
 
     public Guid? BilliardTableId { get; set; }
 
+    public Guid? ConfigId { get; set; }
+
+    public Guid? AreaId { get; set; }
+
     public string? Message { get; set; }
 
-    public DateTime? TimeStart { get; set; }
+    public decimal? Deposit {  get; set; }
 
-    public DateTime? TimeEnd { get; set; }
+    public DateOnly? BookingDate { get; set; }
+
+    public TimeOnly? TimeStart { get; set; }
+
+    public TimeOnly? TimeEnd { get; set; }
+
+    public DateTime? DateStart { get; set; }
+
+    public DateTime? DateEnd { get; set; }
+
+    public string? DayOfWeek { get; set; }
 
     public DateTime? CreatedDate { get; set; }
 
@@ -33,7 +47,9 @@ public partial class Booking
 
     public virtual Account? Customer { get; set; }
 
-    public virtual Store? Store { get; set; }
+    public virtual Store? Store { get; set; }  
+    
+    public virtual ConfigTable? ConfigTable { get; set; }
 
-    public virtual ICollection<TableAvailability> TableAvailabilities { get; set; } = new List<TableAvailability>();
+    public virtual Area? Area { get; set; }
 }

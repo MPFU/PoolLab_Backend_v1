@@ -18,8 +18,7 @@ namespace PoolLab.Core.Interface
         ICourseRepo CourseRepo { get; }
         IEventRepo EventRepo { get; }
         IGroupProductRepo GroupProductRepo { get; }
-        ITableAvailability TableAvailabilityRepo { get; }
-        IRecurringBookingRepo RecurringBookingRepo { get; }
+        IConfigTableRepo ConfigTableRepo { get; }
         IOrderDetailRepo OrderDetailRepo { get; }
         IOrderRepo OrderRepo { get; }
         IPaymentRepo PaymentRepo { get; }
@@ -33,6 +32,7 @@ namespace PoolLab.Core.Interface
         ISubscriptionRepo SubscriptionRepo { get; }
         ISubscriptionTypeRepo SubscriptionTypeRepo { get; }
         IUnitRepo UnitRepo { get; }
+        IBidaTypeAreRepo BidaTypeAreaRepo { get; }
 
         Task<int> SaveAsync();
     }
