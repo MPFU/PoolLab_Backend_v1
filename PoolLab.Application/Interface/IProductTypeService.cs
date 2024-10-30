@@ -1,4 +1,5 @@
-﻿using PoolLab.Core.Models;
+﻿using PoolLab.Application.ModelDTO;
+using PoolLab.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,5 +10,8 @@ namespace PoolLab.Application.Interface
 {
     public interface IProductTypeService 
     {
+        Task<IEnumerable<ProductTypeDTO?>> GetAllProductTypes();
+        Task<string?> CreateNewProductType(CreateProductTypeDTO createProductTypeDTO);
+        Task<ProductTypeDTO?> GetProductTypeByName(string name);
     }
 }

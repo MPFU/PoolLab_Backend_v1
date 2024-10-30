@@ -17,8 +17,6 @@ namespace PoolLab.Application.ModelDTO
 
     public class CreateProductTypeDTO
     {
-        public Guid Id { get; set; }
-
         public string? Name { get; set; }
 
         public string? Descript { get; set; }

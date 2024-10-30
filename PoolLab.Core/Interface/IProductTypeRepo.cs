@@ -9,5 +9,6 @@ namespace PoolLab.Core.Interface
 {
     public interface IProductTypeRepo : IGenericRepo<ProductType>
     {
+        Task<ProductType?> SearchByNameAsync(string name);
     }
 }

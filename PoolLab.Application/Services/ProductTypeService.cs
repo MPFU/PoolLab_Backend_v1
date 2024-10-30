@@ -33,8 +33,8 @@ namespace PoolLab.Application.Interface
             {
                 var check = _mapper.Map<ProductType>(createProductTypeDTO);
                 check.Id = Guid.NewGuid();
-                check.Name = createProductTypeDTO.Name;
-                var namecheck = await GetProductTypeByName(check.Id, check.Name);
+                //var namecheck = await _unitOfWork.ProductTypeRepo.SearchByNameAsync(check.Name);
+                var namecheck = await GetProductTypeByName(check.Name);
                 if (namecheck != null)
                 {
                     return "Tên loại sản phẩm bị trùng.";
@@ -55,11 +55,10 @@ namespace PoolLab.Application.Interface
                 throw;
             }
         }
-        public async Task<ProductTypeDTO?> GetProductTypeByName(Guid Id, string name)
+        public async Task<ProductTypeDTO?> GetProductTypeByName(string? name)
         {
-            var check = await _unitOfWork.ProductTypeRepo.GetByIdAsync(Id);
-            name = check.Name;
-            return _mapper.Map<ProductTypeDTO?>(name);
+            var check = await _unitOfWork.ProductTypeRepo.SearchByNameAsync(name);
+            return _mapper.Map<ProductTypeDTO?>(check);
         }
     }
 }
