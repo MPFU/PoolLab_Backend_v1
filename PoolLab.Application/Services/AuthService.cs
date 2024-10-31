@@ -137,7 +137,8 @@ namespace PoolLab.Application.Services
                 new Claim("AccountStatus", account.Status),
                 new Claim("CompanyId", company),
                 new Claim("StoreId", account.StoreId.ToString()),              
-                new Claim("Username", account.UserName)
+                new Claim("Username", account.UserName),
+                new Claim("Username", account.FullName)
             };
 
 

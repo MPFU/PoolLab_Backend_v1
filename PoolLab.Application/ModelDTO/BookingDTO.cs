@@ -22,6 +22,8 @@ namespace PoolLab.Application.ModelDTO
 
         public string? Message { get; set; }
 
+        public decimal? Deposit { get; set; }
+
         public DateOnly? BookingDate { get; set; }
 
         public TimeOnly? TimeStart { get; set; }
@@ -77,6 +79,8 @@ namespace PoolLab.Application.ModelDTO
         public Guid? AreaId { get; set; }
 
         public string? Message { get; set; }
+
+        public decimal? Deposit { get; set; }
 
         public string? Username { get; set; }
 

@@ -85,5 +85,10 @@ namespace PoolLab.Infrastructure.Interface
                 .Where(x => x.Id.Equals(id))              
                 .FirstOrDefaultAsync();
         }
+
+        public async Task<decimal?> GetPriceOfTable(Guid? id)
+        {
+            return id != null ? await _dbContext.BilliardTables.Where(x => x.Id == id).Select(x => x.Price.OldPrice).FirstOrDefaultAsync() : null;
+        }
     }
 }

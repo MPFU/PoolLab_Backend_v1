@@ -7,6 +7,8 @@ public partial class OrderDetail
 {
     public Guid Id { get; set; }
 
+    public string? ProductName { get; set; }
+
     public Guid? ProductId { get; set; }
 
     public Guid? OrderId { get; set; }

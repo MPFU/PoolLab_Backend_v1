@@ -109,6 +109,7 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.Status).HasMaxLength(50);
             entity.Property(e => e.SubId).HasColumnName("SubID");
             entity.Property(e => e.UserName).HasMaxLength(50);
+            entity.Property(e => e.TimeTotal).HasPrecision(0);
 
             entity.HasOne(d => d.Company).WithMany(p => p.Accounts)
                 .HasForeignKey(d => d.CompanyId)
@@ -369,16 +370,33 @@ public partial class PoolLabDbv1Context : DbContext
             entity.ToTable("Order");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.OrderCode).HasMaxLength(20);
+            entity.Property(e => e.Username).HasMaxLength(100);
             entity.Property(e => e.CustomerId).HasColumnName("CustomerID");
+            entity.Property(e => e.StoreId).HasColumnName("StoreId");
+            entity.Property(e => e.BilliardTableId).HasColumnName("BilliardTableId");
             entity.Property(e => e.Discount).HasColumnType("decimal(11, 1)");
             entity.Property(e => e.OrderDate).HasColumnType("datetime");
             entity.Property(e => e.Status).HasMaxLength(50);
             entity.Property(e => e.StoreId).HasColumnName("StoreID");
             entity.Property(e => e.TotalPrice).HasColumnType("decimal(11, 0)");
+            entity.Property(e => e.CustomerPay).HasColumnType("decimal(11, 0)");
+            entity.Property(e => e.ExcessCash).HasColumnType("decimal(11, 0)");
+            entity.Property(e => e.OrderBy).HasMaxLength(100);
 
             entity.HasOne(d => d.Customer).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.CustomerId)
                 .HasConstraintName("FK_Order_Account")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(d => d.Store).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.StoreId)
+                .HasConstraintName("FK_Order_Store")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(d => d.BilliardTable).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.BilliardTableId)
+                .HasConstraintName("FK_Order_BilliardTable")
                 .OnDelete(DeleteBehavior.NoAction);
         });
 
@@ -387,6 +405,7 @@ public partial class PoolLabDbv1Context : DbContext
             entity.ToTable("OrderDetail");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.ProductName).HasMaxLength(100);
             entity.Property(e => e.BilliardTableId).HasColumnName("BilliardTableID");
             entity.Property(e => e.OrderId).HasColumnName("OrderID");
             entity.Property(e => e.Price).HasColumnType("decimal(11, 0)");
@@ -440,12 +459,11 @@ public partial class PoolLabDbv1Context : DbContext
             entity.ToTable("PlayTime");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Name).HasMaxLength(20);
             entity.Property(e => e.BilliardTableId).HasColumnName("BilliardTableID");
             entity.Property(e => e.OrderId).HasColumnName("OrderID");
-            entity.Property(e => e.TimeEnd).HasColumnType("datetime");
-            entity.Property(e => e.TimeStart).HasColumnType("datetime");
             entity.Property(e => e.TotalPrice).HasColumnType("decimal(11, 0)");
-            entity.Property(e => e.TotalTime).HasColumnType("decimal(11, 2)");
+            entity.Property(e => e.TimeTotal).HasPrecision(0);
 
             entity.HasOne(d => d.BilliardTable).WithMany(p => p.PlayTimes)
                 .HasForeignKey(d => d.BilliardTableId)

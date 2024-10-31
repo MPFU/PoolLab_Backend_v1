@@ -9,5 +9,6 @@ namespace PoolLab.Core.Interface
 {
     public interface IPlaytimeRepo : IGenericRepo<PlayTime>
     {
+        Task<PlayTime?> GetPlayTimeByOrderOrTable(Guid? id);
     }
 }

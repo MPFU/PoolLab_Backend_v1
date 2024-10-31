@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PoolLab.Infrastructure;
 
@@ -11,9 +12,11 @@ using PoolLab.Infrastructure;
 namespace PoolLab.Infrastructure.Migrations
 {
     [DbContext(typeof(PoolLabDbv1Context))]
-    partial class PoolLabDbv1ContextModelSnapshot : ModelSnapshot
+    [Migration("20241030104844_UpdateTimeonlyAccountAndOrder")]
+    partial class UpdateTimeonlyAccountAndOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -610,18 +613,8 @@ namespace PoolLab.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("CustomerID");
 
-                    b.Property<decimal?>("CustomerPay")
-                        .HasColumnType("decimal(11, 0)");
-
                     b.Property<decimal?>("Discount")
                         .HasColumnType("decimal(11, 1)");
-
-                    b.Property<decimal?>("ExcessCash")
-                        .HasColumnType("decimal(11, 0)");
-
-                    b.Property<string>("OrderBy")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("OrderCode")
                         .HasMaxLength(20)
@@ -640,10 +633,6 @@ namespace PoolLab.Infrastructure.Migrations
 
                     b.Property<decimal?>("TotalPrice")
                         .HasColumnType("decimal(11, 0)");
-
-                    b.Property<string>("Username")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -676,10 +665,6 @@ namespace PoolLab.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("ProductID");
 
-                    b.Property<string>("ProductName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<int?>("Quantity")
                         .HasColumnType("int");
 
@@ -702,10 +687,6 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Property<Guid?>("BilliardTableId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("BilliardTableID");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
 
                     b.Property<Guid?>("OrderId")
                         .HasColumnType("uniqueidentifier")

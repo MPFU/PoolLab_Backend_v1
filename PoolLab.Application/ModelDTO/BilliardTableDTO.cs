@@ -118,5 +118,10 @@ namespace PoolLab.Application.ModelDTO
         public Guid CustomerID { get; set; }
     }
 
-   
+    public class ActiveTableForGuest
+    {
+        public string? Answer { get; set; }
+        public Guid? StoreId { get; set; }
+        public string? StaffName { get; set; }
+    }
 }
