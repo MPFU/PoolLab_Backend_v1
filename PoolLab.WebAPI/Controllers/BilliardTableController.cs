@@ -300,12 +300,12 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> ActivateTableForGuest(Guid id)
+        public async Task<IActionResult> ActivateTableForGuest(Guid id, [FromBody] ActiveTableForGuest activeTableFor)
         {
             try
             {
 
-                var requestResult = await _billiardTableService.ActivateTableForGuest(id);
+                var requestResult = await _billiardTableService.ActivateTableForGuest(id, activeTableFor);
                 if (requestResult != null)
                 {
                     if (TimeOnly.TryParse(requestResult, out TimeOnly time))

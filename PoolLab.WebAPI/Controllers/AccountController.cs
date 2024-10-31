@@ -83,6 +83,7 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Member,Manager,Super Manager")]
         public async Task<IActionResult> UpdateInfoUser(Guid id, [FromBody] UpdateAccDTO updateAcc)
         {
             try

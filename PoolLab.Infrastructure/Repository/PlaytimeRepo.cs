@@ -1,4 +1,5 @@
-﻿using PoolLab.Core.Interface;
+﻿using Microsoft.EntityFrameworkCore;
+using PoolLab.Core.Interface;
 using PoolLab.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,13 @@ namespace PoolLab.Infrastructure.Interface
     {
         public PlaytimeRepo(PoolLabDbv1Context dbContext) : base(dbContext)
         {
+        }
+
+        public async Task<PlayTime?> GetPlayTimeByOrderOrTable(Guid? id)
+        {
+            return id != null 
+                ? await _dbContext.PlayTimes.Where(x => x.OrderId == id || x.BilliardTableId == id).FirstOrDefaultAsync()
+                : null;
         }
     }
 }

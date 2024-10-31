@@ -27,7 +27,7 @@ public partial class Account
 
     public decimal? Balance { get; set; }
 
-    public int? TotalTime { get; set; }
+    public TimeOnly? TimeTotal { get; set; }
 
     public string? Rank { get; set; }
 

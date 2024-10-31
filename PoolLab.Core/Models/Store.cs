@@ -48,4 +48,6 @@ public partial class Store
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
     public virtual ICollection<BilliardTypeArea> BilliardTypeAreas { get; set; } = new List<BilliardTypeArea>();
+
+    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 }

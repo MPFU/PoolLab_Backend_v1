@@ -24,8 +24,9 @@ namespace PoolLab.Application.Interface
         private readonly IBidaTypeAreaService _bidaTypeAreaService;
         private readonly IConfigTableService _configTableService;
         private readonly IBookingService _bookingService;
+        private readonly IOrderService _orderService;
 
-        public BilliardTableService(IMapper mapper, IUnitOfWork unitOfWork, IQRCodeGenerate qRCodeGenerate, IAzureBlobService azureBlobService, IBidaTypeAreaService bidaTypeAreaService, IConfigTableService configTableService, IBookingService bookingService)
+        public BilliardTableService(IMapper mapper, IUnitOfWork unitOfWork, IQRCodeGenerate qRCodeGenerate, IAzureBlobService azureBlobService, IBidaTypeAreaService bidaTypeAreaService, IConfigTableService configTableService, IBookingService bookingService, IOrderService orderService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
@@ -34,6 +35,7 @@ namespace PoolLab.Application.Interface
             _bidaTypeAreaService = bidaTypeAreaService;
             _configTableService = configTableService;
             _bookingService = bookingService;
+            _orderService = orderService;
         }
 
 
@@ -110,7 +112,7 @@ namespace PoolLab.Application.Interface
             }
         }
 
-        public async Task<string?> ActivateTableForGuest(Guid activeTable)
+        public async Task<string?> ActivateTableForGuest(Guid activeTable, ActiveTableForGuest tableForGuest)
         {
             try
             {
@@ -119,7 +121,7 @@ namespace PoolLab.Application.Interface
                 var now = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                 var Time = TimeOnly.FromDateTime(now);
                 var check = await _unitOfWork.BilliardTableRepo.CheckTableAvailable(activeTable, now);
-                if(check != null)
+                if(check != null && tableForGuest.Answer == null)
                 {
                     var config = await _configTableService.GetConfigTableByName();
                     if (config == null)
@@ -133,25 +135,62 @@ namespace PoolLab.Application.Interface
                     }
                     else
                     { 
-                        TimeOnly no = new TimeOnly(9,0);
-                        TimeSpan timeOnly = (TimeSpan)(check.TimeStart - no);
+                        TimeSpan timeOnly = check.TimeStart.Value.AddMinutes((double)-config.TimeHold) - Time;
                         return timeOnly.ToString(@"hh\:mm");
                     }
-                }
-                var table = await _unitOfWork.BilliardTableRepo.GetByIdAsync(activeTable);
-                if (table == null)
+                }else if(check != null && tableForGuest.Answer.Equals("Đồng Ý"))
                 {
-                    return "Không tìm thấy bàn chơi này!";
+                    var table = await _unitOfWork.BilliardTableRepo.GetByIdAsync(activeTable);
+                    if (table == null)
+                    {
+                        return "Không tìm thấy bàn chơi này!";
+                    }
+                    var config = await _configTableService.GetConfigTableByName();
+                    if (config == null)
+                    {
+                        return "Không tìm thấy cấu hình!";
+                    }
+                    AddNewOrderDTO orderDTO = new AddNewOrderDTO();
+                    orderDTO.BilliardTableId = activeTable;
+                    orderDTO.OrderBy = tableForGuest.StaffName;
+                    if(tableForGuest.StoreId == null)
+                    {
+                        return "Chưa có chi nhánh!";
+                    }
+                    orderDTO.StoreId = tableForGuest.StoreId;
+                    var createOrder = await _orderService.AddNewOrder(orderDTO);
+                    if (createOrder != null)
+                    {
+                        return createOrder;
+                    }
+                   
+                    table.Status = "Có Khách";
+                    table.UpdatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+                    _unitOfWork.BilliardTableRepo.Update(table);
+                    var result = await _unitOfWork.SaveAsync() > 0;
+                    if (!result)
+                    {
+                        return "Kích hoạt thất bại!";
+                    }
+                    TimeSpan timeOnly = check.TimeStart.Value.AddMinutes((double)-config.TimeHold) - Time;
+                    return timeOnly.TotalMinutes < config.TimeHold ? "Bàn chơi nãy đã được đặt trước!" : timeOnly.ToString(@"hh\:mm");
                 }
-                table.Status = "Có Khách";
-                table.UpdatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
-                _unitOfWork.BilliardTableRepo.Update(table);
-                var result = await _unitOfWork.SaveAsync() > 0;
-                if (!result)
+                else
                 {
-                    return "Kích hoạt thất bại!";
-                }
-
+                    var table = await _unitOfWork.BilliardTableRepo.GetByIdAsync(activeTable);
+                    if (table == null)
+                    {
+                        return "Không tìm thấy bàn chơi này!";
+                    }
+                    table.Status = "Có Khách";
+                    table.UpdatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+                    _unitOfWork.BilliardTableRepo.Update(table);
+                    var result = await _unitOfWork.SaveAsync() > 0;
+                    if (!result)
+                    {
+                        return "Kích hoạt thất bại!";
+                    }
+                }             
                 return null;
             }
             catch (DbUpdateException)

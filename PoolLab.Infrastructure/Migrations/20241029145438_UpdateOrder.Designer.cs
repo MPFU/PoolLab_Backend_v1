@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PoolLab.Infrastructure;
 
@@ -11,9 +12,11 @@ using PoolLab.Infrastructure;
 namespace PoolLab.Infrastructure.Migrations
 {
     [DbContext(typeof(PoolLabDbv1Context))]
-    partial class PoolLabDbv1ContextModelSnapshot : ModelSnapshot
+    [Migration("20241029145438_UpdateOrder")]
+    partial class UpdateOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -81,9 +84,8 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Property<int?>("Tier")
                         .HasColumnType("int");
 
-                    b.Property<TimeOnly?>("TimeTotal")
-                        .HasPrecision(0)
-                        .HasColumnType("time(0)");
+                    b.Property<int?>("TotalTime")
+                        .HasColumnType("int");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(50)
@@ -610,22 +612,8 @@ namespace PoolLab.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("CustomerID");
 
-                    b.Property<decimal?>("CustomerPay")
-                        .HasColumnType("decimal(11, 0)");
-
                     b.Property<decimal?>("Discount")
                         .HasColumnType("decimal(11, 1)");
-
-                    b.Property<decimal?>("ExcessCash")
-                        .HasColumnType("decimal(11, 0)");
-
-                    b.Property<string>("OrderBy")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("OrderCode")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime?>("OrderDate")
                         .HasColumnType("datetime");
@@ -640,10 +628,6 @@ namespace PoolLab.Infrastructure.Migrations
 
                     b.Property<decimal?>("TotalPrice")
                         .HasColumnType("decimal(11, 0)");
-
-                    b.Property<string>("Username")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -676,10 +660,6 @@ namespace PoolLab.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("ProductID");
 
-                    b.Property<string>("ProductName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<int?>("Quantity")
                         .HasColumnType("int");
 
@@ -703,20 +683,21 @@ namespace PoolLab.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("BilliardTableID");
 
-                    b.Property<string>("Name")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
                     b.Property<Guid?>("OrderId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("OrderID");
 
-                    b.Property<TimeOnly?>("TimeTotal")
-                        .HasPrecision(0)
-                        .HasColumnType("time(0)");
+                    b.Property<DateTime?>("TimeEnd")
+                        .HasColumnType("datetime");
+
+                    b.Property<DateTime?>("TimeStart")
+                        .HasColumnType("datetime");
 
                     b.Property<decimal?>("TotalPrice")
                         .HasColumnType("decimal(11, 0)");
+
+                    b.Property<decimal?>("TotalTime")
+                        .HasColumnType("decimal(11, 2)");
 
                     b.HasKey("Id");
 

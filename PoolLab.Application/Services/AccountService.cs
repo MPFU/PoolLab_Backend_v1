@@ -47,7 +47,6 @@ namespace PoolLab.Application.Interface
                 account.Point = 0;
                 account.Balance = 0;
                 account.Tier = 0;
-                account.TotalTime = 0;
                 account.Status = "Kích hoạt";
                 var role1 = await _unitOfWork.RoleRepo.GetRoleByName("Member");
                 account.RoleId = role1.Id;
@@ -96,7 +95,7 @@ namespace PoolLab.Application.Interface
                     return "Không tìm thấy chức vụ này !";
                 }              
                 account.RoleId = roleId.Id;
-                if(createAccDTO.RoleName.Equals("Super Manager"))
+                if(createAccDTO.RoleName.Equals("Super Manager") || createAccDTO.RoleName.Equals("Admin"))
                 {
                     account.StoreId = null;
                     account.CompanyId = createAccDTO.CompanyId;

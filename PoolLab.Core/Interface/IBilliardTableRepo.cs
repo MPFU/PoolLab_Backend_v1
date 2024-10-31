@@ -16,5 +16,7 @@ namespace PoolLab.Core.Interface
         Task<Booking?> CheckTableAvailable(Guid id, DateTime dateTime);
 
         Task<int> CountTableTypeArea(Guid? typeID, Guid? areaID, Guid? storeID);
+
+        Task<decimal?> GetPriceOfTable(Guid? id);
     }
 }

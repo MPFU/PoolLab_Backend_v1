@@ -9,5 +9,10 @@ namespace PoolLab.Core.Interface
 {
     public interface IOrderDetailRepo : IGenericRepo<OrderDetail>
     {
+        Task<IEnumerable<OrderDetail>?> GetOrderDetailByOrderOrTable(Guid? id);
+
+        Task<OrderDetail?> GetOrderDetailByOrderAndProduct(Guid orderID, Guid productID);
+
+        Task<decimal?> GetTotalPriceOrderDetail(Guid? id);
     }
 }

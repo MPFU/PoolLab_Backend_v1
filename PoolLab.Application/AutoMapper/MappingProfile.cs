@@ -93,6 +93,23 @@ namespace PoolLab.Application.AutoMapper
                 .ForMember(dest => dest.TypeName, opt => opt.MapFrom(src => src.BilliardType.Name))
                 .ForMember(dest => dest.AreaName, opt => opt.MapFrom(src => src.Area.Name))
                 .ReverseMap();
+
+            //ORDER
+            CreateMap<AddNewOrderDTO, Order>().ReverseMap();
+            CreateMap<Order, GetAllOrderDTO> ().ReverseMap ();
+            CreateMap<Order, GetOrderBillDTO> ()
+                .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.Name))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Store.Address))
+                .ReverseMap();
+
+            //ORDERDETAIL
+            CreateMap<AddNewOrderDetailDTO, OrderDetail>().ReverseMap();
+            CreateMap<OrderDetailDTO, OrderDetail>().ReverseMap();
+
+            //PLAYTIME
+            CreateMap<AddNewPlayTimeDTO, PlayTime>()
+                .ForMember(dest => dest.TimeTotal, opt => opt.MapFrom(src => TimeOnly.Parse(src.TimeStart)))
+                .ReverseMap();
         }
     }
 }
