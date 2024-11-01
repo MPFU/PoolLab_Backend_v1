@@ -14,6 +14,7 @@ namespace PoolLab.Infrastructure.Interface
         public ProductTypeRepo(PoolLabDbv1Context dbContext) : base(dbContext)
         {
         }
+
         public async Task<ProductType?> SearchByNameAsync(string name)
         {
             return await _dbContext.ProductTypes.FirstOrDefaultAsync(x => x.Name.Equals(name));

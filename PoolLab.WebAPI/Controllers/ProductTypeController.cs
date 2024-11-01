@@ -51,7 +51,7 @@ namespace PoolLab.WebAPI.Controllers
             try
             {
                 var newType = await _productTypeService.CreateNewProductType(create);
-                if(newType != null)
+                if (newType != null)
                 {
                     return BadRequest(new FailResponse()
                     {
@@ -61,7 +61,7 @@ namespace PoolLab.WebAPI.Controllers
                 }
                 return Ok(new SucceededRespone()
                 {
-                    Status= Ok().StatusCode,
+                    Status = Ok().StatusCode,
                     Message = "Tạo loại sản phẩm thành công."
                 });
             }
@@ -74,6 +74,66 @@ namespace PoolLab.WebAPI.Controllers
                 });
             }
 
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProductType(Guid id, [FromBody] CreateProductTypeDTO createProductTypeDTO)
+        {
+            try
+            {
+                var update = await _productTypeService.UpdateProductType(id, createProductTypeDTO);
+                if (update != null)
+                {
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = update
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Cập nhật loại sản phẩm thành công."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteProductType(Guid id)
+        {
+            try
+            {
+                var check = await _productTypeService.DeleteProductType(id);
+                if (check != null)
+                {
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = check
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Xoá loại sản phẩm thành công."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
         }
     }
 }

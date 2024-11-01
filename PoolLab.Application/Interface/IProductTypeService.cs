@@ -13,5 +13,7 @@ namespace PoolLab.Application.Interface
         Task<IEnumerable<ProductTypeDTO?>> GetAllProductTypes();
         Task<string?> CreateNewProductType(CreateProductTypeDTO createProductTypeDTO);
         Task<ProductTypeDTO?> GetProductTypeByName(string name);
+        Task<string?> UpdateProductType(Guid id, CreateProductTypeDTO createProductTypeDTO);
+        Task<string?> DeleteProductType(Guid id);
     }
 }

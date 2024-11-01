@@ -6,6 +6,7 @@ using PoolLab.Core.Interface;
 using PoolLab.Core.Models;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -59,6 +60,65 @@ namespace PoolLab.Application.Interface
         {
             var check = await _unitOfWork.ProductTypeRepo.SearchByNameAsync(name);
             return _mapper.Map<ProductTypeDTO?>(check);
+        }
+        public async Task<string?> UpdateProductType(Guid id, CreateProductTypeDTO createProductTypeDTO)
+        {
+            try
+            {
+                var check = await _unitOfWork.ProductTypeRepo.GetByIdAsync(id);
+                if (check == null)
+                {
+                    return "Không tìm thấy loại sản phẩm này.";
+                }
+                if (createProductTypeDTO.Name != null)
+                {
+                    check.Name = createProductTypeDTO.Name;
+                }
+                else if (createProductTypeDTO.Descript != null)
+                {
+                    check.Descript = createProductTypeDTO.Descript;
+                }
+                else if (createProductTypeDTO.Name.Trim() == null || createProductTypeDTO.Name.Length == 0)
+                {
+                    check.Name = check.Name;
+                }
+                else if (createProductTypeDTO.Descript.Trim() == null || createProductTypeDTO.Descript.Length == 0)
+                {
+                    check.Descript = check.Descript;
+                }
+                var result = await _unitOfWork.SaveAsync() > 0;
+                if (!result)
+                {
+                    return "Lưu thất bại.";
+                }
+                return null;
+            }
+            catch (DbUpdateException)
+            {
+                throw;
+            }
+        }
+        public async Task<string?> DeleteProductType(Guid id)
+        {
+            try
+            {
+                var check = await _unitOfWork.ProductTypeRepo.GetByIdAsync(id);
+                if (check == null)
+                {
+                    return "Không tìm thấy loại sản phẩm này.";
+                }
+                _unitOfWork.ProductTypeRepo.Delete(check);
+                var result = await _unitOfWork.SaveAsync() > 0;
+                if (!result)
+                {
+                    return "Lưu thất bại.";
+                }
+                return null;
+            }
+            catch (DbException)
+            {
+                throw;
+            }
         }
     }
 }
