@@ -104,4 +104,9 @@ namespace PoolLab.Application.ModelDTO
 
         public string? Status { get; set; }
     }
+
+    public class UpdateBookingStatusDTO
+    {
+        public string? Status { get; set; }
+    }
 }

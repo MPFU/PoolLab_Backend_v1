@@ -51,7 +51,7 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllBooing([FromQuery] BookingFilter booking)
+        public async Task<IActionResult> GetAllBooking([FromQuery] BookingFilter booking)
         {
             try
             {
@@ -113,6 +113,71 @@ namespace PoolLab.WebAPI.Controllers
                 {
                     Status = 400,
                     Message = "Đặt bàn thất bại!"
+                });
+
+            }
+            catch (Exception ex)
+            {
+                return Conflict(new FailResponse()
+                {
+                    Status = Conflict().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> CancelBooking(Guid id)
+        {
+            try
+            {
+
+                var requestResult = await _bookingService.CancelBookingForMem(id);
+                if (requestResult != null)
+                {
+                    return StatusCode(400, new FailResponse()
+                    {
+                        Status = 400,
+                        Message = requestResult
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Huỷ đặt lịch thành công."
+                });
+
+            }
+            catch (Exception ex)
+            {
+                return Conflict(new FailResponse()
+                {
+                    Status = Conflict().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateStatusBooking(Guid id, [FromBody] UpdateBookingStatusDTO statusDTO)
+        {
+            try
+            {
+
+                var requestResult = await _bookingService.UpdateStatusBooking(id,statusDTO);
+                if (requestResult != null)
+                {
+                    return StatusCode(400, new FailResponse()
+                    {
+                        Status = 400,
+                        Message = requestResult
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Cập nhật thành công."
                 });
 
             }
