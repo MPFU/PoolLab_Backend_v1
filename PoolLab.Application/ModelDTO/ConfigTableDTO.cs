@@ -18,6 +18,8 @@ namespace PoolLab.Application.ModelDTO
 
         public int? Deposit { get; set; }
 
+        public int? TimeCancelBook { get; set; }
+
         public DateTime? CreatedDate { get; set; }
 
         public DateTime? UpdateDate { get; set; }
@@ -32,5 +34,7 @@ namespace PoolLab.Application.ModelDTO
         public int? TimeHold { get; set; }
 
         public int? Deposit { get; set; }
+
+        public int? TimeCancelBook { get; set; }
     }
 }

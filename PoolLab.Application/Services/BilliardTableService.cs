@@ -59,7 +59,9 @@ namespace PoolLab.Application.Interface
                     {
                         if (Time >= check.TimeStart && Time <= check.TimeStart.Value.AddMinutes((double)config.TimeDelay))
                         {
-                            var book = await _bookingService.UpdateStatusBooking(check.Id, "Hoàn Thành");
+                            UpdateBookingStatusDTO statusDTO = new UpdateBookingStatusDTO();
+                            statusDTO.Status = "Hoàn Thành";
+                            var book = await _bookingService.UpdateStatusBooking(check.Id, statusDTO);
                             if (book != null)
                             {
                                 return book;
@@ -71,7 +73,9 @@ namespace PoolLab.Application.Interface
                         }
                         else
                         {
-                            var book = await _bookingService.UpdateStatusBooking(check.Id, "Đã Huỷ");
+                            UpdateBookingStatusDTO statusDTO = new UpdateBookingStatusDTO();
+                            statusDTO.Status = "Đã Huỷ";
+                            var book = await _bookingService.UpdateStatusBooking(check.Id, statusDTO);
                             if (book != null)
                             {
                                 return book;

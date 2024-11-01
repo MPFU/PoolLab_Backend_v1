@@ -282,7 +282,7 @@ namespace PoolLab.Application.Interface
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)
                 {
-                    return "Cập nhật mật khẩu thất bại!";
+                    return "Cập nhật số dư thất bại!";
                 }
                 return null;
             }

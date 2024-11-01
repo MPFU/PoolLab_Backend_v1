@@ -20,13 +20,15 @@ namespace PoolLab.Application.Interface
         private readonly IMapper _mapper;
         private readonly IAccountService _accountService;
         private readonly IPaymentService _paymentService;
+        private readonly IConfigTableService _configTableService;
 
-        public BookingService(IUnitOfWork unitOfWork, IMapper mapper, IAccountService accountService, IPaymentService paymentService)
+        public BookingService(IUnitOfWork unitOfWork, IMapper mapper, IAccountService accountService, IPaymentService paymentService, IConfigTableService configTableService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _accountService = accountService;
             _paymentService = paymentService;
+            _configTableService = configTableService;
         }
 
         public async Task<string?> AddNewBooking(NewBookingDTO newBookingDTO)
@@ -48,7 +50,7 @@ namespace PoolLab.Application.Interface
       
                 if(book.BookingDate == date)
                 {
-                    if (book.TimeStart <= time || book.TimeStart <= time.AddHours(1))
+                    if (book.TimeStart <= time || book.TimeStart <= time.AddMinutes(30))
                     { 
                         return "Giờ chơi của bạn không hợp lệ!";
                     }
@@ -88,14 +90,15 @@ namespace PoolLab.Application.Interface
                     ? ((bookTime * table.Price.OldPrice) / 100) * config.Deposit * 3
                     : ((bookTime * table.Price.OldPrice) / 100) * config.Deposit * 5;
 
+                var deposit = Math.Round((decimal)bookPrice,2);
                 var customer = await _unitOfWork.AccountRepo.GetAccountBalanceByID((Guid)book.CustomerId);
 
-                if (customer != null && customer < bookPrice)
+                if (customer != null && customer < deposit)
                 {
                     return "Số dư của bạn không đủ!";
-                }else if (customer != null && bookPrice <= customer)
+                }else if (customer != null && deposit <= customer)
                 {
-                    var price = customer - bookPrice;
+                    var price = customer - deposit;
                     var up = await _accountService.UpdateBalance((Guid)book.CustomerId, (decimal)price);
                     if (up != null)
                     {
@@ -103,7 +106,7 @@ namespace PoolLab.Application.Interface
                     }
                     PaymentBookingDTO paymentBookingDTO = new PaymentBookingDTO();
                     paymentBookingDTO.PaymentMethod = "Qua Ví";
-                    paymentBookingDTO.Amount = bookPrice;
+                    paymentBookingDTO.Amount = deposit;
                     paymentBookingDTO.AccountId = book.CustomerId;
                     paymentBookingDTO.PaymentInfo = "Đặt bàn";
                     var pay = await _paymentService.CreateTransactionBooking(paymentBookingDTO);
@@ -121,7 +124,7 @@ namespace PoolLab.Application.Interface
                 book.BilliardTableId = table.Id;
                 book.Id = Guid.NewGuid();
                 book.CreatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
-                book.Deposit = bookPrice;
+                book.Deposit = deposit;
                 book.Status = "Đã đặt";
                 await _unitOfWork.BookingRepo.AddAsync(book);
                 var result = await _unitOfWork.SaveAsync() > 0;
@@ -219,7 +222,7 @@ namespace PoolLab.Application.Interface
             };
         }
 
-        public async Task<string?> UpdateStatusBooking(Guid Id, string status)
+        public async Task<string?> UpdateStatusBooking(Guid Id, UpdateBookingStatusDTO status)
         {
             try
             {
@@ -228,7 +231,7 @@ namespace PoolLab.Application.Interface
                 {
                     return "Không tìm thấy lịch đặt này!";
                 }
-                book.Status = status;
+                book.Status = status.Status != null ? status.Status : book.Status;
                 DateTime utcNow = DateTime.UtcNow;
                 TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                 book.UpdatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
@@ -237,6 +240,80 @@ namespace PoolLab.Application.Interface
                 if(!result)
                 {
                     return "Cập nhật thất bại!";
+                }
+                return null;
+            }catch(DbUpdateException)
+            {
+                throw;
+            }
+        }
+
+        public async Task<string?> CancelBookingForMem(Guid id)
+        {
+            try
+            {
+                var config = await _configTableService.GetConfigTableByName();
+                if (config == null)
+                {
+                    return "Không tìm thấy cấu hình hệ thống!";
+                }
+
+                var book = await _unitOfWork.BookingRepo.GetByIdAsync(id);
+                if (book == null)
+                {
+                    return "Không tìm thấy lịch đặt trước này!";
+                }
+
+                var timeBook = TimeOnly.FromDateTime((DateTime)book.CreatedDate);
+                var dateBook = DateOnly.FromDateTime((DateTime)book.CreatedDate);
+
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                var now = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+
+                var nowTime = TimeOnly.FromDateTime(now);
+                var nowDate = DateOnly.FromDateTime(now);
+
+                if(dateBook == nowDate && nowTime > timeBook.AddMinutes((double)config.TimeCancelBook))
+                {
+                    return "Đã quá thời gian cho phép huỷ đặt bàn!";
+                }else if(dateBook == nowDate && (nowTime <= timeBook.AddMinutes(((double)config.TimeCancelBook)) && nowTime > timeBook))
+                {
+                    var cus = await _unitOfWork.AccountRepo.GetByIdAsync((Guid)book.CustomerId);
+                    if(cus == null)
+                    {
+                        return "Không tìm thấy khách hàng của lịch đặt này!";
+                    }
+
+                    var balance = cus.Balance + book.Deposit;
+                    var up = await _accountService.UpdateBalance(cus.Id, (decimal)balance);
+                    if(up != null)
+                    {
+                        return up;
+                    }
+
+                    PaymentBookingDTO paymentBookingDTO = new PaymentBookingDTO();
+                    paymentBookingDTO.PaymentMethod = "Qua Ví";
+                    paymentBookingDTO.Amount = book.Deposit;
+                    paymentBookingDTO.AccountId = cus.Id;
+                    paymentBookingDTO.PaymentInfo = "Hoàn Tiền";
+                    var pay = await _paymentService.CreateTransactionBooking(paymentBookingDTO);
+                    if (pay != null)
+                    {
+                        return pay;
+                    }
+                    book.Status = "Đã Huỷ";
+                    book.UpdatedDate = now;
+                    _unitOfWork.BookingRepo.Update(book);
+                    var result = await _unitOfWork.SaveAsync() > 0;
+                    if (!result)
+                    {
+                        return "Cập nhật thất bại!";
+                    }
+                }
+                else
+                {
+                    return "Đã quá thời gian cho phép huỷ đặt bàn!";
                 }
                 return null;
             }catch(DbUpdateException)
