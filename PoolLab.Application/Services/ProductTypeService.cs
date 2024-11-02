@@ -46,7 +46,7 @@ namespace PoolLab.Application.Interface
                     var result = await _unitOfWork.SaveAsync() > 0;
                     if (!result)
                     {
-                        return "Tạo mới sản phẩm thất bại.";
+                        return "Tạo mới loại sản phẩm thất bại.";
                     }
                     return null;
                 }
