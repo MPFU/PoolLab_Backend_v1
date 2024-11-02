@@ -68,6 +68,10 @@ namespace PoolLab.Application.AutoMapper
             CreateMap<ProductTypeDTO, ProductType>().ReverseMap();
             CreateMap<CreateProductTypeDTO, ProductType>().ReverseMap();
 
+            //GROUP PRODUCT
+            CreateMap<GroupProductDTO, GroupProduct>().ReverseMap();
+            CreateMap<CreateGroupProductDTO, GroupProduct>().ReverseMap();
+
             //CONFIGTABLE
             CreateMap<NewConfigDTO, ConfigTable>().ReverseMap();
             CreateMap<ConfigTableDTO, ConfigTable>().ReverseMap();            

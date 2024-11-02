@@ -1,4 +1,5 @@
-﻿using PoolLab.Core.Models;
+﻿using PoolLab.Application.ModelDTO;
+using PoolLab.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,12 @@ using System.Threading.Tasks;
 
 namespace PoolLab.Application.Interface
 {
-    public interface IGroupProductService 
+    public interface IGroupProductService
     {
+        Task<IEnumerable<GroupProductDTO?>> GetAllGroupProduct();
+        Task<string?> CreateGroupProduct(CreateGroupProductDTO create);
+        Task<GroupProductDTO?> GetGroupProductByName(string? name);
+        Task<string?> UpdateGroupProduct(Guid id, CreateGroupProductDTO createGroupProductDTO);
+        Task<string?> DeleteGroupProduct(Guid id);
     }
 }
