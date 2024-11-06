@@ -136,10 +136,6 @@ namespace PoolLab.Application.ModelDTO
         public string Email { get; set; }
 
         public string Password { get; set; }
-
-        public Guid? StoreId { get; set; }
-
-        public Guid? CompanyId { get; set; }
     }
 
     public class GetAllAccDTO

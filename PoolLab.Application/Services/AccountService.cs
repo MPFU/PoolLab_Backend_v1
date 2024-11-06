@@ -220,8 +220,7 @@ namespace PoolLab.Application.Interface
         //Login of Manager, Staff,...
         public async Task<GetLoginAccDTO?> GetLoginAcc(LoginAccDTO loginAccDTO)
         {           
-            var id = loginAccDTO.StoreId != null  ? loginAccDTO.StoreId : loginAccDTO.CompanyId ;
-            var acc = await _unitOfWork.AccountRepo.GetAccountLoginStaff(loginAccDTO.Email, id);
+            var acc = await _unitOfWork.AccountRepo.GetAccountLoginStaff(loginAccDTO.Email);
             if(acc != null)
             {
                 if(BCrypt.Net.BCrypt.Verify(loginAccDTO.Password, acc.PasswordHash))

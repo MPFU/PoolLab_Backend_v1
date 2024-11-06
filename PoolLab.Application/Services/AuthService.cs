@@ -108,7 +108,6 @@ namespace PoolLab.Application.Services
 
         private string CreateToken2(GetLoginAccDTO account)
         {
-            string company = (account.CompanyId != null && account.CompanyId != Guid.Empty) ? account.CompanyId.ToString() : "";
             DateTime utcNow = DateTime.UtcNow;
             TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             var nowUtc = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
@@ -133,14 +132,20 @@ namespace PoolLab.Application.Services
                 new Claim(JwtRegisteredClaimNames.Aud,
                                   _configuration.GetSection("JwtSecurityToken:Audience").Value),
                 new Claim(ClaimTypes.Role, account.Role.Name),
-                new Claim("AccountId", account.Id.ToString()),
-                new Claim("AccountStatus", account.Status),
-                new Claim("CompanyId", company),
-                new Claim("StoreId", account.StoreId.ToString()),              
-                new Claim("Username", account.UserName),
-                new Claim("Username", account.FullName)
+                new Claim("accountId", account.Id.ToString()),
+                new Claim("accountStatus", account.Status),       
+                new Claim("username", account.UserName),
+                new Claim("fullName", account.FullName)
             };
-
+            
+            if(account.Role.Name.Equals("Staff") || account.Role.Name.Equals("Manager"))
+            {
+                claims.Add(new Claim("storeId", account.StoreId.ToString()));
+            }
+            else
+            {
+                claims.Add(new Claim("companyId", account.CompanyId.ToString()));
+            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes
                 (_configuration.GetSection("JwtSecurityToken:Key").Value));

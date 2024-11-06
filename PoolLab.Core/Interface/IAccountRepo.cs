@@ -11,7 +11,7 @@ namespace PoolLab.Core.Interface
     {
         Task<string?> CheckDuplicateEmailvsUsername(Guid? id,string? email, string? username);
         Task<Account?> GetAccountByEmailOrUsername(string email);
-        Task<Account?> GetAccountLoginStaff(string email, Guid? id);
+        Task<Account?> GetAccountLoginStaff(string email);
         Task<IEnumerable<Account>> GetAllAccounts();
         Task<decimal?> GetAccountBalanceByID(Guid id);
     }
