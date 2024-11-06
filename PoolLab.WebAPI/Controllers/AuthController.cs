@@ -55,21 +55,6 @@ namespace PoolLab.WebAPI.Controllers
         {
             try
             {
-                if (loginData.StoreId != null && loginData.CompanyId != null)
-                {
-                    return BadRequest(new FailResponse()
-                    {
-                        Status = BadRequest().StatusCode,
-                        Message = "Chỉ được phép nhập 1 trong 2 (chi nhánh hoặc công ty)!"
-                    });
-                }else if(loginData.StoreId == null && loginData.CompanyId == null)
-                {
-                    return BadRequest(new FailResponse()
-                    {
-                        Status = BadRequest().StatusCode,
-                        Message = "Bạn phải chọn chi nhánh hoặc công ty!"
-                    });
-                }
                 var loginRequest = await _authService.LoginStaffAsync(loginData);
                 if (loginRequest == null)
                 {
