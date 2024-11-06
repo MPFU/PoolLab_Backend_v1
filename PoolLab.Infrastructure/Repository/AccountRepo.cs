@@ -83,12 +83,11 @@ namespace PoolLab.Infrastructure.Interface
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<Account?> GetAccountLoginStaff(string email, Guid? id)
+        public async Task<Account?> GetAccountLoginStaff(string email)
         {
 
             return await _dbContext.Accounts
                            .Where(x => x.Email.Equals(email) || x.UserName.Equals(email))
-                           .Where(x => x.StoreId.Equals(id) || x.CompanyId.Equals(id))
                            .Include(x => x.Role)
                            .FirstOrDefaultAsync();
 

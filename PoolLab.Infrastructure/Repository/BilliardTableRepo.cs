@@ -40,31 +40,6 @@ namespace PoolLab.Infrastructure.Interface
                                 .Where(x => x.TimeStart >= Time && x.Status.ToLower().Equals("đã đặt"))
                                 .OrderBy(x => x.TimeStart)
                                 .FirstOrDefaultAsync();
-
-            //var config = await _dbContext.ConfigTable.Where(x => x.Name.ToLower().Equals("cài Đặt")).FirstOrDefaultAsync();
-            
-            //if(booking != null)
-            //{               
-
-            //    if ( booking.CustomerId.Equals(CusID))
-            //    {
-            //        return (Time >= booking.TimeStart && Time <= booking.TimeStart.Value.AddMinutes((double)config.TimeDelay)) 
-            //            ? null
-            //            : "Bạn đã tới trễ!";
-                    
-            //    }
-            //    else
-            //    {
-            //       return  Time <= booking.TimeStart && Time >= booking.TimeStart.Value.AddMinutes((double)-config.TimeHold)
-            //            ? "Bàn chơi này đã được đặt trước!"
-            //            : booking.TimeStart.ToString();                    
-            //    }
-                
-            //}
-            //else
-            //{
-            //    return null;
-            //}
         }
 
         public async Task<int> CountTableTypeArea(Guid? typeID, Guid? areaID, Guid? storeID)

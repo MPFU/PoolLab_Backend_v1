@@ -46,66 +46,112 @@ namespace PoolLab.Application.Interface
                 DateTime utcNow = DateTime.UtcNow;
                 TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                 var now = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+
                 var Time = TimeOnly.FromDateTime(now);
-                var check = await _unitOfWork.BilliardTableRepo.CheckTableAvailable(activeTable.BilliardTableID, now);
-                if (check != null)
-                {
-                    var config = await _configTableService.GetConfigTableByName();
-                    if (config == null)
-                    {
-                        return "Không tìm thấy cấu hình!";
-                    }
-                    if (check.CustomerId == activeTable.CustomerID)
-                    {
-                        if (Time >= check.TimeStart && Time <= check.TimeStart.Value.AddMinutes((double)config.TimeDelay))
-                        {
-                            UpdateBookingStatusDTO statusDTO = new UpdateBookingStatusDTO();
-                            statusDTO.Status = "Hoàn Thành";
-                            var book = await _bookingService.UpdateStatusBooking(check.Id, statusDTO);
-                            if (book != null)
-                            {
-                                return book;
-                            }
-                        }
-                        else if (Time < check.TimeStart)
-                        {
-                            return "Bạn đến quá sớm, hãy quay lại khi tới giờ!";
-                        }
-                        else
-                        {
-                            UpdateBookingStatusDTO statusDTO = new UpdateBookingStatusDTO();
-                            statusDTO.Status = "Đã Huỷ";
-                            var book = await _bookingService.UpdateStatusBooking(check.Id, statusDTO);
-                            if (book != null)
-                            {
-                                return book;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (Time <= check.TimeStart && Time >= check.TimeStart.Value.AddMinutes((double)-config.TimeHold))
-                        {
-                            return "Bàn chơi này đã được đặt trước!";
-                        }
-                        else
-                        {
-                            return check.TimeStart.ToString();
-                        }
-                    }
-                }
+
                 var table = await _unitOfWork.BilliardTableRepo.GetByIdAsync(activeTable.BilliardTableID);
                 if (table == null)
                 {
                     return "Không tìm thấy bàn chơi này!";
                 }
-                table.Status = "Có Khách";
-                table.UpdatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
-                _unitOfWork.BilliardTableRepo.Update(table);
-                var result = await _unitOfWork.SaveAsync() > 0;
-                if (!result)
+                if (!table.Status.Equals("Bàn Trống"))
                 {
-                    return "Kích hoạt thất bại!";
+                    return "Bàn chơi này đang không trống để phục vụ!";
+                }
+
+                var booking = await _unitOfWork.BilliardTableRepo.CheckTableAvailable(activeTable.BilliardTableID, now);
+
+                if (booking != null)
+                {
+                    var config = await _configTableService.GetConfigTableByName();
+
+                    if (config == null)
+                    {
+                        return "Không tìm thấy cấu hình!";
+                    }
+
+                    if (booking.CustomerId == activeTable.CustomerID)
+                    {
+                        //if (Time >= check.TimeStart && Time <= check.TimeStart.Value.AddMinutes((double)config.TimeDelay))
+                        //{
+                        //    UpdateBookingStatusDTO statusDTO = new UpdateBookingStatusDTO();
+                        //    statusDTO.Status = "Hoàn Thành";
+                        //    var book = await _bookingService.UpdateStatusBooking(check.Id, statusDTO);
+                        //    if (book != null)
+                        //    {
+                        //        return book;
+                        //    }
+                        //}
+                        //else if (Time < check.TimeStart)
+                        //{
+                        //    return "Bạn đến quá sớm, hãy quay lại khi tới giờ!";
+                        //}
+                        //else
+                        //{
+                        //    UpdateBookingStatusDTO statusDTO = new UpdateBookingStatusDTO();
+                        //    statusDTO.Status = "Đã Huỷ";
+                        //    var book = await _bookingService.UpdateStatusBooking(check.Id, statusDTO);
+                        //    if (book != null)
+                        //    {
+                        //        return book;
+                        //    }
+                        //}
+                    }
+                    else
+                    {
+                        if (Time <= booking.TimeStart && Time >= booking.TimeStart.Value.AddMinutes((double)-config.TimeHold))
+                        {
+                            return "Bàn chơi này đã được đặt trước!";
+                        }
+                        else
+                        {
+                            //return check.TimeStart.ToString();
+                        }
+                    }
+                }
+                else
+                {
+
+                    var cus = await _unitOfWork.AccountRepo.GetByIdAsync(activeTable.CustomerID);
+                    if (cus == null)
+                    {
+                        return "Không tìm thấy thành viên này!";
+                    }
+
+                    if (cus.Balance <= 0)
+                    {
+                        return "Bạn đã hết tiền trong ví.\n Bạn cần nạp thêm tiền vào ví để kích hoạt bàn!";
+                    }
+
+                    var price = await _unitOfWork.BilliardTableRepo.GetPriceOfTable(activeTable.BilliardTableID);
+                    if (price == null)
+                    {
+                        return "Không tìm thấy giá của bàn!";
+                    }
+
+                    var totalTime = cus.Balance / price;
+
+                    int hours = (int)decimal.Truncate((decimal)totalTime);
+                    int minutes = (int)((totalTime - hours) * 60);
+                    int seconds = (int)(((totalTime - hours) * 60 - minutes) * 60);
+
+                    TimeOnly time = new TimeOnly(hours, minutes, seconds);
+
+                    if (hours == 0 && minutes < 5)
+                    {
+                        return "Thời gian chơi của bạn ít hơn 5 phút.\n Bạn cần nạp thêm tiền vào ví để kích hoạt bàn!";
+                    }
+
+                    table.Status = "Có Khách";
+                    table.UpdatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+                    _unitOfWork.BilliardTableRepo.Update(table);
+                    var result = await _unitOfWork.SaveAsync() > 0;
+                    if (!result)
+                    {
+                        return "Kích hoạt thất bại!";
+                    }
+
+                    return time.ToString("HH:mm:ss");
                 }
 
                 return null;
@@ -124,8 +170,20 @@ namespace PoolLab.Application.Interface
                 TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                 var now = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                 var Time = TimeOnly.FromDateTime(now);
+
+                var table = await _unitOfWork.BilliardTableRepo.GetByIdAsync(activeTable);
+                if (table == null)
+                {
+                    return "Không tìm thấy bàn chơi này!";
+                }
+                if (!table.Status.Equals("Bàn Trống"))
+                {
+                    return "Bàn chơi này đang không trống để phục vụ!";
+                }
+
                 var check = await _unitOfWork.BilliardTableRepo.CheckTableAvailable(activeTable, now);
-                if(check != null && tableForGuest.Answer == null)
+
+                if (check != null && tableForGuest.Answer == null)
                 {
                     var config = await _configTableService.GetConfigTableByName();
                     if (config == null)
@@ -138,17 +196,13 @@ namespace PoolLab.Application.Interface
                         return "Bàn chơi này đã được đặt trước!";
                     }
                     else
-                    { 
+                    {
                         TimeSpan timeOnly = check.TimeStart.Value.AddMinutes((double)-config.TimeHold) - Time;
                         return timeOnly.ToString(@"hh\:mm");
                     }
-                }else if(check != null && tableForGuest.Answer.Equals("Đồng Ý"))
+                }
+                else if (check != null && tableForGuest.Answer.Equals("Đồng Ý"))
                 {
-                    var table = await _unitOfWork.BilliardTableRepo.GetByIdAsync(activeTable);
-                    if (table == null)
-                    {
-                        return "Không tìm thấy bàn chơi này!";
-                    }
                     var config = await _configTableService.GetConfigTableByName();
                     if (config == null)
                     {
@@ -157,7 +211,7 @@ namespace PoolLab.Application.Interface
                     AddNewOrderDTO orderDTO = new AddNewOrderDTO();
                     orderDTO.BilliardTableId = activeTable;
                     orderDTO.OrderBy = tableForGuest.StaffName;
-                    if(tableForGuest.StoreId == null)
+                    if (tableForGuest.StoreId == null)
                     {
                         return "Chưa có chi nhánh!";
                     }
@@ -167,7 +221,7 @@ namespace PoolLab.Application.Interface
                     {
                         return createOrder;
                     }
-                   
+
                     table.Status = "Có Khách";
                     table.UpdatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                     _unitOfWork.BilliardTableRepo.Update(table);
@@ -181,11 +235,7 @@ namespace PoolLab.Application.Interface
                 }
                 else
                 {
-                    var table = await _unitOfWork.BilliardTableRepo.GetByIdAsync(activeTable);
-                    if (table == null)
-                    {
-                        return "Không tìm thấy bàn chơi này!";
-                    }
+                  
                     table.Status = "Có Khách";
                     table.UpdatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                     _unitOfWork.BilliardTableRepo.Update(table);
@@ -194,7 +244,7 @@ namespace PoolLab.Application.Interface
                     {
                         return "Kích hoạt thất bại!";
                     }
-                }             
+                }
                 return null;
             }
             catch (DbUpdateException)
@@ -240,7 +290,7 @@ namespace PoolLab.Application.Interface
                 {
                     return "Tệp tải lên thất bại!";
                 }
-                
+
                 await _unitOfWork.BilliardTableRepo.AddAsync(bida);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)
