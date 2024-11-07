@@ -96,7 +96,7 @@ namespace PoolLab.WebAPI.Controllers
                         {
                             Status = Ok().StatusCode,
                             Message = "Đặt bàn thành công.",
-                            Data = await _billiardTableService.GetBilliardTableByID(Guid.Parse(requestResult))
+                            Data = await _bookingService.GetBookingById(Guid.Parse(requestResult))
                         });
                     }
                     else

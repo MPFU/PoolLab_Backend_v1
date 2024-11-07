@@ -33,7 +33,14 @@ namespace PoolLab.Infrastructure.Interface
 
         public async Task<Booking?> GetBookingByID(Guid id)
         {
-            return await _dbContext.Bookings.Where(x => x.Id.Equals(id)).Include(x => x.Customer).Include(x => x.BilliardTable).FirstOrDefaultAsync();
+            return await _dbContext.Bookings
+                .Where(x => x.Id.Equals(id))
+                .Include(x => x.Customer)
+                .Include(x => x.BilliardTable)
+                .Include(x => x.Store)
+                .Include(x => x.Area)
+                .Include(x => x.BilliardType)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<BilliardTable?> GetTableNotBooking(Booking booking)
@@ -67,5 +74,6 @@ namespace PoolLab.Infrastructure.Interface
                         .Include (x => x.Price)
                         .FirstOrDefaultAsync();
         }
+
     }
 }

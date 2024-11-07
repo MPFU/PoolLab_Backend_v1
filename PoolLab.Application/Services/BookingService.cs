@@ -130,7 +130,7 @@ namespace PoolLab.Application.Interface
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (result)
                 {
-                    return book.BilliardTableId.ToString();
+                    return book.Id.ToString();
                 }
                 return null;
             }catch (DbUpdateException)
