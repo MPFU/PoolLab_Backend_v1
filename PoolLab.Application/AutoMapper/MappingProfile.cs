@@ -86,6 +86,11 @@ namespace PoolLab.Application.AutoMapper
             CreateMap<Booking, GetBookingDTO > ()
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Customer.UserName))
                 .ForMember(dest => dest.TableName, opt => opt.MapFrom(src => src.BilliardTable.Name))
+                .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.Name))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Store.Address))
+                .ForMember(dest => dest.AreaName, opt => opt.MapFrom(src => src.Area.Name))
+                .ForMember(dest => dest.BidaTypeName, opt => opt.MapFrom(src => src.BilliardType.Name))
+                .ForMember(dest => dest.BidaPrice, opt => opt.MapFrom(src => src.BilliardTable.Price.OldPrice))
                 .ReverseMap();
 
             //PAYMENT

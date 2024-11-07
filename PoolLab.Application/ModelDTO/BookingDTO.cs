@@ -84,7 +84,17 @@ namespace PoolLab.Application.ModelDTO
 
         public string? Username { get; set; }
 
-        public string? TableName { get; set; }        
+        public string? TableName { get; set; }   
+        
+        public string? StoreName { get; set; }
+
+        public string? Address { get; set; }
+
+        public string? AreaName { get; set; }   
+
+        public string? BidaTypeName { get; set; }
+
+        public decimal? BidaPrice { get; set; }
 
         public DateOnly? BookingDate { get; set; }
 
