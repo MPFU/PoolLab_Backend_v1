@@ -11,6 +11,8 @@ public partial class Area
 
     public string? Descript { get; set; }
 
+    public string? AreaImg { get; set; }
+
     public Guid? StoreId { get; set; }
 
     public virtual ICollection<BilliardTable> BilliardTables { get; set; } = new List<BilliardTable>();

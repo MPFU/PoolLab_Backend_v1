@@ -128,12 +128,12 @@ namespace PoolLab.WebAPI.Controllers
 
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> CancelBooking(Guid id)
+        public async Task<IActionResult> CancelBooking(Guid id, [FromBody] AnswerBookingDTO? answer = null)
         {
             try
             {
 
-                var requestResult = await _bookingService.CancelBookingForMem(id);
+                var requestResult = await _bookingService.CancelBookingForMem(id, answer);
                 if (requestResult != null)
                 {
                     return StatusCode(400, new FailResponse()

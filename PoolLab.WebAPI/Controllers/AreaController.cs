@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
+using PoolLab.Application.Services;
 using PoolLab.WebAPI.ResponseModel;
 
 namespace PoolLab.WebAPI.Controllers
@@ -11,10 +12,12 @@ namespace PoolLab.WebAPI.Controllers
     public class AreaController : ControllerBase
     {
         private readonly IAreaService _areaService;
+        private readonly IAzureBlobService _azureBlobService;
 
-        public AreaController(IAreaService areaService)
+        public AreaController(IAreaService areaService, IAzureBlobService azureBlobService)
         {
             _areaService = areaService;
+            _azureBlobService = azureBlobService;
         }
 
         [HttpGet("{id}")]
@@ -103,6 +106,49 @@ namespace PoolLab.WebAPI.Controllers
                 {
                     Status = BadRequest().StatusCode,
                     Message = ex.Message
+                });
+            }
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> UploadAreaImg(IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = "Tệp không được chọn hoặc trống."
+                    });
+
+                var imageExtensions = new[] { ".jpg", ".png" };
+                if (imageExtensions.Any(e => file.FileName.EndsWith(e, StringComparison.OrdinalIgnoreCase)) == false)
+                {
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = "Tệp không phải là hình ảnh."
+                    });
+                }
+                var containerName = "store"; // replace with your container name
+                var uri = await _azureBlobService.UploadFileImageAsync(containerName, file);
+
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Tệp được tải lên thành công.",
+                    Data = uri
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new FailResponse()
+                {
+                    Status = 500,
+                    Message = "Tải ảnh thất bại!",
+                    Errors = $"An error occurred while uploading the file: {ex.Message}"
                 });
             }
         }

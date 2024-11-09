@@ -146,7 +146,8 @@ namespace PoolLab.WebAPI.Controllers
                 return StatusCode(500, new FailResponse()
                 {
                     Status = 500,
-                    Message = $"An error occurred while uploading the file: {ex.Message}"
+                    Message = "Tải ảnh thất bại!",
+                    Errors =$"An error occurred while uploading the file: {ex.Message}"
                 });
             }
         }

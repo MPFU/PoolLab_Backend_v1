@@ -125,4 +125,31 @@ namespace PoolLab.Application.ModelDTO
         public Guid? StoreId { get; set; }
         public string? StaffName { get; set; }
     }
+
+    public class GetAllTableDTO
+    {
+        public Guid Id { get; set; }
+
+        public string? Name { get; set; }
+
+        public Guid? StoreId { get; set; }
+
+        public Guid? AreaId { get; set; }
+
+        public Guid? BilliardTypeId { get; set; }
+
+        public Guid? PriceId { get; set; }
+
+        public string? Qrcode { get; set; }
+
+        public string? BidaTypeName { get; set; }
+
+        public string? AreaName { get; set; }
+
+        public DateTime? CreatedDate { get; set; }
+
+        public DateTime? UpdatedDate { get; set; }
+
+        public string? Status { get; set; }
+    }
 }

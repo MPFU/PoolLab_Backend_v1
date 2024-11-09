@@ -28,7 +28,12 @@ namespace PoolLab.Infrastructure.Interface
 
         public async Task<IEnumerable<Booking>> GetAllBooking()
         {
-            return await _dbContext.Bookings.Include(x => x.Customer).Include(x => x.BilliardTable).ToListAsync();
+            return await _dbContext.Bookings
+                .Include(x => x.Store)
+                .Include(x => x.Customer)
+                .Include(x => x.BilliardTable)
+                    .ThenInclude(y => y.Price)
+                .ToListAsync();
         }
 
         public async Task<Booking?> GetBookingByID(Guid id)
@@ -37,6 +42,7 @@ namespace PoolLab.Infrastructure.Interface
                 .Where(x => x.Id.Equals(id))
                 .Include(x => x.Customer)
                 .Include(x => x.BilliardTable)
+                .ThenInclude(y => y.Price)
                 .Include(x => x.Store)
                 .Include(x => x.Area)
                 .Include(x => x.BilliardType)
@@ -48,24 +54,49 @@ namespace PoolLab.Infrastructure.Interface
             var bookings = await _dbContext.Bookings
                           .Where(x => x.BookingDate == booking.BookingDate &&
                           ((x.TimeStart < booking.TimeEnd && x.TimeStart >= booking.TimeStart) || (x.TimeEnd > booking.TimeStart && x.TimeEnd <= booking.TimeEnd)))
-                          .Where(x => x.Status.Equals("Đã đặt"))
+                          .Where(x => x.Status.Equals("Đã Đặt"))
                           .Select(x => x.BilliardTableId)
                           .Distinct()
                           .ToListAsync();
 
             if (bookings != null && bookings.Count() > 0)
             {
-                var table = await _dbContext.BilliardTables
-                        .Where(x => x.BilliardTypeId.Equals(booking.BilliardTypeId) && x.StoreId.Equals(booking.StoreId))
-                        .Where(x => !bookings.Contains(x.Id) && x.AreaId.Equals(booking.AreaId))
-                        .Include(x => x.Price)
-                        .FirstOrDefaultAsync();
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                var now = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
 
-                if ( table != null)
+                var nowDate = DateOnly.FromDateTime(now);
+
+                if(booking.BookingDate == nowDate)
                 {
-                    return table;
+                    var table = await _dbContext.BilliardTables
+                                           .Where(x => x.BilliardTypeId.Equals(booking.BilliardTypeId) && x.StoreId.Equals(booking.StoreId))
+                                           .Where(x => !bookings.Equals(x.Id) && x.AreaId.Equals(booking.AreaId))
+                                           .Where(x => x.Status.Equals("Bàn Trống"))
+                                           .Include(x => x.Price)
+                                           .FirstOrDefaultAsync();
+
+                    if (table != null)
+                    {
+                        return table;
+                    }
+                    return null;
                 }
-                return null;
+                else
+                {
+                    var table = await _dbContext.BilliardTables
+                       .Where(x => x.BilliardTypeId.Equals(booking.BilliardTypeId) && x.StoreId.Equals(booking.StoreId))
+                       .Where(x => !bookings.Equals(x.Id) && x.AreaId.Equals(booking.AreaId))
+                       .Include(x => x.Price)
+                       .FirstOrDefaultAsync();
+
+                    if (table != null)
+                    {
+                        return table;
+                    }
+                    return null;
+                }
+               
             }
 
             return await _dbContext.BilliardTables

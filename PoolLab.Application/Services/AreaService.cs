@@ -27,6 +27,11 @@ namespace PoolLab.Application.Interface
         {
             try
             {
+                var check = await _unitOfWork.AreaRepo.CheckDuplicate((Guid)newAreaDTO.StoreId, newAreaDTO.Name);
+                if (check)
+                {
+                    return "Tên khu vực trong quán đã bị trùng!";
+                }
                 var area = _mapper.Map<Area>(newAreaDTO);
                 area.Id = Guid.NewGuid();
                 await _unitOfWork.AreaRepo.AddAsync(area);
@@ -78,13 +83,20 @@ namespace PoolLab.Application.Interface
         {
             try
             {
+                var check = await _unitOfWork.AreaRepo.CheckDuplicate((Guid)newAreaDTO.StoreId, newAreaDTO.Name);
+                if (check)
+                {
+                    return "Tên khu vực trong quán đã bị trùng!";
+                }
+
                 var are = await _unitOfWork.AreaRepo.GetByIdAsync(Id);
                 if(are == null)
                 {
                     return "Không tìm thấy!";
                 }
-                are.Name = newAreaDTO.Name;
-                are.Descript = newAreaDTO.Descript;
+                are.Name = !string.IsNullOrEmpty(newAreaDTO.Name) ? newAreaDTO.Name : are.Name;
+                are.Descript = !string.IsNullOrEmpty(newAreaDTO.Descript) ? newAreaDTO.Descript : are.Descript;
+                are.AreaImg = !string.IsNullOrEmpty(newAreaDTO.AreaImg) ? newAreaDTO.AreaImg : are.AreaImg;
                 _unitOfWork.AreaRepo.Update(are);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)

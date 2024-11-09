@@ -86,7 +86,7 @@ public partial class PoolLabDbv1Context : DbContext
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", true, true)
             .Build();
-        connectionString = config.GetConnectionString("AzureDB");
+        connectionString = config.GetConnectionString("PhucDatabase");
         return connectionString;
     }
 
@@ -139,6 +139,7 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Descript).HasMaxLength(400);
             entity.Property(e => e.Name).HasMaxLength(50);
+            entity.Property(e => e.AreaImg).HasMaxLength(120);
             entity.Property(e => e.StoreId).HasColumnName("StoreID");
         });
 
