@@ -105,7 +105,10 @@ namespace PoolLab.Application.Interface
                         }
                         else
                         {
-                            //return check.TimeStart.ToString();
+                            if (string.IsNullOrEmpty(activeTable.Answer))
+                            {
+
+                            }
                         }
                     }
                 }
@@ -270,7 +273,7 @@ namespace PoolLab.Application.Interface
                 DateTime utcNow = DateTime.UtcNow;
                 TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                 bida.CreatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
-                bida.Status = "Bàn trống";
+                bida.Status = "Bàn Trống";
                 NewTypeAreaDTO bidaTypeDTO = new NewTypeAreaDTO();
                 bidaTypeDTO.AreaID = bida.AreaId;
                 bidaTypeDTO.BilliardTypeID = bida.BilliardTypeId;
@@ -333,10 +336,10 @@ namespace PoolLab.Application.Interface
             }
         }
 
-        public async Task<PageResult<BilliardTableDTO>> GetAllBidaTable(BidaTableFilter bidaTableFilter)
+        public async Task<PageResult<GetAllTableDTO>> GetAllBidaTable(BidaTableFilter bidaTableFilter)
         {
-            var bidaList = _mapper.Map<IEnumerable<BilliardTableDTO>>(await _unitOfWork.BilliardTableRepo.GetAllAsync());
-            IQueryable<BilliardTableDTO> query = bidaList.AsQueryable();
+            var bidaList = _mapper.Map<IEnumerable<GetAllTableDTO>>(await _unitOfWork.BilliardTableRepo.GetAllBidaTable());
+            IQueryable<GetAllTableDTO> query = bidaList.AsQueryable();
 
             //Filter
             if (!string.IsNullOrEmpty(bidaTableFilter.Name))
@@ -381,7 +384,7 @@ namespace PoolLab.Application.Interface
                 .Take(bidaTableFilter.PageSize)
                 .ToList();
 
-            return new PageResult<BilliardTableDTO>
+            return new PageResult<GetAllTableDTO>
             {
                 Items = pageItems,
                 PageNumber = bidaTableFilter.PageNumber,
@@ -416,9 +419,9 @@ namespace PoolLab.Application.Interface
                 table.Name = !string.IsNullOrEmpty(updateInfoTableDTO.Name) ? updateInfoTableDTO.Name : table.Name;
                 table.Descript = !string.IsNullOrEmpty(updateInfoTableDTO.Descript) ? updateInfoTableDTO.Descript : table.Descript;
                 table.Image = !string.IsNullOrEmpty(updateInfoTableDTO.Image) ? updateInfoTableDTO.Image : table.Image;
-                table.AreaId = updateInfoTableDTO.AreaId != null && updateInfoTableDTO.AreaId != Guid.Empty ? updateInfoTableDTO.AreaId : table.AreaId;
-                table.PriceId = updateInfoTableDTO.PriceId != null && updateInfoTableDTO.PriceId != Guid.Empty ? updateInfoTableDTO.PriceId : table.PriceId;
-                table.BilliardTypeId = updateInfoTableDTO.BilliardTypeId != null && updateInfoTableDTO.BilliardTypeId != Guid.Empty ? updateInfoTableDTO.BilliardTypeId : table.AreaId;
+                table.AreaId = (updateInfoTableDTO.AreaId != null && updateInfoTableDTO.AreaId != Guid.Empty) ? updateInfoTableDTO.AreaId : table.AreaId;
+                table.PriceId = (updateInfoTableDTO.PriceId != null && updateInfoTableDTO.PriceId != Guid.Empty) ? updateInfoTableDTO.PriceId : table.PriceId;
+                table.BilliardTypeId = (updateInfoTableDTO.BilliardTypeId != null && updateInfoTableDTO.BilliardTypeId != Guid.Empty) ? updateInfoTableDTO.BilliardTypeId : table.AreaId;
                 DateTime utcNow = DateTime.UtcNow;
                 TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                 table.UpdatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);

@@ -16,10 +16,10 @@ namespace PoolLab.Application.Interface
 
         Task<GetBookingDTO?> GetBookingById (Guid id);
 
-        Task<PageResult<GetBookingDTO>> GetAllBooking(BookingFilter bookingFilter);
+        Task<PageResult<GetAllBookingDTO>> GetAllBooking(BookingFilter bookingFilter);
 
         Task<string?> UpdateStatusBooking (Guid Id, UpdateBookingStatusDTO status);
 
-        Task<string?> CancelBookingForMem(Guid id);
+        Task<string?> CancelBookingForMem(Guid id, AnswerBookingDTO? answer);
     }
 }

@@ -108,7 +108,7 @@ namespace PoolLab.Application.Interface
                     paymentBookingDTO.PaymentMethod = "Qua Ví";
                     paymentBookingDTO.Amount = deposit;
                     paymentBookingDTO.AccountId = book.CustomerId;
-                    paymentBookingDTO.PaymentInfo = "Đặt bàn";
+                    paymentBookingDTO.PaymentInfo = "Đặt Bàn";
                     var pay = await _paymentService.CreateTransactionBooking(paymentBookingDTO);
                     if (pay != null)
                     {
@@ -125,7 +125,7 @@ namespace PoolLab.Application.Interface
                 book.Id = Guid.NewGuid();
                 book.CreatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                 book.Deposit = deposit;
-                book.Status = "Đã đặt";
+                book.Status = "Đã Đặt";
                 await _unitOfWork.BookingRepo.AddAsync(book);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (result)
@@ -144,10 +144,10 @@ namespace PoolLab.Application.Interface
             return _mapper.Map<GetBookingDTO>(await _unitOfWork.BookingRepo.GetBookingByID(id));
         }
 
-        public async Task<PageResult<GetBookingDTO>> GetAllBooking(BookingFilter bookingFilter)
+        public async Task<PageResult<GetAllBookingDTO>> GetAllBooking(BookingFilter bookingFilter)
         {
-            var bookList = _mapper.Map<IEnumerable<GetBookingDTO>>(await _unitOfWork.BookingRepo.GetAllBooking());
-            IQueryable<GetBookingDTO> result = bookList.AsQueryable();
+            var bookList = _mapper.Map<IEnumerable<GetAllBookingDTO>>(await _unitOfWork.BookingRepo.GetAllBooking());
+            IQueryable<GetAllBookingDTO> result = bookList.AsQueryable();
 
             //Filter
             if (!string.IsNullOrEmpty(bookingFilter.Username))
@@ -212,7 +212,7 @@ namespace PoolLab.Application.Interface
                 .Take(bookingFilter.PageSize)
                 .ToList();
 
-            return new PageResult<GetBookingDTO>
+            return new PageResult<GetAllBookingDTO>
             {
                 Items = pageItems,
                 PageNumber = bookingFilter.PageNumber,
@@ -248,7 +248,7 @@ namespace PoolLab.Application.Interface
             }
         }
 
-        public async Task<string?> CancelBookingForMem(Guid id)
+        public async Task<string?> CancelBookingForMem(Guid id , AnswerBookingDTO? answer)
         {
             try
             {
@@ -274,9 +274,9 @@ namespace PoolLab.Application.Interface
                 var nowTime = TimeOnly.FromDateTime(now);
                 var nowDate = DateOnly.FromDateTime(now);
 
-                if(dateBook == nowDate && nowTime > timeBook.AddMinutes((double)config.TimeCancelBook))
+                if((dateBook <= nowDate && nowTime > timeBook.AddMinutes((double)config.TimeCancelBook)) && answer.Answer == null)
                 {
-                    return "Đã quá thời gian cho phép huỷ đặt bàn!";
+                    return "Đã quá thời gian cho phép huỷ đặt bàn.\n Nếu huỷ đặt bàn bạn sẽ bị mất tiền cọc!";
                 }else if(dateBook == nowDate && (nowTime <= timeBook.AddMinutes(((double)config.TimeCancelBook)) && nowTime > timeBook))
                 {
                     var cus = await _unitOfWork.AccountRepo.GetByIdAsync((Guid)book.CustomerId);
@@ -313,7 +313,14 @@ namespace PoolLab.Application.Interface
                 }
                 else
                 {
-                    return "Đã quá thời gian cho phép huỷ đặt bàn!";
+                    book.Status = "Đã Huỷ";
+                    book.UpdatedDate = now;
+                    _unitOfWork.BookingRepo.Update(book);
+                    var result = await _unitOfWork.SaveAsync() > 0;
+                    if (!result)
+                    {
+                        return "Cập nhật thất bại!";
+                    }
                 }
                 return null;
             }catch(DbUpdateException)

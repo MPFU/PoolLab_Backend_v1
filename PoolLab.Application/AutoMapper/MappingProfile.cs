@@ -56,6 +56,10 @@ namespace PoolLab.Application.AutoMapper
                 .ForMember(dest => dest.BilliardTypeName, opt => opt.MapFrom(src => src.BilliardType.Name))
                 .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Store.Address))
                 .ReverseMap();
+            CreateMap<BilliardTable, GetAllTableDTO>()
+               .ForMember(dest => dest.AreaName, opt => opt.MapFrom(src => src.Area.Name))
+               .ForMember(dest => dest.BidaTypeName, opt => opt.MapFrom(src => src.BilliardType.Name))
+               .ReverseMap();
 
             //COMPANY
             CreateMap<CompanyDTO, Company>().ReverseMap();
@@ -92,6 +96,13 @@ namespace PoolLab.Application.AutoMapper
                 .ForMember(dest => dest.BidaTypeName, opt => opt.MapFrom(src => src.BilliardType.Name))
                 .ForMember(dest => dest.BidaPrice, opt => opt.MapFrom(src => src.BilliardTable.Price.OldPrice))
                 .ReverseMap();
+            CreateMap<Booking, GetAllBookingDTO>()
+             .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Customer.UserName))
+             .ForMember(dest => dest.TableName, opt => opt.MapFrom(src => src.BilliardTable.Name))
+             .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.Name))
+             .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Store.Address))
+             .ForMember(dest => dest.BidaPrice, opt => opt.MapFrom(src => src.BilliardTable.Price.OldPrice))
+             .ReverseMap();
 
             //PAYMENT
             CreateMap<PaymentBookingDTO, Transaction>().ReverseMap();

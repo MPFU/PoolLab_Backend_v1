@@ -18,5 +18,7 @@ namespace PoolLab.Core.Interface
         Task<int> CountTableTypeArea(Guid? typeID, Guid? areaID, Guid? storeID);
 
         Task<decimal?> GetPriceOfTable(Guid? id);
+
+        Task<IEnumerable<BilliardTable>?> GetAllBidaTable();
     }
 }

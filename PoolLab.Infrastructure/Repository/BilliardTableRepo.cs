@@ -50,6 +50,14 @@ namespace PoolLab.Infrastructure.Interface
                 .CountAsync();
         }
 
+        public async Task<IEnumerable<BilliardTable>?> GetAllBidaTable()
+        {
+            return await _dbContext.BilliardTables
+                .Include(x => x.BilliardType)
+                .Include(x => x.Area)
+                .ToListAsync();
+        }
+
         public async Task<BilliardTable?> GetBidaTableByID(Guid id)
         {
             return await _dbContext.BilliardTables
