@@ -73,23 +73,23 @@ namespace PoolLab.Application.Interface
                 {
                     return "Không tìm thấy nhóm sản phẩm này.";
                 }
-                if (createGroupProductDTO.Name != null && createGroupProductDTO.Descript.Trim() == null ||
-                        createGroupProductDTO.Name != null && createGroupProductDTO.Descript.Length == 0)
+                if (createGroupProductDTO.Name.Trim() != null && createGroupProductDTO.Descript.Trim() == null ||
+                        createGroupProductDTO.Name.Trim() != null && createGroupProductDTO.Descript.Length == 0)
                 {
                     check.Name = createGroupProductDTO.Name;
-                    check.Descript = check.Descript;
+                    createGroupProductDTO.Descript = check.Descript;
                 }
-                else if (createGroupProductDTO.Descript != null && createGroupProductDTO.Name.Trim() == null ||
-                            createGroupProductDTO.Descript != null && createGroupProductDTO.Name.Length == 0)
+                else if (createGroupProductDTO.Descript.Trim() != null && createGroupProductDTO.Name.Trim() == null ||
+                            createGroupProductDTO.Descript.Trim() != null && createGroupProductDTO.Name.Length == 0)
                 {
                     check.Descript = createGroupProductDTO.Descript;
-                    check.Name = check.Name;
+                    createGroupProductDTO.Name = check.Name;
                 }
                 else if (createGroupProductDTO.Name.Trim() == null && createGroupProductDTO.Descript.Trim() == null ||
                             createGroupProductDTO.Name.Length == 0 && createGroupProductDTO.Descript.Length == 0)
                 {
-                    check.Name = check.Name;
-                    check.Descript = check.Descript;
+                    createGroupProductDTO.Name = check.Name;
+                    createGroupProductDTO.Descript = check.Descript;
                 }
                 else
                 {

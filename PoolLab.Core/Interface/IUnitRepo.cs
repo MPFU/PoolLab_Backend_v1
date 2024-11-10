@@ -9,5 +9,6 @@ namespace PoolLab.Core.Interface
 {
     public interface IUnitRepo : IGenericRepo<Unit>
     {
+        Task<Unit?> SearchByNameAsync(string name);
     }
 }
