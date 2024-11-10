@@ -10,5 +10,7 @@ namespace PoolLab.Core.Interface
     public interface IAreaRepo : IGenericRepo<Area>
     {
         Task<Guid?> GetAreaIdByName (string? name); 
+
+        Task<bool> CheckDuplicate (Guid storeId, string name);
     }
 }

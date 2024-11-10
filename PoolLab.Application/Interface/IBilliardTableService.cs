@@ -16,7 +16,7 @@ namespace PoolLab.Application.Interface
 
         Task<GetBilliardTableDTO?> GetBilliardTableByID(Guid Id);
 
-        Task<PageResult<BilliardTableDTO>> GetAllBidaTable(BidaTableFilter bidaTableFilter);
+        Task<PageResult<GetAllTableDTO>> GetAllBidaTable(BidaTableFilter bidaTableFilter);
 
         Task<string?> UpdateInfoTable(Guid Id, UpdateInfoTableDTO updateInfoTableDTO);
 

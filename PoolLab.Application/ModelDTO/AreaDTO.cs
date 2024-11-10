@@ -14,6 +14,8 @@ namespace PoolLab.Application.ModelDTO
 
         public string? Descript { get; set; }
 
+        public string? AreaImg { get; set; }
+
         public Guid? StoreId { get; set; }
     }
 
@@ -22,6 +24,8 @@ namespace PoolLab.Application.ModelDTO
         public string? Name { get; set; }
 
         public string? Descript { get; set; }
+
+        public string? AreaImg { get; set; }
 
         public Guid? StoreId { get; set; }
     }
