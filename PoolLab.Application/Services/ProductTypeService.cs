@@ -70,21 +70,28 @@ namespace PoolLab.Application.Interface
                 {
                     return "Không tìm thấy loại sản phẩm này.";
                 }
-                if (createProductTypeDTO.Name != null)
+                if (createProductTypeDTO.Name.Trim() != null && createProductTypeDTO.Descript.Trim() == null ||
+                            createProductTypeDTO.Name.Trim() != null && createProductTypeDTO.Descript.Length == 0)
                 {
                     check.Name = createProductTypeDTO.Name;
+                    createProductTypeDTO.Descript = check.Descript;
                 }
-                else if (createProductTypeDTO.Descript != null)
+                else if (createProductTypeDTO.Descript.Trim() != null && createProductTypeDTO.Name.Trim() == null ||
+                            createProductTypeDTO.Descript.Trim() != null && createProductTypeDTO.Name.Length == 0)
                 {
+                    createProductTypeDTO.Name = check.Name;
+                    check.Descript = createProductTypeDTO.Descript;                  
+                }
+                else if (createProductTypeDTO.Name.Trim() == null && createProductTypeDTO.Descript.Trim() == null || 
+                            createProductTypeDTO.Name.Length == 0 && createProductTypeDTO.Descript.Length == 0)
+                {
+                    createProductTypeDTO.Name = check.Name;
+                    createProductTypeDTO.Descript = check.Descript;
+                }
+                else
+                {
+                    check.Name = createProductTypeDTO.Name;
                     check.Descript = createProductTypeDTO.Descript;
-                }
-                else if (createProductTypeDTO.Name.Trim() == null || createProductTypeDTO.Name.Length == 0)
-                {
-                    check.Name = check.Name;
-                }
-                else if (createProductTypeDTO.Descript.Trim() == null || createProductTypeDTO.Descript.Length == 0)
-                {
-                    check.Descript = check.Descript;
                 }
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)

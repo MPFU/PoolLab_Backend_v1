@@ -1,4 +1,5 @@
-﻿using PoolLab.Core.Interface;
+﻿using Microsoft.EntityFrameworkCore;
+using PoolLab.Core.Interface;
 using PoolLab.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,11 @@ namespace PoolLab.Infrastructure.Interface
     {
         public ProductRepo(PoolLabDbv1Context dbContext) : base(dbContext)
         {
+        }
+
+        public async Task<Product?> SearchByNameAsync(string name)
+        {
+            return await _dbContext.Products.FirstOrDefaultAsync(x => x.Name.Equals(name));
         }
     }
 }

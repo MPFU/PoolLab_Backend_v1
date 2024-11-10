@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 namespace PoolLab.Core.Interface
 {
     public interface IProductRepo : IGenericRepo<Product>
-    { 
+    {
+        Task<Product?> SearchByNameAsync(string name);
     }
 }
