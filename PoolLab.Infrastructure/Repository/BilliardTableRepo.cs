@@ -32,12 +32,12 @@ namespace PoolLab.Infrastructure.Interface
             return  false;
         }
 
-        public async Task<Booking?> CheckTableAvailable(Guid id, DateTime dateTime)
+        public async Task<Booking?> CheckTableBooking(Guid id, DateTime dateTime)
         {
             var Time = TimeOnly.FromDateTime(dateTime);
             return await _dbContext.Bookings
                                 .Where(x => x.BilliardTableId.Equals(id) && x.BookingDate == DateOnly.FromDateTime(dateTime))
-                                .Where(x => x.TimeStart >= Time && x.Status.ToLower().Equals("đã đặt"))
+                                .Where(x => x.Status.Equals("Đã Đặt"))
                                 .OrderBy(x => x.TimeStart)
                                 .FirstOrDefaultAsync();
         }

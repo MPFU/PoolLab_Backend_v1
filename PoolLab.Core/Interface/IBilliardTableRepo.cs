@@ -13,7 +13,7 @@ namespace PoolLab.Core.Interface
 
         Task<bool> CheckDuplicateName(Guid? id, string name, Guid? storeID);
 
-        Task<Booking?> CheckTableAvailable(Guid id, DateTime dateTime);
+        Task<Booking?> CheckTableBooking(Guid id, DateTime dateTime);
 
         Task<int> CountTableTypeArea(Guid? typeID, Guid? areaID, Guid? storeID);
 
