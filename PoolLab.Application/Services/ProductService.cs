@@ -1,5 +1,9 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using PoolLab.Application.FilterModel;
+using PoolLab.Application.FilterModel.Helper;
 using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
 using PoolLab.Core.Interface;
@@ -24,9 +28,68 @@ namespace PoolLab.Application.Interface
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IEnumerable<ProductDTO?>> GetAllProducts()
+        public async Task<PageResult<ProductDTO>> GetAllProducts(ProductFilter productFilter)
         {
-            return _mapper.Map<IEnumerable<ProductDTO?>>(await _unitOfWork.ProductRepo.GetAllAsync());
+            var productList = _mapper.Map<IEnumerable<ProductDTO>>(await _unitOfWork.ProductRepo.GetAllProducts());
+            IQueryable<ProductDTO> result = productList.AsQueryable();
+
+            //Filter
+            if (!string.IsNullOrEmpty(productFilter.Name))
+                result = result.Where(x => x.Name.Contains(productFilter.Name, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(productFilter.Descript))
+                result = result.Where(x => x.Descript.Contains(productFilter.Descript, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(productFilter.ProductImg))
+                result = result.Where(x => x.ProductImg.Contains(productFilter.ProductImg, StringComparison.OrdinalIgnoreCase));
+           
+            if (!string.IsNullOrEmpty(productFilter.Status))
+                result = result.Where(x => x.Status.Contains(productFilter.Status, StringComparison.OrdinalIgnoreCase));
+
+            if (productFilter.ProductTypeId != null)
+                result = result.Where(x => x.ProductTypeId == productFilter.ProductTypeId);
+
+            if (productFilter.ProductGroupId != null)
+                result = result.Where(x => x.ProductGroupId == productFilter.ProductGroupId);
+
+            if (productFilter.StoreId != null)
+                result = result.Where(x => x.StoreId == productFilter.StoreId);
+
+            if (productFilter.UnitId != null)
+                result = result.Where(x => x.UnitId == productFilter.UnitId);
+
+            //Sorting
+            if (!string.IsNullOrEmpty(productFilter.SortBy))
+            {
+                switch (productFilter.SortBy)
+                {
+                    case "CreatedDate":
+                        result = productFilter.SortAscending ?
+                            result.OrderBy(x => x.CreatedDate) :
+                            result.OrderByDescending(x => x.CreatedDate);
+                        break;
+                    case "UpdatedDate":
+                        result = productFilter.SortAscending ?
+                            result.OrderBy(x => x.UpdatedDate) :
+                            result.OrderByDescending(x => x.UpdatedDate);
+                        break;
+                }
+            }
+
+            //Paging
+            var pageItems = result
+                .Skip((productFilter.PageNumber - 1) * productFilter.PageSize)
+                .Take(productFilter.PageSize)
+                .ToList();
+
+            return new PageResult<ProductDTO>
+            {
+                Items = pageItems,
+                PageNumber = productFilter.PageNumber,
+                PageSize = productFilter.PageSize,
+                TotalItem = result.Count(),
+                TotalPages = (int)Math.Ceiling((decimal)result.Count() / (decimal)productFilter.PageSize)
+            };
         }
 
         public async Task<string?> CreateProduct(CreateProductDTO create)
@@ -122,5 +185,10 @@ namespace PoolLab.Application.Interface
                 throw;
             }
         }
+
+        public async Task<ProductDTO?> SearchProductById(Guid id)
+        {
+            return _mapper.Map<ProductDTO>(await _unitOfWork.ProductRepo.GetByIdAsync(id));
+        }      
     }
 }
