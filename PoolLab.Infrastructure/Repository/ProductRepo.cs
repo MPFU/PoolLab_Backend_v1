@@ -19,5 +19,14 @@ namespace PoolLab.Infrastructure.Interface
         {
             return await _dbContext.Products.FirstOrDefaultAsync(x => x.Name.Equals(name));
         }
+
+        public async Task<IEnumerable<Product>> GetAllProducts()
+        {
+            return await _dbContext.Products
+                .Include(x => x.ProductGroup)
+                .Include(x => x.ProductType)
+                .Include(x => x.Unit)
+                .ToListAsync();
+        }
     }
 }
