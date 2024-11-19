@@ -87,6 +87,7 @@ namespace PoolLab.Application.Interface
                     TimeSpan timeCus = TimeSpan.Parse(activeTable.CustomerTime);
 
                     decimal totalPrice = (decimal)((decimal)timeCus.TotalHours * table.Price.OldPrice);
+                    totalPrice = Math.Round(totalPrice, 0, MidpointRounding.AwayFromZero);
 
                     if (cus.Balance < totalPrice)
                     {
@@ -95,28 +96,30 @@ namespace PoolLab.Application.Interface
 
                     decimal balance = (decimal)(cus.Balance - totalPrice);
 
+                    AddNewPlayTimeDTO playTimeDTO = new AddNewPlayTimeDTO();
+                    playTimeDTO.BilliardTableId = table.Id;
+                    playTimeDTO.TotaLTime = (decimal)timeCus.TotalHours;
+                    playTimeDTO.TotaLPrice = totalPrice;
+                    playTimeDTO.Status = "Đã Tạo";
+                    var crePlay = await _playtimeService.AddNewPlaytime(playTimeDTO);
+                    if (!Guid.TryParse(crePlay, out _))
+                    {
+                        return crePlay;
+                    }
 
                     AddNewOrderDTO orderDTO = new AddNewOrderDTO();
                     orderDTO.CustomerId = cus.Id;
                     orderDTO.Username = !string.IsNullOrEmpty(cus.FullName) ? cus.FullName : cus.UserName;
                     orderDTO.BilliardTableId = table.Id;
                     orderDTO.StoreId = table.StoreId;
+                    orderDTO.PlayTimeId = Guid.Parse(crePlay);
                     var creOrder = await _orderService.AddNewOrder(orderDTO);
                     if (!Guid.TryParse(creOrder, out _))
                     {
                         return creOrder;
                     }
 
-                    AddNewPlayTimeDTO playTimeDTO = new AddNewPlayTimeDTO();
-                    playTimeDTO.OrderId = Guid.Parse(creOrder);
-                    playTimeDTO.BilliardTableId = table.Id;
-                    playTimeDTO.TotaLTime = (decimal)timeCus.TotalHours;
-                    playTimeDTO.TotaLPrice = totalPrice;
-                    var crePlay = await _playtimeService.AddNewPlaytime(playTimeDTO);
-                    if (crePlay != null)
-                    {
-                        return crePlay;
-                    }
+
 
                     var upBalance = await _accountService.UpdateBalance(cus.Id, balance);
                     if (upBalance != null)
@@ -185,26 +188,27 @@ namespace PoolLab.Application.Interface
                                     decimal priceCus = (decimal)(cus.Balance - priceBook - booking.Deposit);
                                     priceCus = Math.Round(priceCus, 0, MidpointRounding.AwayFromZero);
 
+                                    AddNewPlayTimeDTO playTimeDTO = new AddNewPlayTimeDTO();
+                                    playTimeDTO.Status = "Đã Tạo";
+                                    playTimeDTO.BilliardTableId = table.Id;
+                                    playTimeDTO.TotaLTime = (decimal)timeBook.TotalHours;
+                                    playTimeDTO.TotaLPrice = priceBook;
+                                    var crePlay = await _playtimeService.AddNewPlaytime(playTimeDTO);
+                                    if (!Guid.TryParse(crePlay, out _))
+                                    {
+                                        return crePlay;
+                                    }
+
                                     AddNewOrderDTO orderDTO = new AddNewOrderDTO();
                                     orderDTO.CustomerId = cus.Id;
                                     orderDTO.Username = !string.IsNullOrEmpty(cus.FullName) ? cus.FullName : cus.UserName;
                                     orderDTO.BilliardTableId = table.Id;
                                     orderDTO.StoreId = table.StoreId;
+                                    orderDTO.PlayTimeId = Guid.Parse(crePlay);
                                     var creOrder = await _orderService.AddNewOrder(orderDTO);
                                     if (!Guid.TryParse(creOrder, out _))
                                     {
                                         return creOrder;
-                                    }
-
-                                    AddNewPlayTimeDTO playTimeDTO = new AddNewPlayTimeDTO();
-                                    playTimeDTO.OrderId = Guid.Parse(creOrder);
-                                    playTimeDTO.BilliardTableId = table.Id;
-                                    playTimeDTO.TotaLTime = (decimal)timeBook.TotalHours;
-                                    playTimeDTO.TotaLPrice = priceBook;
-                                    var crePlay = await _playtimeService.AddNewPlaytime(playTimeDTO);
-                                    if (crePlay != null)
-                                    {
-                                        return crePlay;
                                     }
 
                                     var upBalance = await _accountService.UpdateBalance(cus.Id, priceCus);
@@ -227,7 +231,7 @@ namespace PoolLab.Application.Interface
                                     }
 
                                     UpdateBookingStatusDTO statusDTO = new UpdateBookingStatusDTO();
-                                    statusDTO.Status = "Đang Tiến Hành";
+                                    statusDTO.Status = "Hoàn Thành";
                                     var upBooking = await _bookingService.UpdateStatusBooking(booking.Id, statusDTO);
                                     if (upBooking != null)
                                     {
@@ -642,7 +646,7 @@ namespace PoolLab.Application.Interface
                         }
                         else
                         {
-                            var time2 = new TimeOnly(Time.Hour,Time.Minute,0);
+                            var time2 = new TimeOnly(Time.Hour, Time.Minute, 0);
 
                             TimeSpan differ = booking.TimeStart.Value.AddMinutes((double)-config.TimeHold) - time2;
 

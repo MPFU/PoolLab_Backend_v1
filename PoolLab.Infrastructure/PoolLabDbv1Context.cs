@@ -376,6 +376,7 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.CustomerId).HasColumnName("CustomerID");
             entity.Property(e => e.StoreId).HasColumnName("StoreId");
             entity.Property(e => e.BilliardTableId).HasColumnName("BilliardTableId");
+            entity.Property(e => e.PlayTimeId).HasColumnName("PlayTimeId");
             entity.Property(e => e.Discount).HasColumnType("decimal(11, 1)");
             entity.Property(e => e.OrderDate).HasColumnType("datetime");
             entity.Property(e => e.Status).HasMaxLength(50);
@@ -399,6 +400,11 @@ public partial class PoolLabDbv1Context : DbContext
                 .HasForeignKey(d => d.BilliardTableId)
                 .HasConstraintName("FK_Order_BilliardTable")
                 .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(d => d.PlayTime).WithMany(p => p.Orders)
+              .HasForeignKey(d => d.PlayTimeId)
+              .HasConstraintName("FK_Order_PlayTime")
+              .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<OrderDetail>(entity =>
@@ -461,8 +467,8 @@ public partial class PoolLabDbv1Context : DbContext
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Name).HasMaxLength(20);
+            entity.Property(e => e.Status).HasMaxLength(20);
             entity.Property(e => e.BilliardTableId).HasColumnName("BilliardTableID");
-            entity.Property(e => e.OrderId).HasColumnName("OrderID");
             entity.Property(e => e.TotalPrice).HasColumnType("decimal(11, 0)");
             entity.Property(e => e.TotalTime).HasColumnType("decimal(11, 5)");
             entity.Property(e => e.TimeStart).HasColumnType("datetime");
@@ -471,10 +477,6 @@ public partial class PoolLabDbv1Context : DbContext
             entity.HasOne(d => d.BilliardTable).WithMany(p => p.PlayTimes)
                 .HasForeignKey(d => d.BilliardTableId)
                 .HasConstraintName("FK_PlayTime_BilliardTable");
-
-            entity.HasOne(d => d.Order).WithMany(p => p.PlayTimes)
-                .HasForeignKey(d => d.OrderId)
-                .HasConstraintName("FK_PlayTime_Order");
         });
 
         modelBuilder.Entity<Product>(entity =>

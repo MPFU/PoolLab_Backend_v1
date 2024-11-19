@@ -9,8 +9,6 @@ public partial class PlayTime
 
     public string? Name { get; set; }
 
-    public Guid? OrderId { get; set; }
-
     public Guid? BilliardTableId { get; set; }
 
     public DateTime? TimeStart { get; set; }
@@ -21,7 +19,9 @@ public partial class PlayTime
 
     public decimal? TotalPrice { get; set; }
 
+    public string? Status { get; set; }
+
     public virtual BilliardTable? BilliardTable { get; set; }
 
-    public virtual Order? Order { get; set; }
+    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 }

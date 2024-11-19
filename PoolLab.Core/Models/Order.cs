@@ -17,6 +17,8 @@ public partial class Order
 
     public Guid? StoreId { get; set; }
 
+    public Guid? PlayTimeId { get; set; }
+
     public DateTime? OrderDate { get; set; }
 
     public string? OrderBy { get; set; }
@@ -37,9 +39,10 @@ public partial class Order
 
     public virtual BilliardTable? BilliardTable { get; set; }
 
+    public virtual PlayTime? PlayTime { get; set; }
+
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
     public virtual ICollection<Transaction> Payments { get; set; } = new List<Transaction>();
-
-    public virtual ICollection<PlayTime> PlayTimes { get; set; } = new List<PlayTime>();    
+   
 }

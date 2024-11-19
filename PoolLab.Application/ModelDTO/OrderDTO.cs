@@ -37,6 +37,8 @@ namespace PoolLab.Application.ModelDTO
 
         public Guid? StoreId { get; set; }
 
+        public Guid? PlayTimeId { get; set; }
+
         public string? OrderBy {  get; set; }
     }
 

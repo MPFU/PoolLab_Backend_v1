@@ -30,12 +30,17 @@ namespace PoolLab.Infrastructure.Interface
                 : null;
         }
 
+        public async Task<Order?> GetOrderByPlayTime(Guid id)
+        {
+           return await _dbContext.Orders.Where(x => x.PlayTimeId == id).FirstOrDefaultAsync();
+        }
+
         public async Task<Order?> GetOrderForPayByID(Guid? id)
         {
             return id != null
                 ? await _dbContext.Orders
                 .Include(x => x.Store)
-                .Include(x => x.PlayTimes)
+                .Include(x => x.PlayTime)
                 .Include(x => x.OrderDetails)
                 .FirstOrDefaultAsync(x =>x.Id.Equals(id))
                 : null;

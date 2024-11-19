@@ -18,7 +18,7 @@ namespace PoolLab.Infrastructure.Interface
         public async Task<PlayTime?> GetPlayTimeByOrderOrTable(Guid? id)
         {
             return id != null 
-                ? await _dbContext.PlayTimes.Where(x => x.OrderId == id || x.BilliardTableId == id).FirstOrDefaultAsync()
+                ? await _dbContext.PlayTimes.Where(x => x.BilliardTableId == id && x.Status.Equals("Đã Tạo")).FirstOrDefaultAsync()
                 : null;
         }
     }

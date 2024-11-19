@@ -20,7 +20,7 @@ namespace PoolLab.Infrastructure.Interface
             var bookings = await _dbContext.Bookings
                           .Where(x => x.BookingDate == booking.BookingDate &&
                           ((x.TimeStart < booking.TimeEnd && x.TimeStart >= booking.TimeStart) || (x.TimeEnd > booking.TimeStart && x.TimeEnd <= booking.TimeEnd)))
-                          .Where(x => x.Status.Equals("Đã đặt") && x.CustomerId == booking.CustomerId)
+                          .Where(x => x.Status.Equals("Đã Đặt") && x.CustomerId == booking.CustomerId)
                           .Select(x => x.Id)
                           .FirstOrDefaultAsync();
             return (bookings != Guid.Empty && booking != null) ? true : false;
@@ -48,6 +48,8 @@ namespace PoolLab.Infrastructure.Interface
                 .Include(x => x.BilliardType)
                 .FirstOrDefaultAsync();
         }
+
+       
 
         public async Task<BilliardTable?> GetTableNotBooking(Booking booking)
         {
