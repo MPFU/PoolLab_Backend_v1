@@ -85,7 +85,7 @@ namespace PoolLab.Application.Interface
                     AddNewPlayTimeDTO playTimeDTO = new AddNewPlayTimeDTO();
                     playTimeDTO.OrderId = order.Id;
                     playTimeDTO.BilliardTableId = order.BilliardTableId;
-                    playTimeDTO.TimeStart = createOrderBill.TimePlay;
+                  //  playTimeDTO.TimeStart = createOrderBill.TimePlay;
                     var check = await _laytimeService.AddNewPlaytime(playTimeDTO);
                 }
                 return order.Id.ToString();

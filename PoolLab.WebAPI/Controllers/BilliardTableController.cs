@@ -357,21 +357,26 @@ namespace PoolLab.WebAPI.Controllers
                         return Ok(new SucceededRespone()
                         {
                             Status = Ok().StatusCode,
-                            Message = $"Thời điểm đặt bàn sắp tới là {requestResult}",
+                            Message = "Kích hoạt bàn thành công.",
                             Data = requestResult
                         });
                     }
-
-                    return StatusCode(400, new FailResponse()
+                    else
                     {
-                        Status = 400,
-                        Message = requestResult
-                    });
+                        return BadRequest(new FailResponse()
+                        {
+                            Status = 400,
+                            Message = requestResult
+                        });
+                    }
+
+                    
                 }
-                return Ok(new SucceededRespone()
+                return BadRequest(new FailResponse()
                 {
-                    Status = Ok().StatusCode,
-                    Message = "Kích hoạt thành công."
+                    Status = BadRequest().StatusCode,
+                    Message = "Kích hoạt thất bại",
+                    Errors = "Dữ liệu nhập vào bị sai!"
                 });
 
             }

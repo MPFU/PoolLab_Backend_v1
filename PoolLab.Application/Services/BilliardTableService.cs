@@ -144,7 +144,7 @@ namespace PoolLab.Application.Interface
                     {
                         return "Kích hoạt thất bại!";
                     }
-                    return $"{timeCus.TotalHours:00}:{timeCus.Minutes:00}:{timeCus.Seconds:00}";
+                    return $"{(int)timeCus.TotalHours:00}:{timeCus.Minutes:00}:{timeCus.Seconds:00}";
                 }
                 else
                 {
@@ -162,7 +162,7 @@ namespace PoolLab.Application.Interface
                         {
                             if (Time >= booking.TimeStart.Value.AddMinutes((double)-config.TimeHold) && Time <= booking.TimeStart.Value.AddMinutes((double)config.TimeDelay))
                             {
-                                var cusBalance = cus.Balance + booking.Deposit;
+                                var cusBalance = (cus.Balance + booking.Deposit) / table.Price.OldPrice;
 
                                 TimeSpan timeCus1 = ConvertDecimalToTime((decimal)cusBalance);
 
@@ -173,13 +173,17 @@ namespace PoolLab.Application.Interface
                                     TimeSpan differ = timeBook - timeCus1;
 
                                     decimal money = (decimal)((decimal)differ.TotalHours * table.Price.OldPrice);
+                                    money = Math.Round(money, 0, MidpointRounding.AwayFromZero);
 
                                     return $"Số tiền chơi trong ví không đủ với thời gian đặt. \n Bạn cần nạp thêm ít nhất {money}!";
                                 }
                                 else
                                 {
-                                    var priceBook = ((decimal)timeBook.TotalHours * table.Price.OldPrice);
+                                    var priceBook = (decimal)timeBook.TotalHours * table.Price.OldPrice;
+                                    priceBook = Math.Round((decimal)priceBook, 0, MidpointRounding.AwayFromZero);
+
                                     decimal priceCus = (decimal)(cus.Balance - priceBook - booking.Deposit);
+                                    priceCus = Math.Round(priceCus, 0, MidpointRounding.AwayFromZero);
 
                                     AddNewOrderDTO orderDTO = new AddNewOrderDTO();
                                     orderDTO.CustomerId = cus.Id;
@@ -195,7 +199,7 @@ namespace PoolLab.Application.Interface
                                     AddNewPlayTimeDTO playTimeDTO = new AddNewPlayTimeDTO();
                                     playTimeDTO.OrderId = Guid.Parse(creOrder);
                                     playTimeDTO.BilliardTableId = table.Id;
-                                    playTimeDTO.TotaLTime = (decimal)timeCus1.TotalHours;
+                                    playTimeDTO.TotaLTime = (decimal)timeBook.TotalHours;
                                     playTimeDTO.TotaLPrice = priceBook;
                                     var crePlay = await _playtimeService.AddNewPlaytime(playTimeDTO);
                                     if (crePlay != null)
@@ -238,7 +242,7 @@ namespace PoolLab.Application.Interface
                                         return "Kích hoạt thất bại!";
                                     }
 
-                                    return $"{timeCus1.TotalHours:00}:{timeCus1.Minutes:00}:{timeCus1.Seconds:00}";
+                                    return $"{(int)timeBook.TotalHours:00}:{timeBook.Minutes:00}:{timeBook.Seconds:00}";
                                 }
                             }
                             else if (Time < booking.TimeStart.Value.AddMinutes((double)-config.TimeHold))
@@ -638,7 +642,10 @@ namespace PoolLab.Application.Interface
                         }
                         else
                         {
-                            TimeSpan differ = booking.TimeStart.Value.AddMinutes((double)-config.TimeHold) - Time;
+                            var time2 = new TimeOnly(Time.Hour,Time.Minute,0);
+
+                            TimeSpan differ = booking.TimeStart.Value.AddMinutes((double)-config.TimeHold) - time2;
+
                             if (differ.Hours == 0 && differ.Minutes < 30)
                             {
                                 return $" Bàn này đã được đặt. \n Thời gian để bạn chơi quá ít xin hãy chọn bàn khác!";
