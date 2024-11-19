@@ -52,7 +52,7 @@ namespace PoolLab.Application.Interface
                 {
                     return "Tạo đơn hàng thất bại!";
                 }
-                return null;
+                return order.Id.ToString();
             }catch(DbUpdateException)
             {
                 throw;
@@ -83,9 +83,8 @@ namespace PoolLab.Application.Interface
                 else
                 {
                     AddNewPlayTimeDTO playTimeDTO = new AddNewPlayTimeDTO();
-                    playTimeDTO.OrderId = order.Id;
                     playTimeDTO.BilliardTableId = order.BilliardTableId;
-                    playTimeDTO.TimeStart = createOrderBill.TimePlay;
+                  //  playTimeDTO.TimeStart = createOrderBill.TimePlay;
                     var check = await _laytimeService.AddNewPlaytime(playTimeDTO);
                 }
                 return order.Id.ToString();

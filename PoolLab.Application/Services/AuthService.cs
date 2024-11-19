@@ -132,6 +132,7 @@ namespace PoolLab.Application.Services
                 new Claim(JwtRegisteredClaimNames.Aud,
                                   _configuration.GetSection("JwtSecurityToken:Audience").Value),
                 new Claim(ClaimTypes.Role, account.Role.Name),
+                new Claim("role", account.Role.Name),
                 new Claim("accountId", account.Id.ToString()),
                 new Claim("accountStatus", account.Status),       
                 new Claim("username", account.UserName),

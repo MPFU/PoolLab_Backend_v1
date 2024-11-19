@@ -55,6 +55,7 @@ namespace PoolLab.Application.AutoMapper
                 .ForMember(dest => dest.AreaName, opt => opt.MapFrom(src => src.Area.Name))
                 .ForMember(dest => dest.BilliardTypeName, opt => opt.MapFrom(src => src.BilliardType.Name))
                 .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Store.Address))
+                .ForMember(dest => dest.BidaPrice, opt => opt.MapFrom(src => src.Price.OldPrice))
                 .ReverseMap();
             CreateMap<BilliardTable, GetAllTableDTO>()
                .ForMember(dest => dest.AreaName, opt => opt.MapFrom(src => src.Area.Name))
@@ -136,7 +137,6 @@ namespace PoolLab.Application.AutoMapper
 
             //PLAYTIME
             CreateMap<AddNewPlayTimeDTO, PlayTime>()
-                .ForMember(dest => dest.TimeTotal, opt => opt.MapFrom(src => TimeOnly.Parse(src.TimeStart)))
                 .ReverseMap();
         }
     }

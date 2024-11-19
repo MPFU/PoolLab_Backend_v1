@@ -27,10 +27,19 @@ namespace PoolLab.Application.ModelDTO
 
     public class AddNewPlayTimeDTO
     {
-        public Guid? OrderId { get; set; }
-
         public Guid? BilliardTableId { get; set; }
 
-        public string? TimeStart { get; set; }
+        public decimal? TotaLTime { get; set; }
+
+        public decimal? TotaLPrice { get; set; }
+
+        public string? Status { get; set; }
+    }
+
+    public class StopTimeDTO
+    {
+        public Guid BilliardTableID { get; set; }
+        public Guid? CustomerID { get; set; }
+        public string? CustomerTime { get; set; }
     }
 }

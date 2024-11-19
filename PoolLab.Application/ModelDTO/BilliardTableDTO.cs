@@ -89,7 +89,7 @@ namespace PoolLab.Application.ModelDTO
 
         public string? AreaName { get; set; }
 
-        public BilliardPriceDTO Price { get; set; }
+        public decimal? BidaPrice { get; set; }
     }
 
     public class UpdateInfoTableDTO
@@ -116,7 +116,13 @@ namespace PoolLab.Application.ModelDTO
     {
         public Guid BilliardTableID { get; set; }
         public Guid CustomerID { get; set; }
-        public string? Answer {  get; set; }
+        public string? CustomerTime {  get; set; }
+    }
+
+    public class GetByQRCode
+    {
+        public Guid BilliardTableID { get; set; }
+        public Guid CustomerID { get; set; }
     }
 
     public class ActiveTableForGuest

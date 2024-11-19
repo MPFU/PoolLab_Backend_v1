@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PoolLab.Infrastructure;
 
@@ -11,9 +12,11 @@ using PoolLab.Infrastructure;
 namespace PoolLab.Infrastructure.Migrations
 {
     [DbContext(typeof(PoolLabDbv1Context))]
-    partial class PoolLabDbv1ContextModelSnapshot : ModelSnapshot
+    [Migration("20241118133909_updateplaytime")]
+    partial class updateplaytime
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -634,10 +637,6 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Property<DateTime?>("OrderDate")
                         .HasColumnType("datetime");
 
-                    b.Property<Guid?>("PlayTimeId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("PlayTimeId");
-
                     b.Property<string>("Status")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -658,8 +657,6 @@ namespace PoolLab.Infrastructure.Migrations
                     b.HasIndex("BilliardTableId");
 
                     b.HasIndex("CustomerId");
-
-                    b.HasIndex("PlayTimeId");
 
                     b.HasIndex("StoreId");
 
@@ -717,9 +714,9 @@ namespace PoolLab.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<string>("Status")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                    b.Property<Guid?>("OrderId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("OrderID");
 
                     b.Property<DateTime?>("TimeEnd")
                         .HasColumnType("datetime");
@@ -736,6 +733,8 @@ namespace PoolLab.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BilliardTableId");
+
+                    b.HasIndex("OrderId");
 
                     b.ToTable("PlayTime", (string)null);
                 });
@@ -1355,12 +1354,6 @@ namespace PoolLab.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_Order_Account");
 
-                    b.HasOne("PoolLab.Core.Models.PlayTime", "PlayTime")
-                        .WithMany("Orders")
-                        .HasForeignKey("PlayTimeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_Order_PlayTime");
-
                     b.HasOne("PoolLab.Core.Models.Store", "Store")
                         .WithMany("Orders")
                         .HasForeignKey("StoreId")
@@ -1370,8 +1363,6 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Navigation("BilliardTable");
 
                     b.Navigation("Customer");
-
-                    b.Navigation("PlayTime");
 
                     b.Navigation("Store");
                 });
@@ -1409,7 +1400,14 @@ namespace PoolLab.Infrastructure.Migrations
                         .HasForeignKey("BilliardTableId")
                         .HasConstraintName("FK_PlayTime_BilliardTable");
 
+                    b.HasOne("PoolLab.Core.Models.Order", "Order")
+                        .WithMany("PlayTimes")
+                        .HasForeignKey("OrderId")
+                        .HasConstraintName("FK_PlayTime_Order");
+
                     b.Navigation("BilliardTable");
+
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("PoolLab.Core.Models.Product", b =>
@@ -1595,11 +1593,8 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Navigation("OrderDetails");
 
                     b.Navigation("Payments");
-                });
 
-            modelBuilder.Entity("PoolLab.Core.Models.PlayTime", b =>
-                {
-                    b.Navigation("Orders");
+                    b.Navigation("PlayTimes");
                 });
 
             modelBuilder.Entity("PoolLab.Core.Models.Product", b =>

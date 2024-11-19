@@ -23,6 +23,8 @@ public partial class Transaction
 
     public int? PaymentCode { get; set; }
 
+    public int? TypeCode { get; set; }
+
     public string? Message { get; set; }
 
     public string? Status { get; set; }
