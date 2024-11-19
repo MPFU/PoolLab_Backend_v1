@@ -52,7 +52,7 @@ namespace PoolLab.Application.Interface
                 {
                     return "Tạo đơn hàng thất bại!";
                 }
-                return null;
+                return order.Id.ToString();
             }catch(DbUpdateException)
             {
                 throw;

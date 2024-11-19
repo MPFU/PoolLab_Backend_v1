@@ -31,6 +31,8 @@ namespace PoolLab.Application.ModelDTO
 
         public Guid? BilliardTableId { get; set; }
 
-        public string? TimeStart { get; set; }
+        public decimal? TotaLTime { get; set; }
+
+        public decimal? TotaLPrice { get; set; }
     }
 }

@@ -30,7 +30,7 @@ namespace PoolLab.Application.Interface
             {
                 var pay =  _mapper.Map<Transaction>(paymentBookingDTO);
                 pay.Id = Guid.NewGuid();
-                pay.Status = "Hoàn tất";
+                pay.Status = "Hoàn Tất";
                 DateTime utcNow = DateTime.UtcNow;
                 TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                 pay.PaymentDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);

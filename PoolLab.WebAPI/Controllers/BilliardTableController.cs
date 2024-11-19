@@ -54,6 +54,90 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> GetBilliardTableByQRCode([FromQuery] GetByQRCode getByQR)
+        {
+            try
+            {
+                var table = await _billiardTableService.GetTableByQRCode(getByQR);
+                if (table != null)
+                {
+                    if (table.Contains("|"))
+                    {
+                        string[] parts = table.Split('|');
+
+                        return Ok(new SucceededRespone()
+                        {
+                            Status = 202,
+                            Message = $"Bàn có lịch đặt lúc {parts[1]}.",
+                            Data = new
+                            {
+                                BidaTable = await _billiardTableService.GetBilliardTableByID(getByQR.BilliardTableID),
+                                TimeCus = parts[0],
+                                BookingTime = parts[1]
+                            }
+                        });
+                    }
+                    else if (table.Contains("&")){
+                        string[] parts = table.Split('&');
+
+                        return Ok(new SucceededRespone()
+                        {
+                            Status = 202,
+                            Message = $"Bàn có lịch đặt lúc {parts[1]}. \n Bạn chỉ có thể chơi {parts[0]} nếu kích hoạt!",
+                            Data = new
+                            {
+                                BidaTable = await _billiardTableService.GetBilliardTableByID(getByQR.BilliardTableID),
+                                TimeCus = parts[0],
+                                BookingTime = parts[1]
+                            }
+                        });
+                    }
+                    else if (table.Contains(":"))
+                    {
+                        return Ok(new SucceededRespone()
+                        {
+                            Status = 200,
+                            Message = "Thời gian chơi của người chơi.",
+                            Data = new
+                            {
+                                BidaTable = await _billiardTableService.GetBilliardTableByID(getByQR.BilliardTableID),
+                                TimeCus = table
+                            }
+                        });
+                    }
+                    else
+                    {
+                        return BadRequest(new FailResponse()
+                        {
+                            Status = BadRequest().StatusCode,
+                            Message = table
+                        });
+                    }
+
+                }
+                else
+                {
+                    return Ok(new SucceededRespone()
+                    {
+                        Status = 203,
+                        Message = "Người đặt bàn.",
+                        Data = await _billiardTableService.GetBilliardTableByID(getByQR.BilliardTableID)
+                    });
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = "Thất Bại!",
+                    Errors = ex.Message
+                });
+            }
+        }
+
+        [HttpGet]
         public async Task<IActionResult> GetAllBilliardTable([FromQuery] BidaTableFilter accountFilter)
         {
             try
@@ -78,7 +162,8 @@ namespace PoolLab.WebAPI.Controllers
                 return BadRequest(new FailResponse()
                 {
                     Status = BadRequest().StatusCode,
-                    Message = ex.Message
+                    Message = "Thất Bại",
+                    Errors = ex.Message
                 });
             }
         }
@@ -140,7 +225,8 @@ namespace PoolLab.WebAPI.Controllers
                 return Conflict(new FailResponse()
                 {
                     Status = Conflict().StatusCode,
-                    Message = ex.Message
+                    Message = "Tạo bàn thất bại.",
+                    Errors = ex.Message
                 });
             }
         }
@@ -225,7 +311,7 @@ namespace PoolLab.WebAPI.Controllers
             {
                 if (string.IsNullOrEmpty(status.Status))
                 {
-                    return BadRequest(new FailResponse ()
+                    return BadRequest(new FailResponse()
                     {
                         Status = BadRequest().StatusCode,
                         Message = "Yêu cầu nhập trạng thái thay đổi!"
@@ -266,7 +352,7 @@ namespace PoolLab.WebAPI.Controllers
                 var requestResult = await _billiardTableService.ActivateTable(tableDTO);
                 if (requestResult != null)
                 {
-                    if(TimeOnly.TryParse(requestResult, out TimeOnly time))
+                    if (requestResult.Contains(":") && !requestResult.Contains("!"))
                     {
                         return Ok(new SucceededRespone()
                         {

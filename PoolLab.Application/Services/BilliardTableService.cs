@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PoolLab.Application.Interface
@@ -25,8 +26,11 @@ namespace PoolLab.Application.Interface
         private readonly IConfigTableService _configTableService;
         private readonly IBookingService _bookingService;
         private readonly IOrderService _orderService;
+        private readonly IAccountService _accountService;
+        private readonly IPlaytimeService _playtimeService;
+        private readonly IPaymentService _paymentService;
 
-        public BilliardTableService(IMapper mapper, IUnitOfWork unitOfWork, IQRCodeGenerate qRCodeGenerate, IAzureBlobService azureBlobService, IBidaTypeAreaService bidaTypeAreaService, IConfigTableService configTableService, IBookingService bookingService, IOrderService orderService)
+        public BilliardTableService(IMapper mapper, IUnitOfWork unitOfWork, IQRCodeGenerate qRCodeGenerate, IAzureBlobService azureBlobService, IBidaTypeAreaService bidaTypeAreaService, IConfigTableService configTableService, IBookingService bookingService, IOrderService orderService, IAccountService accountService, IPlaytimeService playtimeService, IPaymentService paymentService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
@@ -36,6 +40,9 @@ namespace PoolLab.Application.Interface
             _configTableService = configTableService;
             _bookingService = bookingService;
             _orderService = orderService;
+            _accountService = accountService;
+            _playtimeService = playtimeService;
+            _paymentService = paymentService;
         }
 
 
@@ -58,148 +65,207 @@ namespace PoolLab.Application.Interface
 
                 var Time = TimeOnly.FromDateTime(now);
 
-                var table = await _unitOfWork.BilliardTableRepo.GetByIdAsync(activeTable.BilliardTableID);
+                var table = await _unitOfWork.BilliardTableRepo.GetBidaTableByID(activeTable.BilliardTableID);
                 if (table == null)
                 {
                     return "Không tìm thấy bàn chơi này!";
                 }
-                if (!table.Status.Equals("Bàn Trống"))
+                if (table.Status.Equals("Có Khách"))
                 {
                     return "Bàn chơi này đang không trống để phục vụ!";
                 }
 
+                //Customer Account
                 var cus = await _unitOfWork.AccountRepo.GetByIdAsync(activeTable.CustomerID);
                 if (cus == null)
                 {
                     return "Không tìm thấy thành viên này!";
                 }
 
-                if (cus.Balance <= 0)
+                if (!string.IsNullOrEmpty(activeTable.CustomerTime))
                 {
-                    return "Bạn đã hết tiền trong ví.\n Bạn cần nạp thêm tiền vào ví để kích hoạt bàn!";
-                }
+                    TimeSpan timeCus = TimeSpan.Parse(activeTable.CustomerTime);
 
-                var price = await _unitOfWork.BilliardTableRepo.GetPriceOfTable(activeTable.BilliardTableID);
-                if (price == null)
-                {
-                    return "Không tìm thấy giá của bàn!";
-                }
+                    decimal totalPrice = (decimal)((decimal)timeCus.TotalHours * table.Price.OldPrice);
 
-                var totalTime = cus.Balance / price;
-
-                TimeSpan timeCus = ConvertDecimalToTime((decimal)totalTime);
-
-                if (timeCus.Hours == 0 && timeCus.Minutes < 5)
-                {
-                    return "Thời gian chơi của bạn ít hơn 5 phút.\n Bạn cần nạp thêm tiền vào ví để kích hoạt bàn!";
-                }
-
-                var booking = await _unitOfWork.BilliardTableRepo.CheckTableBooking(activeTable.BilliardTableID, now);
-
-                if (booking != null)
-                {
-                    var config = await _configTableService.GetConfigTableByName();
-
-                    if (config == null)
+                    if (cus.Balance < totalPrice)
                     {
-                        return "Không tìm thấy cấu hình!";
+                        return $"Số dư của bạn không đủ! Cần nạp thêm ít nhất {totalPrice - cus.Balance}";
                     }
 
-                    if (booking.CustomerId == activeTable.CustomerID)
+                    decimal balance = (decimal)(cus.Balance - totalPrice);
+
+
+                    AddNewOrderDTO orderDTO = new AddNewOrderDTO();
+                    orderDTO.CustomerId = cus.Id;
+                    orderDTO.Username = !string.IsNullOrEmpty(cus.FullName) ? cus.FullName : cus.UserName;
+                    orderDTO.BilliardTableId = table.Id;
+                    orderDTO.StoreId = table.StoreId;
+                    var creOrder = await _orderService.AddNewOrder(orderDTO);
+                    if (!Guid.TryParse(creOrder, out _))
                     {
-                        if (Time >= booking.TimeStart.Value.AddMinutes((double)-config.TimeHold) && Time <= booking.TimeStart.Value.AddMinutes((double)config.TimeDelay))
+                        return creOrder;
+                    }
+
+                    AddNewPlayTimeDTO playTimeDTO = new AddNewPlayTimeDTO();
+                    playTimeDTO.OrderId = Guid.Parse(creOrder);
+                    playTimeDTO.BilliardTableId = table.Id;
+                    playTimeDTO.TotaLTime = (decimal)timeCus.TotalHours;
+                    playTimeDTO.TotaLPrice = totalPrice;
+                    var crePlay = await _playtimeService.AddNewPlaytime(playTimeDTO);
+                    if (crePlay != null)
+                    {
+                        return crePlay;
+                    }
+
+                    var upBalance = await _accountService.UpdateBalance(cus.Id, balance);
+                    if (upBalance != null)
+                    {
+                        return upBalance;
+                    }
+
+                    PaymentBookingDTO paymentDTO = new PaymentBookingDTO();
+                    paymentDTO.PaymentMethod = "Qua Ví";
+                    paymentDTO.Amount = totalPrice;
+                    paymentDTO.AccountId = cus.Id;
+                    paymentDTO.OrderId = Guid.Parse(creOrder);
+                    paymentDTO.TypeCode = -1;
+                    paymentDTO.PaymentInfo = "Mở Bàn";
+                    var pay = await _paymentService.CreateTransactionBooking(paymentDTO);
+                    if (pay != null)
+                    {
+                        return pay;
+                    }
+
+                    table.Status = "Có Khách";
+                    _unitOfWork.BilliardTableRepo.Update(table);
+                    var result = await _unitOfWork.SaveAsync() > 0;
+                    if (!result)
+                    {
+                        return "Kích hoạt thất bại!";
+                    }
+                    return $"{timeCus.TotalHours:00}:{timeCus.Minutes:00}:{timeCus.Seconds:00}";
+                }
+                else
+                {
+                    var booking = await _unitOfWork.BilliardTableRepo.CheckTableBooking(activeTable.BilliardTableID, now);
+                    if (booking != null)
+                    {
+                        var config = await _configTableService.GetConfigTableByName();
+
+                        if (config == null)
                         {
-                            var deposit = booking.Deposit / price;
-                            TimeSpan timeDepo = ConvertDecimalToTime((decimal)deposit);
-
-                            TimeSpan timePlay = timeCus + timeDepo;
-
-                            TimeSpan timeBook = (TimeSpan)(booking.TimeEnd - Time);
-
-                            if(timeBook > timePlay && string.IsNullOrEmpty(activeTable.Answer))
-                            {
-                                return "Số tiền chơi trong ví không đủ với thời gian đặt. \n Bạn có muốn nạp thêm!";
-                            }
-                            else if (activeTable.Answer.Equals("No"))
-                            {
-                                table.Status = "Có Khách";
-                                table.UpdatedDate = now;
-                                _unitOfWork.BilliardTableRepo.Update(table);
-                                var result2 = await _unitOfWork.SaveAsync() > 0;
-                                if (!result2)
-                                {
-                                    return "Kích hoạt thất bại!";
-                                }
-                                return timePlay.ToString(@"hh\:mm\:ss");
-                            }
-                            else
-                            {
-                                table.Status = "Có Khách";
-                                table.UpdatedDate = now;
-                                _unitOfWork.BilliardTableRepo.Update(table);
-                                var result2 = await _unitOfWork.SaveAsync() > 0;
-                                if (!result2)
-                                {
-                                    return "Kích hoạt thất bại!";
-                                }
-                                return timePlay.ToString(@"hh\:mm\:ss");
-                            }
-
+                            return "không tìm thấy cấu hình!";
                         }
-                        else if(Time < booking.TimeStart.Value.AddMinutes((double)-config.TimeHold))
+
+                        if (booking.CustomerId == activeTable.CustomerID)
                         {
-                            TimeSpan timeSpan1 = booking.TimeStart.Value.AddMinutes((double)-config.TimeHold) - Time;
-                            return $"Bạn đã đến sớm hơn so với lịch đặt. \n Hãy quay lại sau {timeSpan1} để chơi!";
+                            if (Time >= booking.TimeStart.Value.AddMinutes((double)-config.TimeHold) && Time <= booking.TimeStart.Value.AddMinutes((double)config.TimeDelay))
+                            {
+                                var cusBalance = cus.Balance + booking.Deposit;
+
+                                TimeSpan timeCus1 = ConvertDecimalToTime((decimal)cusBalance);
+
+                                TimeSpan timeBook = (TimeSpan)(booking.TimeEnd - Time);
+
+                                if (timeBook > timeCus1)
+                                {
+                                    TimeSpan differ = timeBook - timeCus1;
+
+                                    decimal money = (decimal)((decimal)differ.TotalHours * table.Price.OldPrice);
+
+                                    return $"Số tiền chơi trong ví không đủ với thời gian đặt. \n Bạn cần nạp thêm ít nhất {money}!";
+                                }
+                                else
+                                {
+                                    var priceBook = ((decimal)timeBook.TotalHours * table.Price.OldPrice);
+                                    decimal priceCus = (decimal)(cus.Balance - priceBook - booking.Deposit);
+
+                                    AddNewOrderDTO orderDTO = new AddNewOrderDTO();
+                                    orderDTO.CustomerId = cus.Id;
+                                    orderDTO.Username = !string.IsNullOrEmpty(cus.FullName) ? cus.FullName : cus.UserName;
+                                    orderDTO.BilliardTableId = table.Id;
+                                    orderDTO.StoreId = table.StoreId;
+                                    var creOrder = await _orderService.AddNewOrder(orderDTO);
+                                    if (!Guid.TryParse(creOrder, out _))
+                                    {
+                                        return creOrder;
+                                    }
+
+                                    AddNewPlayTimeDTO playTimeDTO = new AddNewPlayTimeDTO();
+                                    playTimeDTO.OrderId = Guid.Parse(creOrder);
+                                    playTimeDTO.BilliardTableId = table.Id;
+                                    playTimeDTO.TotaLTime = (decimal)timeCus1.TotalHours;
+                                    playTimeDTO.TotaLPrice = priceBook;
+                                    var crePlay = await _playtimeService.AddNewPlaytime(playTimeDTO);
+                                    if (crePlay != null)
+                                    {
+                                        return crePlay;
+                                    }
+
+                                    var upBalance = await _accountService.UpdateBalance(cus.Id, priceCus);
+                                    if (upBalance != null)
+                                    {
+                                        return upBalance;
+                                    }
+
+                                    PaymentBookingDTO paymentDTO = new PaymentBookingDTO();
+                                    paymentDTO.PaymentMethod = "Qua Ví";
+                                    paymentDTO.Amount = priceBook;
+                                    paymentDTO.AccountId = cus.Id;
+                                    paymentDTO.OrderId = Guid.Parse(creOrder);
+                                    paymentDTO.TypeCode = -1;
+                                    paymentDTO.PaymentInfo = "Mở Bàn Đặt";
+                                    var pay = await _paymentService.CreateTransactionBooking(paymentDTO);
+                                    if (pay != null)
+                                    {
+                                        return pay;
+                                    }
+
+                                    UpdateBookingStatusDTO statusDTO = new UpdateBookingStatusDTO();
+                                    statusDTO.Status = "Đang Tiến Hành";
+                                    var upBooking = await _bookingService.UpdateStatusBooking(booking.Id, statusDTO);
+                                    if (upBooking != null)
+                                    {
+                                        return upBooking;
+                                    }
+
+                                    table.Status = "Có Khách";
+                                    _unitOfWork.BilliardTableRepo.Update(table);
+                                    var result = await _unitOfWork.SaveAsync() > 0;
+                                    if (!result)
+                                    {
+                                        return "Kích hoạt thất bại!";
+                                    }
+
+                                    return $"{timeCus1.TotalHours:00}:{timeCus1.Minutes:00}:{timeCus1.Seconds:00}";
+                                }
+                            }
+                            else if (Time < booking.TimeStart.Value.AddMinutes((double)-config.TimeHold))
+                            {
+                                TimeSpan timeRange = booking.TimeStart.Value.AddMinutes((double)-config.TimeHold) - Time;
+                                return $"Bạn đã đến quá sớm. \n Hãy quay lại sau {timeRange}!";
+                            }
                         }
                         else
                         {
+                            UpdateBookingStatusDTO statusDTO = new UpdateBookingStatusDTO();
+                            statusDTO.Status = "Đã Huỷ";
+                            var upBooking = await _bookingService.UpdateStatusBooking(booking.Id, statusDTO);
+                            if (upBooking != null)
+                            {
+                                return upBooking;
+                            }
 
+                            return $"Bạn đã kích hoạt trễ hơn {config.TimeDelay} thời gian giữ bàn. Hãy quét lại qrcode để kích hoạt như bình thường!";
                         }
                     }
                     else
                     {
-                        if (Time <= booking.TimeStart && Time >= booking.TimeStart.Value.AddMinutes((double)-config.TimeHold))
-                        {
-                            return "Bàn chơi này đã được đặt trước!";
-                        }
-                        else
-                        {
-                            if (string.IsNullOrEmpty(activeTable.Answer))
-                            {
-                                TimeSpan timeSpan = (TimeSpan)(booking.TimeStart - Time);
-                                return $"Bàn này có lịch đặt lúc {booking.TimeStart}. \n Nên bạn chỉ có {timeSpan} để chơi!";
-                            }
-                            else
-                            {
-                                table.Status = "Có Khách";
-                                table.UpdatedDate = now;
-                                _unitOfWork.BilliardTableRepo.Update(table);
-                                var result1 = await _unitOfWork.SaveAsync() > 0;
-                                if (!result1)
-                                {
-                                    return "Kích hoạt thất bại!";
-                                }
-
-                                TimeSpan timeSpan = (TimeSpan)(booking.TimeStart - Time);
-
-                                return timeSpan.ToString(@"hh\:mm\:ss");
-                            }
-                        }
+                        return $"Lịch đặt của bạn đã bị huỷ do bạn kích hoạt trễ hơn thời gian giữ bàn. Hãy quét lại qrcode để kích hoạt như bình thường!";
                     }
                 }
-           
-
-                table.Status = "Có Khách";
-                table.UpdatedDate = now;
-                _unitOfWork.BilliardTableRepo.Update(table);
-                var result = await _unitOfWork.SaveAsync() > 0;
-                if (!result)
-                {
-                    return "Kích hoạt thất bại!";
-                }
-
-                return timeCus.ToString(@"hh\:mm\:ss");
-
+                return null;
             }
             catch (DbUpdateException)
             {
@@ -498,6 +564,105 @@ namespace PoolLab.Application.Interface
                     return "Cập nhật thất bại!";
                 }
                 return null;
+            }
+            catch (DbUpdateException)
+            {
+                throw;
+            }
+        }
+
+        public async Task<string?> GetTableByQRCode(GetByQRCode getByQR)
+        {
+            try
+            {
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                var now = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+                var Time = TimeOnly.FromDateTime(now);
+
+                var table = await _unitOfWork.BilliardTableRepo.GetBidaTableByID(getByQR.BilliardTableID);
+                if (table == null)
+                {
+                    return "Không tìm thấy bàn chơi này!";
+                }
+                if (table.Status.Equals("Có Khách"))
+                {
+                    return "Bàn chơi này đang không trống để phục vụ!";
+                }
+
+                var cus = await _unitOfWork.AccountRepo.GetByIdAsync(getByQR.CustomerID);
+                if (cus == null)
+                {
+                    return "Không tìm thấy thành viên này!";
+                }
+
+                if (cus.Balance <= 0)
+                {
+                    return "Bạn đã hết tiền trong ví.\n Bạn cần nạp thêm tiền vào ví để kích hoạt bàn!";
+                }
+
+                var totalTime = cus.Balance / table.Price.OldPrice;
+
+                TimeSpan timeCus = ConvertDecimalToTime((decimal)totalTime);
+
+
+                if ((int)timeCus.TotalHours == 0 && timeCus.Minutes < 30)
+                {
+                    return "Thời gian chơi của bạn ít hơn 30 phút.\n Bạn cần nạp thêm tiền vào ví để kích hoạt bàn!";
+                }
+                else if (timeCus.Minutes > 30 && timeCus.Minutes <= 59)
+                {
+                    timeCus = new TimeSpan((int)timeCus.TotalHours, 30, 0);
+                }
+                else
+                {
+                    timeCus = new TimeSpan((int)timeCus.TotalHours, 0, 0);
+                }
+
+                var booking = await _unitOfWork.BilliardTableRepo.CheckTableBooking(getByQR.BilliardTableID, now);
+
+                if (booking != null)
+                {
+                    var config = await _configTableService.GetConfigTableByName();
+
+                    if (config == null)
+                    {
+                        return "Không tìm thấy cấu hình!";
+                    }
+
+                    if (booking.CustomerId != cus.Id)
+                    {
+                        if (Time >= booking.TimeStart.Value.AddMinutes((double)-config.TimeHold) && Time <= booking.TimeStart.Value.AddMinutes((double)config.TimeDelay))
+                        {
+                            return "Bàn chơi này đã được đặt trước. \n Quý khách vui lòng chọn bàn chơi khác!";
+                        }
+                        else
+                        {
+                            TimeSpan differ = booking.TimeStart.Value.AddMinutes((double)-config.TimeHold) - Time;
+                            if (differ.Hours == 0 && differ.Minutes < 30)
+                            {
+                                return $" Bàn này đã được đặt. \n Thời gian để bạn chơi quá ít xin hãy chọn bàn khác!";
+                            }
+                            else if (differ.Minutes > 30 && differ.Minutes <= 59)
+                            {
+                                differ = new TimeSpan(differ.Hours, 30, 0);
+                            }
+                            else
+                            {
+                                differ = new TimeSpan(differ.Hours, 0, 0);
+                            }
+                            return differ > timeCus
+                                ? $"{(int)timeCus.TotalHours:00}:{timeCus.Minutes:00}:{timeCus.Seconds:00}|{booking.TimeStart.Value.Hour:00}:{booking.TimeStart.Value.Minute:00}:{booking.TimeStart.Value.Second:00}"
+                                : $"{differ.Hours:00}:{differ.Minutes:00}:{differ.Seconds:00}&{booking.TimeStart.Value.Hour:00}:{booking.TimeStart.Value.Minute:00}:{booking.TimeStart.Value.Second:00}";
+                        }
+                    }
+                    return null;
+                }
+                else
+                {
+                    return $"{(int)timeCus.TotalHours:00}:{timeCus.Minutes:00}:{timeCus.Seconds:00}";
+                }
+
             }
             catch (DbUpdateException)
             {

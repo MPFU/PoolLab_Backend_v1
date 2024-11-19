@@ -17,6 +17,5 @@ namespace PoolLab.Core.Interface
 
         Task<bool> CheckAccountHasBooking(Booking booking);
 
-        
     }
 }

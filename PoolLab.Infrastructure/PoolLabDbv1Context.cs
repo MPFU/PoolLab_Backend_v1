@@ -464,7 +464,9 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.BilliardTableId).HasColumnName("BilliardTableID");
             entity.Property(e => e.OrderId).HasColumnName("OrderID");
             entity.Property(e => e.TotalPrice).HasColumnType("decimal(11, 0)");
-            entity.Property(e => e.TimeTotal).HasPrecision(0);
+            entity.Property(e => e.TotalTime).HasColumnType("decimal(11, 5)");
+            entity.Property(e => e.TimeStart).HasColumnType("datetime");
+            entity.Property(e => e.TimeEnd).HasColumnType("datetime");
 
             entity.HasOne(d => d.BilliardTable).WithMany(p => p.PlayTimes)
                 .HasForeignKey(d => d.BilliardTableId)

@@ -13,7 +13,11 @@ public partial class PlayTime
 
     public Guid? BilliardTableId { get; set; }
 
-    public TimeOnly? TimeTotal { get; set; }
+    public DateTime? TimeStart { get; set; }
+
+    public DateTime? TimeEnd{ get; set; }
+
+    public decimal? TotalTime { get; set; }
 
     public decimal? TotalPrice { get; set; }
 

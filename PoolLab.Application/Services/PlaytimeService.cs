@@ -30,31 +30,11 @@ namespace PoolLab.Application.Interface
                 var play = _mapper.Map<PlayTime>(addNewPlayTimeDTO);
                 play.Id = Guid.NewGuid();
                 play.Name = "Giờ chơi";
-                var bidaPrice = await _unitOfWork.BilliardTableRepo.GetPriceOfTable(play.BilliardTableId);
-                if (bidaPrice == null)
-                {
-                    return "Không tìm thấy bàn chơi này!";
-                }
-                var timePlay = ConvertTimeOnlyToDecimal((TimeOnly)play.TimeTotal);
-                play.TotalPrice = timePlay * bidaPrice;
                 await _unitOfWork.PlaytimeRepo.AddAsync(play);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)
                 {
                     return "Tạo giờ chơi thất bại";
-                }
-                var order = await _unitOfWork.OrderRepo.GetByIdAsync((Guid)play.OrderId);
-                if (order == null)
-                {
-                    return "Không tìm thấy hoá đơn của giờ chơi này!";
-                }
-                order.TotalPrice += play.TotalPrice;
-                order.Status = "Chờ Thanh Toán";
-                _unitOfWork.OrderRepo.Update(order);
-                var result1 = await _unitOfWork.SaveAsync() > 0;
-                if (!result1)
-                {
-                    return "Cập nhật hoá đơn trên giờ chơi thất bại";
                 }
                 return null;
             }
