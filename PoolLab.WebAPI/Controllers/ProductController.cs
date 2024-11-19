@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PoolLab.Application.FilterModel;
 using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
 using PoolLab.WebAPI.ResponseModel;
@@ -17,23 +18,23 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllProducts()
+        public async Task<IActionResult> GetAllProducts([FromQuery] ProductFilter productFilter)
         {
             try
             {
-                var product = await _productService.GetAllProducts();
-                if (product == null || product.Count() <= 0)
+                var productList = await _productService.GetAllProducts(productFilter);
+                if (productList == null || productList.Items.Count() <= 0)
                 {
                     return NotFound(new FailResponse()
                     {
                         Status = NotFound().StatusCode,
-                        Message = "Không có sản phẩm này."
+                        Message = "Không có sản phẩm nào."
                     });
                 }
                 return Ok(new SucceededRespone()
                 {
                     Status = Ok().StatusCode,
-                    Data = product
+                    Data = productList
                 });
             }
             catch (Exception ex)
@@ -124,6 +125,36 @@ namespace PoolLab.WebAPI.Controllers
                 {
                     Status = Ok().StatusCode,
                     Message = "Xoá sản phẩm thành công."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetProductByID(Guid id)
+        {
+            try
+            {
+                var check = await _productService.SearchProductById(id);
+                if (check == null)
+                {
+                    return NotFound(new FailResponse()
+                    {
+                        Status = NotFound().StatusCode,
+                        Message = "Không tìm thấy sản phẩm này."
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Data = check
                 });
             }
             catch (Exception ex)
