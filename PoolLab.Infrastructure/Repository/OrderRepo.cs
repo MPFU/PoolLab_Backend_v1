@@ -26,6 +26,7 @@ namespace PoolLab.Infrastructure.Interface
                 ? await _dbContext.Orders
                 .Where(x => x.CustomerId == id || x.BilliardTableId == id)
                 .Where(x => x.Status.Equals("Đã Tạo"))
+                .Include(x => x.OrderDetails)
                 .FirstOrDefaultAsync()
                 : null;
         }

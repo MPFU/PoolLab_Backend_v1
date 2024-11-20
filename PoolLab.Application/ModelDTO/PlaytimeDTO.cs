@@ -12,8 +12,6 @@ namespace PoolLab.Application.ModelDTO
 
         public string? Name { get; set; }
 
-        public Guid? OrderId { get; set; }
-
         public Guid? BilliardTableId { get; set; }
 
         public DateTime? TimeStart { get; set; }
@@ -23,6 +21,8 @@ namespace PoolLab.Application.ModelDTO
         public decimal? TotalTime { get; set; }
 
         public decimal? TotalPrice { get; set; }
+
+        public string? Status { get; set; }
     }
 
     public class AddNewPlayTimeDTO

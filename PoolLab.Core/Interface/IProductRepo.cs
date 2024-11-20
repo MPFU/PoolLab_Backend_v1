@@ -11,5 +11,7 @@ namespace PoolLab.Core.Interface
     {
         Task<Product?> SearchByNameAsync(string name);
         Task<IEnumerable<Product>> GetAllProducts();
+
+        Task<bool> CheckProductNameDup(string name, Guid storeId, Guid? Id = null);
     }
 }

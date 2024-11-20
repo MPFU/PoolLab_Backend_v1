@@ -50,7 +50,7 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpPost("{id}")]
-        public async Task<IActionResult> AddNewProductToOrder(Guid id,[FromBody] List<AddNewOrderDetailDTO> orderDetailDTO)
+        public async Task<IActionResult> AddNewProductToOrder(Guid id,[FromBody] List<AddOrderDetailDTO> orderDetailDTO)
         {
             try
             {

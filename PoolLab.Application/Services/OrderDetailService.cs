@@ -16,11 +16,17 @@ namespace PoolLab.Application.Interface
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IProductService _productService;
+        private readonly IAccountService _accountService;
+        private readonly IPaymentService _paymentService;
 
-        public OrderDetailService(IMapper mapper, IUnitOfWork unitOfWork)
+        public OrderDetailService(IMapper mapper, IUnitOfWork unitOfWork, IProductService productService, IAccountService accountService, IPaymentService paymentService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
+            _productService = productService;
+            _accountService = accountService;
+            _paymentService = paymentService;
         }
 
         public async Task<string?> AddNewOrderDetail(AddNewOrderDetailDTO orderDetailDTO)
@@ -43,66 +49,124 @@ namespace PoolLab.Application.Interface
             }
         }
 
-        public async Task<string?> AddNewProductToOrder(Guid bidaID, List<AddNewOrderDetailDTO> orderDetailDTOs)
+        public async Task<string?> AddNewProductToOrder(Guid bidaID, List<AddOrderDetailDTO> orderDetailDTOs)
         {
             try
             {
                 var order = await _unitOfWork.OrderRepo.GetOrderByCusOrTable(bidaID);
-                if(order == null)
+                if (order == null)
                 {
                     return "Không tìm thấy hoá đơn của bàng này!";
                 }
-                foreach (var orderDetails in orderDetailDTOs)
-                {                   
-                    if (order.Id != orderDetails.OrderId)
-                    {
-                        return "Có sản phẩm có hoá đơn không trùng với hoá đơn bàn!";
-                    }
-                }
-                var orderDetail = await _unitOfWork.OrderDetailRepo.GetOrderDetailByOrderOrTable(order.Id);
-                if (orderDetail == null)
+
+                // Đối với member
+                if (order.CustomerId != null)
                 {
-                    foreach (var orderDetails in orderDetailDTOs)
+                    var allPrice = orderDetailDTOs.Sum(x => x.Price);
+                    if (allPrice == null)
                     {
-                        var addNew = await AddNewOrderDetail(orderDetails);
+                        return "Không tính được tổng của sản phẩm vừa đặt!";
+                    }
+
+                    var cus = await _unitOfWork.AccountRepo.GetByIdAsync((Guid)order.CustomerId);
+                    if (cus == null)
+                    {
+                        return "Không tìm thấy thành viên này!";
+                    }
+
+                    if(cus.Balance < allPrice)
+                    {
+                        return $"Bạn chỉ có {cus.Balance} trong ví không đủ để đặt món!";
+                    }
+
+                    var balance = cus.Balance - allPrice;
+                    var upCus = await _accountService.UpdateBalance(cus.Id, (decimal)balance);
+
+                    if (upCus != null)
+                    {
+                        return upCus;
+                    }
+
+                    PaymentBookingDTO paymentDTO = new PaymentBookingDTO();
+                    paymentDTO.PaymentMethod = "Qua Ví";
+                    paymentDTO.Amount = allPrice;
+                    paymentDTO.AccountId = cus.Id;
+                    paymentDTO.OrderId = order.Id;
+                    paymentDTO.TypeCode = -1;
+                    paymentDTO.PaymentInfo = "Hoá Đơn";
+                    var pay = await _paymentService.CreateTransactionBooking(paymentDTO);
+                    if (pay != null)
+                    {
+                        return pay;
+                    }
+                }               
+
+                foreach (var orderDetails in orderDetailDTOs)
+                {
+                    var product = await _unitOfWork.ProductRepo.GetByIdAsync((Guid)orderDetails.ProductId);
+                    if (product == null)
+                    {
+                        return $"Không tìm thấy {orderDetails.ProductName}!";
+                    }
+
+                    // Trả về order detail của order
+                    var exist = order.OrderDetails.FirstOrDefault(x => x.ProductId == product.Id);
+
+                    if (exist == null)
+                    {
+                        // Các sản phẩm chưa có trong order
+
+                        var upPro = await _productService.UpdateQuantityProduct(product.Id, (int)orderDetails.Quantity, false);
+                        if (upPro != null)
+                        {
+                            return upPro;
+                        }
+
+                        var newOrderDe = _mapper.Map<AddNewOrderDetailDTO>(orderDetails);
+                        newOrderDe.OrderId = order.Id;
+                        var addNew = await AddNewOrderDetail(newOrderDe);
                         if (addNew != null)
                         {
                             return addNew;
                         }
                     }
-                }
-                else
-                {
-                    foreach (var orderDetails in orderDetailDTOs)
+                    else
                     {
-                        var product = orderDetail.Where(x => x.ProductId == orderDetails.ProductId && x.OrderId == order.Id).FirstOrDefault();                        
-                        if (product != null)
+                        // Các sản phẩm đã có khi khách order trước đó 
+
+                        var upPro = await _productService.UpdateQuantityProduct(product.Id, (int)orderDetails.Quantity, false);
+                        if (upPro != null)
                         {
-                            product.Quantity += orderDetails.Quantity;
-                            product.Price += orderDetails.Price;
-                            _unitOfWork.OrderDetailRepo.Update(product);
-                            var result =  await _unitOfWork.SaveAsync() > 0 ;
-                            if (!result)
-                            {
-                                return "Cập nhật số lượng thất bại!";
-                            }
+                            return upPro;
                         }
+
+                        exist.Price += orderDetails.Price;
+                        exist.Quantity += orderDetails.Quantity;
+                        _unitOfWork.OrderDetailRepo.Update(exist);
+                        var upOrDe = await _unitOfWork.SaveAsync();
                     }
+
                 }
+
+               
                 var TotalPrice1 = await _unitOfWork.OrderDetailRepo.GetTotalPriceOrderDetail(order.Id);
                 if (TotalPrice1 == null)
                 {
                     return "Không tính được tổng tiền của các sản phẩm!";
                 }
-                order.TotalPrice += TotalPrice1;
+                order.TotalPrice = TotalPrice1;
                 _unitOfWork.OrderRepo.Update(order);
                 var result1 = await _unitOfWork.SaveAsync() > 0;
                 if (!result1)
                 {
                     return "Cập nhật tổng tiền thất bại!";
                 }
+
+                
+
                 return order.TotalPrice.ToString();
-            }catch(DbUpdateException)
+            }
+            catch (DbUpdateException)
             {
                 throw;
             }

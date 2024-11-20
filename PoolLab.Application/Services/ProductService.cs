@@ -28,20 +28,14 @@ namespace PoolLab.Application.Interface
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<PageResult<ProductDTO>> GetAllProducts(ProductFilter productFilter)
+        public async Task<PageResult<GetAllProduct>> GetAllProducts(ProductFilter productFilter)
         {
-            var productList = _mapper.Map<IEnumerable<ProductDTO>>(await _unitOfWork.ProductRepo.GetAllProducts());
-            IQueryable<ProductDTO> result = productList.AsQueryable();
+            var productList = _mapper.Map<IEnumerable<GetAllProduct>>(await _unitOfWork.ProductRepo.GetAllProducts());
+            IQueryable<GetAllProduct> result = productList.AsQueryable();
 
             //Filter
             if (!string.IsNullOrEmpty(productFilter.Name))
-                result = result.Where(x => x.Name.Contains(productFilter.Name, StringComparison.OrdinalIgnoreCase));
-
-            if (!string.IsNullOrEmpty(productFilter.Descript))
-                result = result.Where(x => x.Descript.Contains(productFilter.Descript, StringComparison.OrdinalIgnoreCase));
-
-            if (!string.IsNullOrEmpty(productFilter.ProductImg))
-                result = result.Where(x => x.ProductImg.Contains(productFilter.ProductImg, StringComparison.OrdinalIgnoreCase));
+                result = result.Where(x => x.Name.Contains(productFilter.Name, StringComparison.OrdinalIgnoreCase));        
            
             if (!string.IsNullOrEmpty(productFilter.Status))
                 result = result.Where(x => x.Status.Contains(productFilter.Status, StringComparison.OrdinalIgnoreCase));
@@ -63,15 +57,25 @@ namespace PoolLab.Application.Interface
             {
                 switch (productFilter.SortBy)
                 {
-                    case "CreatedDate":
+                    case "createdDate":
                         result = productFilter.SortAscending ?
                             result.OrderBy(x => x.CreatedDate) :
                             result.OrderByDescending(x => x.CreatedDate);
                         break;
-                    case "UpdatedDate":
+                    case "updatedDate":
                         result = productFilter.SortAscending ?
                             result.OrderBy(x => x.UpdatedDate) :
                             result.OrderByDescending(x => x.UpdatedDate);
+                        break;
+                    case "price":
+                        result = productFilter.SortAscending ?
+                            result.OrderBy(x => x.Price) :
+                            result.OrderByDescending (x => x.Price);
+                        break;
+                    case "quantity":
+                        result = productFilter.SortAscending ?
+                            result.OrderBy(x => x.Quantity) :
+                            result.OrderByDescending(x => x.Quantity);
                         break;
                 }
             }
@@ -82,7 +86,7 @@ namespace PoolLab.Application.Interface
                 .Take(productFilter.PageSize)
                 .ToList();
 
-            return new PageResult<ProductDTO>
+            return new PageResult<GetAllProduct>
             {
                 Items = pageItems,
                 PageNumber = productFilter.PageNumber,
@@ -96,15 +100,17 @@ namespace PoolLab.Application.Interface
         {
             try
             {
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"); 
                 var check = _mapper.Map<Product>(create);
                 check.Id = Guid.NewGuid();
-                check.CreatedDate = DateTime.Now;
-                check.UpdatedDate = DateTime.Now;
-                check.Status = "Đang hoạt động";
-                var namecheck = await GetProductByName(check.Name);
-                if (namecheck != null)
+                check.CreatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+                check.ProductImg = !string.IsNullOrEmpty(create.ProductImg) ? create.ProductImg : "https://capstonepoollab.blob.core.windows.net/product/5ed65cfb-38a4-4720-ae10-5b68a5d10578.jpg";
+                check.Status = "Còn Hàng";
+                var namecheck = await _unitOfWork.ProductRepo.CheckProductNameDup(check.Name, (Guid)check.StoreId);
+                if (namecheck)
                 {
-                    return "Tên sản phẩm bị trùng.";
+                    return "Tên sản phẩm bị trùng!";
                 }
                 else
                 {
@@ -112,7 +118,7 @@ namespace PoolLab.Application.Interface
                     var result = await _unitOfWork.SaveAsync() > 0;
                     if (!result)
                     {
-                        return "Tạo mới sản phẩm thất bại.";
+                        return "Tạo mới sản phẩm thất bại!";
                     }
                     return null;
                 }
@@ -130,25 +136,34 @@ namespace PoolLab.Application.Interface
             return _mapper.Map<ProductDTO?>(check);
         }
 
-        public async Task<string?> UpdateProduct(Guid id, CreateProductDTO create)
+        public async Task<string?> UpdateProduct(Guid id, UpdateProductInfo create)
         {
             try
             {
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+
                 var check = await _unitOfWork.ProductRepo.GetByIdAsync(id);
                 if (check == null)
                 {
                     return "Không tìm thấy sản phẩm này.";
                 }
-                check.Name = create.Name;
-                check.Descript = create.Descript;
-                check.Quantity = create.Quantity;
-                check.Price = create.Price;
-                check.ProductGroupId = create.ProductGroupId;
-                check.UnitId = create.UnitId;
-                check.ProductType = check.ProductType;
-                check.ProductImg = create.ProductImg;
-                check.Status = create.Status;
-                check.UpdatedDate = DateTime.Now;
+                var dup = await _unitOfWork.ProductRepo.CheckProductNameDup(create.Name, (Guid)check.StoreId, check.Id);
+                if (dup)
+                {
+                    return "Tên sản phẩm bị trùng!";
+                }
+                check.Name = !string.IsNullOrEmpty(create.Name) ? create.Name : check.Name;
+                check.Descript = !string.IsNullOrEmpty(create.Descript) ? create.Descript : check.Descript;
+                check.Quantity = check.Quantity != null ? create.Quantity : check.Quantity;
+                check.MinQuantity = check.MinQuantity != null ? create.MinQuantity : check.MinQuantity;
+                check.Price = check.Price != null ? create.Price : check.Price;
+                check.ProductGroupId = check.ProductGroupId != null ? create.ProductGroupId : check.ProductGroupId;
+                check.UnitId = check.UnitId != null ? create.UnitId : check.UnitId;
+                check.ProductTypeId = check.ProductType != null ? create.ProductTypeId : check.ProductTypeId;
+                check.ProductImg = !string.IsNullOrEmpty(create.ProductImg) ? create.ProductImg : check.ProductImg;
+                check.Status = !string.IsNullOrEmpty(create.Status) ? create.Status : check.Status;
+                check.UpdatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
 
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)
@@ -189,6 +204,58 @@ namespace PoolLab.Application.Interface
         public async Task<ProductDTO?> SearchProductById(Guid id)
         {
             return _mapper.Map<ProductDTO>(await _unitOfWork.ProductRepo.GetByIdAsync(id));
-        }      
+        }
+
+        public async Task<string?> UpdateQuantityProduct(Guid id, int quantity, bool check)
+        {
+            try
+            {
+                var product = await _unitOfWork.ProductRepo.GetByIdAsync(id);
+                if (product == null)
+                {
+                    return "Không tìm thấy sản phẩm này!";
+                }
+
+                if (product.Quantity != null)
+                {
+                    if (check)
+                    {
+                        if(product.Quantity == 0)
+                        {
+                            product.Status = "Còn Hàng";
+                        }
+                        product.Quantity += quantity;
+                        _unitOfWork.ProductRepo.Update(product);
+                        var result = await _unitOfWork.SaveAsync() > 0;
+                        if (!result)
+                        {
+                            return $"Cập nhật số lượng {product.Name} thất bại!";
+                        }
+                    }
+                    else
+                    {
+                        if(quantity > product.Quantity)
+                        {
+                            return $"Số lượng sản phẩm {product.Name} không đủ để phục vụ!";
+                        }
+                        product.Quantity -= quantity;
+                        if (product.Quantity == 0)
+                        {
+                            product.Status = "Hết Hàng";
+                        }
+                        _unitOfWork.ProductRepo.Update(product);
+                        var result = await _unitOfWork.SaveAsync() > 0;
+                        if (!result)
+                        {
+                            return $"Cập nhật số lượng {product.Name} thất bại!";
+                        }
+                    }
+                }
+                return null;
+            }catch(DbUpdateException)
+            {
+                throw;
+            }
+        }
     }
 }

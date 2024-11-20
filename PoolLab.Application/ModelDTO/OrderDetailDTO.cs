@@ -37,4 +37,21 @@ namespace PoolLab.Application.ModelDTO
 
         public decimal? Price { get; set; }
     }
+
+    public class AddOrderDetailDTO
+    {
+        public string? ProductName { get; set; }
+
+        public Guid? ProductId { get; set; }
+
+        public int? Quantity { get; set; }
+
+        public decimal? Price { get; set; }
+    }
+
+    public class CreOrderDetailDTO
+    {
+        public decimal? TotalPrice { get; set; }
+        public List<AddOrderDetailDTO>? AddNewOrders { get; set; }
+    }
 }

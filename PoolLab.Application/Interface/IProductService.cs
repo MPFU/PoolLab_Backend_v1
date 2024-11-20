@@ -12,11 +12,12 @@ namespace PoolLab.Application.Interface
 {
     public interface IProductService 
     {
-        Task<PageResult<ProductDTO>> GetAllProducts(ProductFilter productFilter);
+        Task<PageResult<GetAllProduct>> GetAllProducts(ProductFilter productFilter);
         Task<string?> CreateProduct(CreateProductDTO create);
         Task<ProductDTO?> GetProductByName(string? name);
-        Task<string?> UpdateProduct(Guid id, CreateProductDTO create);
+        Task<string?> UpdateProduct(Guid id, UpdateProductInfo create);
         Task<string?> DeleteProduct(Guid id);
         Task<ProductDTO?> SearchProductById(Guid id);
+        Task<string?> UpdateQuantityProduct(Guid id, int quantity, bool check);
     }
 }
