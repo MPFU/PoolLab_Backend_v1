@@ -28,5 +28,12 @@ namespace PoolLab.Infrastructure.Interface
                 .Include(x => x.Unit)
                 .ToListAsync();
         }
+
+        public async Task<bool> CheckProductNameDup(string name, Guid storeId, Guid? Id)
+        {           
+            return Id != null 
+                ? await _dbContext.Products.AnyAsync(x => x.Name.Equals(name) && x.StoreId == storeId)
+                : await _dbContext.Products.AnyAsync(x => x.Name.Equals(name) && x.StoreId == storeId && x.Id != Id);
+        }
     }
 }

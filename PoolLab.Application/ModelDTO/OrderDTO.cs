@@ -88,7 +88,7 @@ namespace PoolLab.Application.ModelDTO
 
         public string? Address { get; set; }
 
-        public List<PlaytimeDTO>? PlayTimes { get; set; }
+        public PlaytimeDTO? PlayTime { get; set; }
 
         public List<OrderDetailDTO>? OrderDetails { get; set; }
 

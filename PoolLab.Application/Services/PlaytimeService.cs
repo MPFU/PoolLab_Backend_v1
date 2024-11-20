@@ -31,9 +31,13 @@ namespace PoolLab.Application.Interface
         {
             try
             {
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+
                 var play = _mapper.Map<PlayTime>(addNewPlayTimeDTO);
                 play.Id = Guid.NewGuid();
                 play.Name = "Giờ chơi";
+                play.TimeStart = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                 await _unitOfWork.PlaytimeRepo.AddAsync(play);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)
@@ -52,6 +56,11 @@ namespace PoolLab.Application.Interface
         {
             try
             {
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                var now = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+                TimeSpan timeNow = now.TimeOfDay;
+
                 var table = await _unitOfWork.BilliardTableRepo.GetBidaTableByID(timeDTO.BilliardTableID);
                 if (table == null)
                 {
@@ -99,6 +108,14 @@ namespace PoolLab.Application.Interface
                             if (!upOrder)
                             {
                                 return "Cập nhật hoá đơn thất bại";
+                            }
+
+                            table.Status = "Bàn Trống";
+                            _unitOfWork.BilliardTableRepo.Update(table);
+                            var UpTable = await _unitOfWork.SaveAsync() > 0;
+                            if (!UpTable)
+                            {
+                                return "Cập nhật bàn thất bại!";
                             }
                         }
                         else
@@ -153,6 +170,14 @@ namespace PoolLab.Application.Interface
                             {
                                 return pay;
                             }
+
+                            table.Status = "Bàn Trống";
+                            _unitOfWork.BilliardTableRepo.Update(table);
+                            var UpTable = await _unitOfWork.SaveAsync() > 0;
+                            if (!UpTable)
+                            {
+                                return "Cập nhật bàn thất bại!";
+                            }
                         }
                     }
                     else
@@ -179,6 +204,59 @@ namespace PoolLab.Application.Interface
                         {
                             return "Cập nhật hoá đơn thất bại";
                         }
+
+                        table.Status = "Bàn Trống";
+                        _unitOfWork.BilliardTableRepo.Update(table);
+                        var UpTable = await _unitOfWork.SaveAsync() > 0;
+                        if (!UpTable)
+                        {
+                            return "Cập nhật bàn thất bại!";
+                        }
+                    }
+                }
+                else
+                {
+                    var order = await _unitOfWork.OrderRepo.GetOrderByPlayTime(play.Id);
+                    if (order == null)
+                    {
+                        return "Không tìm thấy hoá đơn này!";
+                    }
+
+                    TimeSpan timeStart = play.TimeStart.Value.TimeOfDay;
+
+                    TimeSpan timePlay = timeNow - timeStart;
+
+                    decimal totalTime = (decimal)timePlay.TotalHours;
+
+                    decimal totalPrice = (decimal)(totalTime * table.Price.OldPrice);
+                    totalPrice = Math.Round(totalPrice, 0,MidpointRounding.AwayFromZero);
+
+                    play.TotalPrice = totalPrice;
+                    play.TotalTime = totalTime;
+                    play.TimeEnd = now;
+                    play.Status = "Hoàn Thành";
+                    _unitOfWork.PlaytimeRepo.Update(play);
+                    var upPlay = await _unitOfWork.SaveAsync() > 0;
+                    if (!upPlay)
+                    {
+                        return "Cập nhật phiên chơi thất bại";
+                    }
+
+                    order.TotalPrice = order.TotalPrice + play.TotalPrice;
+                    order.Status = "Hoàn Thành";
+                    _unitOfWork.OrderRepo.Update(order);
+                    var upOrder = await _unitOfWork.SaveAsync() > 0;
+                    if (!upOrder)
+                    {
+                        return "Cập nhật hoá đơn thất bại";
+                    }
+
+                    table.Status = "Bàn Trống";
+                    _unitOfWork.BilliardTableRepo.Update(table);
+                    var UpTable = await _unitOfWork.SaveAsync() > 0;
+                    if (!UpTable)
+                    {
+                        return "Cập nhật bàn thất bại!";
                     }
                 }
                 return null;

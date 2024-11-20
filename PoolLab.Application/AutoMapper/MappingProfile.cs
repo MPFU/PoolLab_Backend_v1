@@ -80,6 +80,12 @@ namespace PoolLab.Application.AutoMapper
             //PRODUCT
             CreateMap<ProductDTO, Product>().ReverseMap();
             CreateMap<CreateProductDTO, Product>().ReverseMap();
+            CreateMap<UpdateProductInfo, Product>().ReverseMap();
+            CreateMap<Product, GetAllProduct>()
+               .ForMember(dest => dest.GroupName, opt => opt.MapFrom(src => src.ProductGroup.Name))
+               .ForMember(dest => dest.ProductTypeName, opt => opt.MapFrom(src => src.ProductType.Name))
+               .ForMember(dest => dest.UnitName, opt => opt.MapFrom(src => src.Unit.Name))
+               .ReverseMap();
 
             //UNIT
             CreateMap<UnitDTO, Unit>() .ReverseMap();
@@ -134,9 +140,12 @@ namespace PoolLab.Application.AutoMapper
             //ORDERDETAIL
             CreateMap<AddNewOrderDetailDTO, OrderDetail>().ReverseMap();
             CreateMap<OrderDetailDTO, OrderDetail>().ReverseMap();
+            CreateMap<AddNewOrderDetailDTO, AddOrderDetailDTO>().ReverseMap();
 
             //PLAYTIME
             CreateMap<AddNewPlayTimeDTO, PlayTime>()
+                .ReverseMap();
+            CreateMap<PlaytimeDTO, PlayTime>()
                 .ReverseMap();
         }
     }
