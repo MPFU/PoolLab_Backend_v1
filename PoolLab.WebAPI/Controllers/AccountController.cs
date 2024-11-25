@@ -130,7 +130,67 @@ namespace PoolLab.WebAPI.Controllers
                 return Ok(new SucceededRespone()
                 {
                     Status = Ok().StatusCode,
-                    Message = "Cập nhật mật khẩu thành công!"
+                    Message = "Cập nhật mật khẩu thành công."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> DepositBalance(Guid id, [FromBody] decimal amount)
+        {
+            try
+            {
+                var acc = await _accountService.DepositBalance(id, amount);
+                if (acc != null)
+                {
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = acc
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Nạp tiền thành công."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateAccStatus(Guid id, [FromBody] UpdateAccStatusDTO statusDTO)
+        {
+            try
+            {
+                var acc = await _accountService.UpdateAccStatus(id, statusDTO);
+                if (acc != null)
+                {
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = acc
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Cập nhật trạng thái thành công."
                 });
             }
             catch (Exception ex)

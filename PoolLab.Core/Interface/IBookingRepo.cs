@@ -17,5 +17,8 @@ namespace PoolLab.Core.Interface
 
         Task<bool> CheckAccountHasBooking(Booking booking);
 
+        Task<IEnumerable<Booking>> GetAllBookingInDate(DateTime now);
+
+        Task<IEnumerable<Booking>> GetAllBookingDelayInDate(DateTime now);
     }
 }

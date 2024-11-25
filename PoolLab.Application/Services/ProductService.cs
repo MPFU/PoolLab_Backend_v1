@@ -35,8 +35,14 @@ namespace PoolLab.Application.Interface
 
             //Filter
             if (!string.IsNullOrEmpty(productFilter.Name))
-                result = result.Where(x => x.Name.Contains(productFilter.Name, StringComparison.OrdinalIgnoreCase));        
-           
+                result = result.Where(x => x.Name.Contains(productFilter.Name, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(productFilter.ProductTypeName))
+                result = result.Where(x => x.ProductTypeName.Contains(productFilter.ProductTypeName, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(productFilter.ProductGroupName))
+                result = result.Where(x => x.GroupName.Contains(productFilter.ProductGroupName, StringComparison.OrdinalIgnoreCase));
+
             if (!string.IsNullOrEmpty(productFilter.Status))
                 result = result.Where(x => x.Status.Contains(productFilter.Status, StringComparison.OrdinalIgnoreCase));
 

@@ -15,5 +15,6 @@ namespace PoolLab.Application.Interface
         Task<StoreDTO?> GetStoreById(Guid id);
         Task<IEnumerable<StoreDTO>?> GetAllStore();
         Task<string?> UpdateStore(Guid Id, NewStoreDTO newStore);
+        Task<string?> UpdateStoreRating(Guid Id, int rate);
     }
 }

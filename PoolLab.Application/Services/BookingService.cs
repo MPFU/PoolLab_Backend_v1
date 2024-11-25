@@ -95,7 +95,7 @@ namespace PoolLab.Application.Interface
 
                 if (customer != null && customer < deposit)
                 {
-                    return "Số dư của bạn không đủ!";
+                    return $"Số dư của bạn không đủ. Bạn cần nạp thêm ít nhất {deposit - customer}!";
                 }else if (customer != null && deposit <= customer)
                 {
                     var price = customer - deposit;
@@ -232,9 +232,6 @@ namespace PoolLab.Application.Interface
                     return "Không tìm thấy lịch đặt này!";
                 }
                 book.Status = status.Status != null ? status.Status : book.Status;
-                DateTime utcNow = DateTime.UtcNow;
-                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-                book.UpdatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                 _unitOfWork.BookingRepo.Update(book);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if(!result)
@@ -328,5 +325,7 @@ namespace PoolLab.Application.Interface
                 throw;
             }
         }
+
+        
     }
 }

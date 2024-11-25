@@ -243,20 +243,12 @@ namespace PoolLab.Application.Interface
                     }
 
                     order.TotalPrice = order.TotalPrice + play.TotalPrice;
-                    order.Status = "Hoàn Thành";
+                    order.Status = "Đang Thanh Toán";
                     _unitOfWork.OrderRepo.Update(order);
                     var upOrder = await _unitOfWork.SaveAsync() > 0;
                     if (!upOrder)
                     {
                         return "Cập nhật hoá đơn thất bại";
-                    }
-
-                    table.Status = "Bàn Trống";
-                    _unitOfWork.BilliardTableRepo.Update(table);
-                    var UpTable = await _unitOfWork.SaveAsync() > 0;
-                    if (!UpTable)
-                    {
-                        return "Cập nhật bàn thất bại!";
                     }
                 }
                 return null;

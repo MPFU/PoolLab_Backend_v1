@@ -47,6 +47,18 @@ namespace PoolLab.Infrastructure.Interface
                 : null;
         }
 
+        public async Task<Order?> GetOrderForPayByBidaID(Guid? id)
+        {
+            return id != null
+                ? await _dbContext.Orders
+                .Include(x => x.Store)
+                .Include(x => x.PlayTime)
+                .Include(x => x.OrderDetails)
+                .Where(x => x.BilliardTableId == id && x.Status.Equals("Đang Thanh Toán"))
+                .FirstOrDefaultAsync()
+                : null;
+        }
+
         public async Task<decimal?> GetTotalPriceOrder(Guid? id)
         {
             return id != null

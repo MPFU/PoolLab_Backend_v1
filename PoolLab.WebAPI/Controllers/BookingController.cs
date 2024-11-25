@@ -136,11 +136,22 @@ namespace PoolLab.WebAPI.Controllers
                 var requestResult = await _bookingService.CancelBookingForMem(id, answer);
                 if (requestResult != null)
                 {
-                    return StatusCode(400, new FailResponse()
+                    if (requestResult.Contains("."))
                     {
-                        Status = 400,
-                        Message = requestResult
-                    });
+                        return Ok(new SucceededRespone()
+                        {
+                            Status = 202,
+                            Message = requestResult
+                        });
+                    }
+                    else
+                    {
+                        return StatusCode(400, new FailResponse()
+                        {
+                            Status = 400,
+                            Message = requestResult
+                        });
+                    }                  
                 }
                 return Ok(new SucceededRespone()
                 {

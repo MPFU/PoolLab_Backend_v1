@@ -17,6 +17,8 @@ namespace PoolLab.Core.Interface
 
         Task<Order?> GetOrderForPayByID(Guid? id);
 
+        Task<Order?> GetOrderForPayByBidaID(Guid? id);
+
         Task<Order?> GetOrderByPlayTime(Guid id);
     }
 }

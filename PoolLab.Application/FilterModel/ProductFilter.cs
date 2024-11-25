@@ -12,6 +12,10 @@ namespace PoolLab.Application.FilterModel
     {
         public string? Name { get; set; }
 
+        public string? ProductTypeName { get; set; }
+
+        public string? ProductGroupName { get; set; }
+
         public Guid? ProductTypeId { get; set; }
 
         public Guid? ProductGroupId { get; set; }

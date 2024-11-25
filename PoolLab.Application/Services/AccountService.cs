@@ -19,12 +19,14 @@ namespace PoolLab.Application.Interface
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IPaymentService _paymentService;
 
 
-        public AccountService(IUnitOfWork unitOfWork, IMapper mapper)
+        public AccountService(IUnitOfWork unitOfWork, IMapper mapper, IPaymentService paymentService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _paymentService = paymentService;
         }
 
         public async Task<string?> AddNewUser(RegisterDTO registerDTO)
@@ -120,6 +122,48 @@ namespace PoolLab.Application.Interface
             }
         }
 
+        public async Task<string?> DepositBalance(Guid Id, decimal amount)
+        {
+            try
+            {
+                var cus = await _unitOfWork.AccountRepo.GetByIdAsync(Id);
+                if(cus == null)
+                {
+                    return "Không tìm thấy thành viên này!";
+                }
+
+                if(amount <= 0 )
+                {
+                    return "Số tiền của bạn không hợp lệ!";
+                }
+
+                cus.Balance = cus.Balance + amount;
+                _unitOfWork.AccountRepo.Update(cus);
+                var result = await _unitOfWork.SaveAsync() > 0;
+                if (!result)
+                {
+                    return "Nạp tiền thất bại!";
+                }
+
+                PaymentBookingDTO paymentDTO = new PaymentBookingDTO();
+                paymentDTO.PaymentMethod = "Online";
+                paymentDTO.Amount = amount;
+                paymentDTO.AccountId = cus.Id;
+                paymentDTO.TypeCode = 1;
+                paymentDTO.PaymentInfo = "Nạp Tiền";
+                var pay = await _paymentService.CreateTransactionBooking(paymentDTO);
+                if (pay != null)
+                {
+                    return pay;
+                }
+                return null ;
+            }
+            catch(DbUpdateException)
+            {
+                throw;
+            }
+        }
+
         public async Task<AccountLoginDTO?> GetAccountByEmailAndPasswordAsync(string email, string password)
         {
             var acc = await _unitOfWork.AccountRepo.GetAccountByEmailOrUsername(email);
@@ -160,6 +204,9 @@ namespace PoolLab.Application.Interface
 
             if (!string.IsNullOrEmpty(accountFilter.Status))
                 result = result.Where(x => x.Status.Contains(accountFilter.Status, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(accountFilter.RoleName))
+                result = result.Where(x => x.RoleName.Contains(accountFilter.RoleName, StringComparison.OrdinalIgnoreCase));
 
             if (accountFilter.RoleId != null)
                 result = result.Where(x => x.RoleId == accountFilter.RoleId);
@@ -310,6 +357,31 @@ namespace PoolLab.Application.Interface
                 if (!result)
                 {
                     return "Cập nhật mật khẩu thất bại!";
+                }
+                return null;
+            }
+            catch (DbUpdateException)
+            {
+                throw;
+            }
+        }
+
+        public async Task<string?> UpdateAccStatus(Guid Id, UpdateAccStatusDTO statusDTO)
+        {
+            try
+            {
+                var acc = await _unitOfWork.AccountRepo.GetByIdAsync(Id);
+                if (acc == null)
+                {
+                    return "Không tìm thấy tài khoản này!";
+                }
+               
+                acc.Status = !string.IsNullOrEmpty(statusDTO.Status) ? statusDTO.Status : acc.Status; 
+                _unitOfWork.AccountRepo.Update(acc);
+                var result = await _unitOfWork.SaveAsync() > 0;
+                if (!result)
+                {
+                    return "Cập nhật trạng thái thất bại!";
                 }
                 return null;
             }

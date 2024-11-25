@@ -15,6 +15,7 @@ namespace PoolLab.Application.FilterModel
         public string? PhoneNumber { get; set; }
         public string? Rank { get; set; }
         public string? Status { get; set; }
+        public string? RoleName { get; set; }
         public Guid? RoleId { get; set; }
         public Guid? StoreId { get; set; }
         public Guid? SubId { get; set; }

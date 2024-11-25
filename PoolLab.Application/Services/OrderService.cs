@@ -152,7 +152,17 @@ namespace PoolLab.Application.Interface
 
         public async Task<GetOrderBillDTO?> GetOrderBillForPay(Guid id)
         {
-            return _mapper.Map<GetOrderBillDTO>(await _unitOfWork.OrderRepo.GetOrderForPayByID(id));
+            var orsder = _mapper.Map<GetOrderBillDTO>(await _unitOfWork.OrderRepo.GetOrderForPayByID(id));
+            if (orsder != null)
+            {
+                return orsder;
+            }
+            var order = _mapper.Map<GetOrderBillDTO>(await _unitOfWork.OrderRepo.GetOrderForPayByBidaID(id));
+            if(order != null)
+            {
+                return order;
+            }
+            return null;
         }
 
         public async Task<string?> UpdateCusPayOrder(Guid id, UpdateCusPayDTO updateCusPayDTO)
@@ -163,6 +173,12 @@ namespace PoolLab.Application.Interface
                 if (order == null)
                 {
                     return "Không tìm thấy hoá đơn này!";
+                }
+
+                var table = await _unitOfWork.BilliardTableRepo.GetByIdAsync((Guid)order.BilliardTableId);
+                if (table == null)
+                {
+                    return "Không tìm thấy bàn chơi này!";
                 }
                 order.TotalPrice = updateCusPayDTO.TotalPrice !=null ? updateCusPayDTO.TotalPrice : order.TotalPrice;
                 order.Discount = updateCusPayDTO.Discount != null ? updateCusPayDTO.Discount : order.Discount;
@@ -175,6 +191,15 @@ namespace PoolLab.Application.Interface
                 {
                     return "Cập nhật hoá đơn thất bại!";
                 }
+
+                table.Status = "Bàn Trống";
+                _unitOfWork.BilliardTableRepo.Update(table);
+                var result1 = await _unitOfWork.SaveAsync() > 0;
+                if (!result1)
+                {
+                    return "Cập nhật thất bại!";
+                }
+
                 return null;
             }
             catch(DbUpdateException) 

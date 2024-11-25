@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using PoolLab.Application.FilterModel;
+using PoolLab.Application.FilterModel.Helper;
 using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
 using PoolLab.Core.Interface;
@@ -45,6 +47,64 @@ namespace PoolLab.Application.Interface
             {
                 throw;
             }
+        }
+
+        public async Task<PageResult<PaymentDTO>> GetAllTransaction(PaymentFilter paymentFilter)
+        {
+            var tranList = _mapper.Map<IEnumerable<PaymentDTO>>(await _unitOfWork.PaymentRepo.GetAllTransaction());
+            IQueryable<PaymentDTO> query = tranList.AsQueryable();
+
+            //Filter
+            if (!string.IsNullOrEmpty(paymentFilter.Username))
+                query = query.Where(x => x.Username.Contains(paymentFilter.Username, StringComparison.OrdinalIgnoreCase));
+
+            if (paymentFilter.OrderId != null)
+                query = query.Where(x => x.OrderId.Equals(paymentFilter.OrderId));
+
+            if (paymentFilter.AccountId != null)
+                query = query.Where(x => x.AccountId.Equals(paymentFilter.AccountId));
+
+            if (paymentFilter.SubId != null)
+                query = query.Where(x => x.SubId.Equals(paymentFilter.SubId));
+
+            if (paymentFilter.TypeCode != null)
+                query = query.Where(x => x.TypeCode == paymentFilter.TypeCode);
+
+            if (!string.IsNullOrEmpty(paymentFilter.Status))
+                query = query.Where(x => x.Status.Contains(paymentFilter.Status, StringComparison.OrdinalIgnoreCase));
+
+            //Sorting
+            if (!string.IsNullOrEmpty(paymentFilter.SortBy))
+            {
+                switch (paymentFilter.SortBy)
+                {
+                    case "paymentDate":
+                        query = paymentFilter.SortAscending ?
+                            query.OrderBy(x => x.PaymentDate) :
+                            query.OrderByDescending(x => x.PaymentDate);
+                        break;
+                    case "amount":
+                        query = paymentFilter.SortAscending ?
+                            query.OrderBy(x => x.Amount) :
+                            query.OrderByDescending(x => x.Amount);
+                        break;
+                }
+            }
+
+            //Paging
+            var pageItems = query
+                .Skip((paymentFilter.PageNumber - 1) * paymentFilter.PageSize)
+                .Take(paymentFilter.PageSize)
+                .ToList();
+
+            return new PageResult<PaymentDTO>
+            {
+                Items = pageItems,
+                PageNumber = paymentFilter.PageNumber,
+                PageSize = paymentFilter.PageSize,
+                TotalItem = query.Count(),
+                TotalPages = (int)Math.Ceiling((decimal)query.Count() / (decimal)paymentFilter.PageSize)
+            };
         }
     }
 }
