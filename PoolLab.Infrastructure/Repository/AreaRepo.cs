@@ -15,9 +15,11 @@ namespace PoolLab.Infrastructure.Interface
         {
         }
 
-        public async Task<bool> CheckDuplicate(Guid storeId, string name)
+        public async Task<bool> CheckDuplicate(Guid storeId, string name, Guid? id)
         {
-            return await _dbContext.Areas.AnyAsync(x => x.Name.Equals(name) && x.StoreId == storeId);
+            return id != null
+                ? await _dbContext.Areas.AnyAsync(x => x.Name.Equals(name) && x.StoreId == storeId && x.Id != id)
+                : await _dbContext.Areas.AnyAsync(x => x.Name.Equals(name) && x.StoreId == storeId);
         }
 
         public async Task<Guid?> GetAreaIdByName(string? name)

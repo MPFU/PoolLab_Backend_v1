@@ -113,5 +113,30 @@ namespace PoolLab.Application.Interface
                 throw;
             }
         }
+
+        public async Task<string?> UpdateStoreRating(Guid Id, int rate)
+        {
+            try
+            {
+                var store = await _unitOfWork.StoreRepo.GetByIdAsync(Id);
+                if (store == null)
+                {
+                    return "Không tìm thấy chi nhánh này!";
+                }
+
+                store.Rated = (store.Rated + rate) / 2;
+                store.Rated = Math.Round((decimal)store.Rated, 1);
+                _unitOfWork.StoreRepo.Update(store);
+                var result = await _unitOfWork.SaveAsync() > 0;
+                if (!result)
+                {
+                    return "Cập nhật thất bại!";
+                }
+                return null;
+            }catch(DbUpdateException )
+            {
+                throw;
+            }
+        }
     }
 }

@@ -86,7 +86,7 @@ public partial class PoolLabDbv1Context : DbContext
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", true, true)
             .Build();
-        connectionString = config.GetConnectionString("AzureDB");
+        connectionString = config.GetConnectionString("PhucDatabase");
         return connectionString;
     }
 

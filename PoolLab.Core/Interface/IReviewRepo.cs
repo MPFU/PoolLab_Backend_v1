@@ -9,5 +9,8 @@ namespace PoolLab.Core.Interface
 {
     public interface IReviewRepo : IGenericRepo<Review>
     {
+        Task<Review?> GetReview(Guid id);
+
+        Task<IEnumerable<Review>?> GetAllReviews();
     }
 }

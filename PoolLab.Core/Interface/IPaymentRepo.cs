@@ -9,6 +9,6 @@ namespace PoolLab.Core.Interface
 {
     public interface IPaymentRepo : IGenericRepo<Transaction>
     {
-        
+        Task<IEnumerable<Transaction>> GetAllTransaction();
     }
 }

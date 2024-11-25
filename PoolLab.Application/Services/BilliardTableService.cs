@@ -313,6 +313,7 @@ namespace PoolLab.Application.Interface
                 orderDTO.BilliardTableId = table.Id;
                 orderDTO.StoreId = table.StoreId;
                 orderDTO.PlayTimeId = Guid.Parse(crePlay);
+                orderDTO.OrderBy = tableForGuest.StaffName;
                 var creOrder = await _orderService.AddNewOrder(orderDTO);
                 if (!Guid.TryParse(creOrder, out _))
                 {
@@ -642,6 +643,53 @@ namespace PoolLab.Application.Interface
             catch (DbUpdateException)
             {
                 throw;
+            }
+        }
+
+        public async Task UpdateBidaTableStatusAuto()
+        {
+            DateTime utcNow = DateTime.UtcNow;
+            TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            var now = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+
+            var bookingsToReserve = await _unitOfWork.BookingRepo.GetAllBookingInDate(now);
+
+            if(bookingsToReserve != null)
+            {
+                foreach(var booking in bookingsToReserve )
+                {
+                    UpdateStatusTableDTO tableDTO = new UpdateStatusTableDTO();
+                    tableDTO.Status = "Bàn Đặt";
+                    var result = await UpdateStatusTable((Guid)booking.BilliardTableId, tableDTO);
+                    if(result != null)
+                    {
+                        Console.WriteLine(result);
+                    }
+                }
+            }
+
+            var bookingsToCancel = await _unitOfWork.BookingRepo.GetAllBookingDelayInDate(now);
+
+            if (bookingsToCancel != null)
+            {
+                foreach (var bookings in bookingsToCancel)
+                {
+                    UpdateStatusTableDTO tableDTO = new UpdateStatusTableDTO();
+                    tableDTO.Status = "Bàn Trống";
+                    var up = await UpdateStatusTable((Guid)bookings.BilliardTableId, tableDTO);
+                    if(up != null)
+                    {
+                        Console.WriteLine(up);
+                    }
+
+                    UpdateBookingStatusDTO bookDTO = new UpdateBookingStatusDTO();
+                    bookDTO.Status = "Đã Huỷ";
+                    var up1 = await _bookingService.UpdateStatusBooking(bookings.Id, bookDTO);
+                    if (up1 != null)
+                    {
+                        Console.WriteLine(up1);
+                    }
+                }
             }
         }
     }

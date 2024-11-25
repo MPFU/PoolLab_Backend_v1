@@ -11,6 +11,6 @@ namespace PoolLab.Core.Interface
     {
         Task<Guid?> GetAreaIdByName (string? name); 
 
-        Task<bool> CheckDuplicate (Guid storeId, string name);
+        Task<bool> CheckDuplicate (Guid storeId, string name, Guid? id);
     }
 }

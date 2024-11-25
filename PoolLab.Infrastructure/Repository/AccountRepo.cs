@@ -21,12 +21,12 @@ namespace PoolLab.Infrastructure.Interface
             Account? checkU = null;
             if (!string.IsNullOrEmpty(email))
             {
-                checkE = await _dbContext.Accounts.Where(x => x.Email.Equals(email)).FirstOrDefaultAsync();
+                checkE = await _dbContext.Accounts.Where(x => x.Email.Equals(email) && x.Status.Equals("Kích hoạt")).FirstOrDefaultAsync();
             }
 
             if (!string.IsNullOrEmpty(username))
             {
-                checkU = await _dbContext.Accounts.Where(x => x.UserName.Equals(username)).FirstOrDefaultAsync();
+                checkU = await _dbContext.Accounts.Where(x => x.UserName.Equals(username) && x.Status.Equals("Kích hoạt")).FirstOrDefaultAsync();
             }
 
             if (id != null)
@@ -88,6 +88,7 @@ namespace PoolLab.Infrastructure.Interface
 
             return await _dbContext.Accounts
                            .Where(x => x.Email.Equals(email) || x.UserName.Equals(email))
+                           .Where(x => x.Status.Equals("Kích hoạt"))
                            .Include(x => x.Role)
                            .FirstOrDefaultAsync();
 

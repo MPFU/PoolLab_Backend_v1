@@ -1,4 +1,8 @@
-﻿using PoolLab.Core.Models;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using PoolLab.Application.FilterModel;
+using PoolLab.Application.FilterModel.Helper;
+using PoolLab.Application.ModelDTO;
+using PoolLab.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,5 +13,10 @@ namespace PoolLab.Application.Interface
 {
     public interface IReviewService 
     {
+        Task<string?> CreateReview(CreateReviewDTO reviewDTO);
+
+        Task<PageResult<GetReviewDTO>> GetAllReview(ReviewFilter review);
+
+        Task<string?> DeleteReview(Guid Id);
     }
 }

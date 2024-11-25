@@ -29,5 +29,7 @@ namespace PoolLab.Application.Interface
         Task<string?> ActivateTableForGuest(Guid activeTable, ActiveTableForGuest activeTableFor);
 
         Task<string?> GetTableByQRCode(GetByQRCode getByQR);
+
+        Task UpdateBidaTableStatusAuto();
     }
 }

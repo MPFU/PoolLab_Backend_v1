@@ -1,4 +1,5 @@
-﻿using PoolLab.Core.Interface;
+﻿using Microsoft.EntityFrameworkCore;
+using PoolLab.Core.Interface;
 using PoolLab.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,16 @@ namespace PoolLab.Infrastructure.Interface
     {
         public ReviewRepo(PoolLabDbv1Context dbContext) : base(dbContext)
         {
+        }
+
+        public async Task<IEnumerable<Review>?> GetAllReviews()
+        {
+           return await _dbContext.Reviews.Include(x => x.Store).Include(x => x.Customer).ToListAsync();
+        }
+
+        public async Task<Review?> GetReview(Guid id)
+        {
+            return await _dbContext.Reviews.Include(x => x.Store).Include(x => x.Customer).FirstOrDefaultAsync();
         }
     }
 }

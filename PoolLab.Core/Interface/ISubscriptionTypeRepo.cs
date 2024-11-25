@@ -9,5 +9,6 @@ namespace PoolLab.Core.Interface
 {
     public interface ISubscriptionTypeRepo : IGenericRepo<SubscriptionType>
     {
+        Task<bool> CheckDuplicate(Guid? id, string name);
     }
 }

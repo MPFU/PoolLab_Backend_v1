@@ -1,4 +1,6 @@
-﻿using PoolLab.Application.ModelDTO;
+﻿using PoolLab.Application.FilterModel;
+using PoolLab.Application.FilterModel.Helper;
+using PoolLab.Application.ModelDTO;
 using PoolLab.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -11,5 +13,7 @@ namespace PoolLab.Application.Interface
     public interface IPaymentService 
     {
         Task<string?> CreateTransactionBooking(PaymentBookingDTO paymentBookingDTO);
+
+        Task<PageResult<PaymentDTO>> GetAllTransaction(PaymentFilter paymentFilter);
     }
 }

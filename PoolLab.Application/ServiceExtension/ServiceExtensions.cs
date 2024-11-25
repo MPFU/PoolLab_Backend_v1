@@ -54,6 +54,8 @@ namespace PoolLab.Application.ServiceExtension
 
             services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
+            services.AddHostedService<TableStatusUpdateService>();
+
             return services;
         }
     }

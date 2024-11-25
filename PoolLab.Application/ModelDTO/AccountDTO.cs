@@ -114,6 +114,11 @@ namespace PoolLab.Application.ModelDTO
         public string? NewPassword { get; set; }
     }
 
+    public class UpdateAccStatusDTO
+    {
+        public string? Status { get; set; }
+    }
+
     public class GetLoginAccDTO
     {
         public Guid Id { get; set; }

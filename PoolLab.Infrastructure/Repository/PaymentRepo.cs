@@ -1,4 +1,5 @@
-﻿using PoolLab.Core.Interface;
+﻿using Microsoft.EntityFrameworkCore;
+using PoolLab.Core.Interface;
 using PoolLab.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,11 @@ namespace PoolLab.Infrastructure.Interface
     {
         public PaymentRepo(PoolLabDbv1Context dbContext) : base(dbContext)
         {
+        }
+
+        public async Task<IEnumerable<Transaction>> GetAllTransaction()
+        {
+           return await _dbContext.Payments.Include(x => x.Account).ToListAsync();
         }
     }
 }

@@ -15,6 +15,31 @@ namespace PoolLab.Infrastructure.Interface
         {
         }
 
+        public async Task<IEnumerable<Booking>> GetAllBookingInDate(DateTime now)
+        {
+            var nowDate = DateOnly.FromDateTime(now);
+            var nowTime = TimeOnly.FromDateTime(now);
+
+            return await _dbContext.Bookings
+                .Include(x => x.ConfigTable)
+                .Where(x => x.Status.Equals("Đã Đặt") && x.BookingDate == nowDate)
+                .Where(x => x.TimeStart <= nowTime.AddMinutes((double)x.ConfigTable.TimeHold))
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Booking>> GetAllBookingDelayInDate(DateTime now)
+        {
+            var nowDate = DateOnly.FromDateTime(now);
+            var nowTime = TimeOnly.FromDateTime(now);
+
+            return await _dbContext.Bookings
+                .Include(x => x.BilliardTable)
+                .Include(x => x.ConfigTable)
+                .Where(x => x.Status.Equals("Đã Đặt") && x.BookingDate == nowDate)
+                .Where(x => x.TimeStart < nowTime.AddMinutes((double)-x.ConfigTable.TimeDelay) && x.BilliardTable.Status.Equals("Bàn Đặt"))
+                .ToListAsync();
+        }
+
         public async Task<bool> CheckAccountHasBooking(Booking booking)
         {
             var bookings = await _dbContext.Bookings
