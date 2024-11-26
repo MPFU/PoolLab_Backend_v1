@@ -144,11 +144,11 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> DepositBalance(Guid id, [FromBody] decimal amount)
+        public async Task<IActionResult> DepositBalance(Guid id, [FromBody] DepositBalanceDTO amount)
         {
             try
             {
-                var acc = await _accountService.DepositBalance(id, amount);
+                var acc = await _accountService.DepositBalance(id, amount.Amount);
                 if (acc != null)
                 {
                     return BadRequest(new FailResponse()
