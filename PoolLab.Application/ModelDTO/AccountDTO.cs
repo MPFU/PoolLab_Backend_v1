@@ -119,6 +119,11 @@ namespace PoolLab.Application.ModelDTO
         public string? Status { get; set; }
     }
 
+    public class DepositBalanceDTO
+    {
+        public decimal Amount { get; set; }
+    }
+
     public class GetLoginAccDTO
     {
         public Guid Id { get; set; }
