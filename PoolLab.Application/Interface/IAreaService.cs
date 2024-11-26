@@ -1,4 +1,5 @@
-﻿using PoolLab.Application.ModelDTO;
+﻿using PoolLab.Application.FilterModel;
+using PoolLab.Application.ModelDTO;
 using PoolLab.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace PoolLab.Application.Interface
         Task<string?> AddNewArea(NewAreaDTO newAreaDTO);
         Task<string?> DeleteArea(Guid Id);
         Task<AreaDTO?> GetAreaById(Guid id);
-        Task<IEnumerable<AreaDTO>?> GetAllArea();
+        Task<IEnumerable<AreaDTO>?> GetAllArea(AreaFilter areaFilter);
         Task<string?> UpdateArea(Guid Id, NewAreaDTO newAreaDTO);
     }
 }

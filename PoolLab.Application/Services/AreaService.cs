@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using PoolLab.Application.FilterModel;
 using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
 using PoolLab.Core.Interface;
@@ -69,9 +70,15 @@ namespace PoolLab.Application.Interface
             }
         }
 
-        public async Task<IEnumerable<AreaDTO>?> GetAllArea()
+        public async Task<IEnumerable<AreaDTO>?> GetAllArea(AreaFilter areaFilter)
         {
-            return _mapper.Map<IEnumerable<AreaDTO>?>(await _unitOfWork.AreaRepo.GetAllAsync());
+            var priceList = _mapper.Map<IEnumerable<AreaDTO>>(await _unitOfWork.AreaRepo.GetAllAsync());
+            IQueryable<AreaDTO> result = priceList.AsQueryable();
+
+            if (areaFilter.StoreId != null)
+                result = result.Where(x => x.StoreId == areaFilter.StoreId);
+
+            return result.ToList();
         }
 
         public async Task<AreaDTO?> GetAreaById(Guid id)

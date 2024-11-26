@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PoolLab.Application.FilterModel;
 using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
 using PoolLab.Application.Services;
@@ -51,11 +52,11 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllArea()
+        public async Task<IActionResult> GetAllArea([FromBody]AreaFilter areaFilter)
         {
             try
             {
-                var area = await _areaService.GetAllArea();
+                var area = await _areaService.GetAllArea(areaFilter);
                 if (area == null || area.Count() <= 0)
                 {
                     return NotFound(new FailResponse()
