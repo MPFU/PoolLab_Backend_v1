@@ -34,6 +34,9 @@ namespace PoolLab.Core.Interface
         IUnitRepo UnitRepo { get; }
         IBidaTypeAreRepo BidaTypeAreaRepo { get; }
 
+        Task BeginTransactionAsync();
+        Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
         Task<int> SaveAsync();
     }
 }

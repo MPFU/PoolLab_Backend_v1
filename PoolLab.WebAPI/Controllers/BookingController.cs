@@ -50,6 +50,36 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetBookingRecurringByID(Guid id)
+        {
+            try
+            {
+                var book = await _bookingService.GetRecurringBookingById(id);
+                if (book == null)
+                {
+                    return NotFound(new FailResponse()
+                    {
+                        Status = NotFound().StatusCode,
+                        Message = "Không tìm thấy lịch đặt nào!"
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Data = book
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetAllBooking([FromQuery] BookingFilter booking)
         {
@@ -87,7 +117,7 @@ namespace PoolLab.WebAPI.Controllers
             {
 
                 var requestResult = await _bookingService.AddNewBooking(bookingDTO);
-               
+
                 if (requestResult != null)
                 {
                     if (Guid.TryParse(requestResult, out Guid result))
@@ -107,7 +137,7 @@ namespace PoolLab.WebAPI.Controllers
                             Message = requestResult
                         });
                     }
-                    
+
                 }
                 return StatusCode(400, new FailResponse()
                 {
@@ -126,6 +156,40 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> CreateRecurringBooking([FromBody] BookingReqDTO bookingDTO)
+        {
+            try
+            {
+
+                var requestResult = await _bookingService.CreateBookingForMonth(bookingDTO);
+
+                if (requestResult != null)
+                {
+
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = requestResult
+                    });
+
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Đặt bàn định kì thành công!"
+                });
+
+            }
+            catch (Exception ex)
+            {
+                return Conflict(new FailResponse()
+                {
+                    Status = Conflict().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> CancelBooking(Guid id, [FromBody] AnswerBookingDTO? answer = null)
@@ -151,7 +215,7 @@ namespace PoolLab.WebAPI.Controllers
                             Status = 400,
                             Message = requestResult
                         });
-                    }                  
+                    }
                 }
                 return Ok(new SucceededRespone()
                 {
@@ -171,12 +235,55 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpPut("{id}")]
+        public async Task<IActionResult> CancelBookingRecurring(Guid id, [FromBody] AnswerBookingDTO answer)
+        {
+            try
+            {
+
+                var requestResult = await _bookingService.CancelBookingForMonth(id, answer);
+                if (requestResult != null)
+                {
+                    if (requestResult.Contains("."))
+                    {
+                        return Ok(new SucceededRespone()
+                        {
+                            Status = 202,
+                            Message = requestResult
+                        });
+                    }
+                    else
+                    {
+                        return BadRequest(new FailResponse()
+                        {
+                            Status = BadRequest().StatusCode,
+                            Message = requestResult
+                        });
+                    }
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Huỷ đặt lịch định kì thành công."
+                });
+
+            }
+            catch (Exception ex)
+            {
+                return Conflict(new FailResponse()
+                {
+                    Status = Conflict().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateStatusBooking(Guid id, [FromBody] UpdateBookingStatusDTO statusDTO)
         {
             try
             {
 
-                var requestResult = await _bookingService.UpdateStatusBooking(id,statusDTO);
+                var requestResult = await _bookingService.UpdateStatusBooking(id, statusDTO);
                 if (requestResult != null)
                 {
                     return StatusCode(400, new FailResponse()

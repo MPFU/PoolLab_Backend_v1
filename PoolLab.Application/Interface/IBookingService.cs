@@ -21,5 +21,11 @@ namespace PoolLab.Application.Interface
         Task<string?> UpdateStatusBooking (Guid Id, UpdateBookingStatusDTO status);
 
         Task<string?> CancelBookingForMem(Guid id, AnswerBookingDTO? answer);
+
+        Task<string?> CreateBookingForMonth(BookingReqDTO bookingReqDTO);
+
+        Task<string?> CancelBookingForMonth(Guid id, AnswerBookingDTO answer);
+
+        Task<GetRecurringBookingDTO?> GetRecurringBookingById(Guid id);
     }
 }

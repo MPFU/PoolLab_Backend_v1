@@ -96,12 +96,20 @@ namespace PoolLab.Application.AutoMapper
             CreateMap<ConfigTableDTO, ConfigTable>().ReverseMap();
 
             //BOOKING
+            CreateMap<NewBookingRecurrDTO, Booking>().ReverseMap();
             CreateMap<NewBookingDTO, Booking>()
                 .ForMember(dest => dest.BookingDate, opt => opt.MapFrom(src => DateOnly.Parse(src.BookingDate)))
                 .ForMember(dest => dest.TimeStart, opt => opt.MapFrom(src => TimeOnly.Parse(src.TimeStart)))
                 .ForMember(dest => dest.TimeEnd, opt => opt.MapFrom(src => TimeOnly.Parse(src.TimeEnd)))
                 .ReverseMap();
             CreateMap<BookingDTO, Booking>().ReverseMap();
+            CreateMap<Booking, GetRecurringBookingDTO>()
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Customer.UserName))
+                .ForMember(dest => dest.TableName, opt => opt.MapFrom(src => src.BilliardTable.Name))
+                .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.Name))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Store.Address))
+                .ForMember(dest => dest.BidaPrice, opt => opt.MapFrom(src => src.BilliardTable.Price.OldPrice))
+                .ReverseMap();
             CreateMap<Booking, GetBookingDTO>()
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Customer.UserName))
                 .ForMember(dest => dest.TableName, opt => opt.MapFrom(src => src.BilliardTable.Name))
