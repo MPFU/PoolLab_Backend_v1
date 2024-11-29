@@ -28,5 +28,6 @@ namespace PoolLab.Application.FilterModel
 
         public string? Status { get; set; }
 
+        public bool? IsRecurring { get; set; }
     }
 }

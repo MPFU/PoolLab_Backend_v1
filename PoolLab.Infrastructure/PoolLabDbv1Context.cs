@@ -224,6 +224,8 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.TimeStart).HasPrecision(0);
             entity.Property(e => e.TimeEnd).HasPrecision(0);
             entity.Property(e => e.Deposit).HasColumnType("decimal(11, 0)");
+            entity.Property(e => e.RecurringId).HasColumnName("RecurringId");
+            entity.Property(e => e.IsRecurring).HasColumnType("BIT").HasDefaultValue(false);
 
             entity.HasOne(d => d.BilliardTable).WithMany(p => p.Bookings)
                 .HasForeignKey(d => d.BilliardTableId)
@@ -254,6 +256,11 @@ public partial class PoolLabDbv1Context : DbContext
                .HasForeignKey(d => d.AreaId)
                .HasConstraintName("FK_Booking_Area")
                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(d => d.Recurring).WithMany(p => p.RecurringBookings)
+            .HasForeignKey(d => d.RecurringId)
+            .HasConstraintName("FK_Booking_Recurring")
+            .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<BilliardTypeArea>(entity =>
@@ -364,7 +371,7 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Descript).HasMaxLength(400);
             entity.Property(e => e.Name).HasMaxLength(50);
-        });   
+        });
 
         modelBuilder.Entity<Order>(entity =>
         {

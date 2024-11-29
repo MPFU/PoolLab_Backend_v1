@@ -19,6 +19,8 @@ public partial class Booking
 
     public Guid? AreaId { get; set; }
 
+    public Guid? RecurringId { get; set; }
+
     public string? Message { get; set; }
 
     public decimal? Deposit {  get; set; }
@@ -39,6 +41,8 @@ public partial class Booking
 
     public DateTime? UpdatedDate { get; set; }
 
+    public bool? IsRecurring { get; set; }
+
     public string? Status { get; set; }
 
     public virtual BilliardTable? BilliardTable { get; set; }
@@ -52,4 +56,9 @@ public partial class Booking
     public virtual ConfigTable? ConfigTable { get; set; }
 
     public virtual Area? Area { get; set; }
+
+    public virtual Booking? Recurring {  get; set; }
+
+    public virtual ICollection<Booking> RecurringBookings { get; set; } = new List<Booking>();
+
 }

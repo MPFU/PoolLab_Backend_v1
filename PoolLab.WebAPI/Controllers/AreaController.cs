@@ -52,7 +52,7 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllArea([FromBody]AreaFilter areaFilter)
+        public async Task<IActionResult> GetAllArea([FromQuery]AreaFilter areaFilter)
         {
             try
             {
