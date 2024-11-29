@@ -169,6 +169,10 @@ namespace PoolLab.Application.Interface
         {
             try
             {
+                if(updateCusPayDTO.CustomerPay < updateCusPayDTO.TotalPrice)
+                {
+                    return "Số tiền khách trả không hợp lệ!";
+                }
                 var order = await _unitOfWork.OrderRepo.GetByIdAsync(id);
                 if (order == null)
                 {
