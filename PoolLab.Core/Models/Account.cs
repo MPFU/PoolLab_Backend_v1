@@ -53,6 +53,8 @@ public partial class Account
 
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
+    public virtual ICollection<Course> Courses { get; set; } = new List<Course>();
+
     public virtual Role? Role { get; set; }
 
     public virtual Store? Store { get; set; }
