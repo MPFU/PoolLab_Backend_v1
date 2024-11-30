@@ -216,7 +216,7 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.CustomerId).HasColumnName("CustomerID");
             entity.Property(e => e.Message).HasMaxLength(500);
             entity.Property(e => e.Status).HasMaxLength(50);
-            entity.Property(e => e.DayOfWeek).HasMaxLength(20);
+            entity.Property(e => e.DayOfWeek).HasMaxLength(200);
             entity.Property(e => e.StoreId).HasColumnName("StoreID");
             entity.Property(e => e.DateStart).HasColumnType("datetime");
             entity.Property(e => e.DateEnd).HasColumnType("datetime");
