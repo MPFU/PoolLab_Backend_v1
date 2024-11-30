@@ -86,7 +86,7 @@ public partial class PoolLabDbv1Context : DbContext
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", true, true)
             .Build();
-        connectionString = config.GetConnectionString("AzureDB");
+        connectionString = config.GetConnectionString("Database");
         return connectionString;
     }
 
@@ -324,8 +324,9 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.Status).HasMaxLength(50);
             entity.Property(e => e.Descript).HasColumnType("nvarchar(MAX)");
             entity.Property(e => e.Level).HasMaxLength(50);
+            entity.Property(e => e.AccountId).HasColumnName("AccountID");
             entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
-            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.Schedule).HasMaxLength(100);
 
             entity.HasOne(d => d.Store).WithMany(p => p.Courses)
                 .HasForeignKey(d => d.StoreId)
@@ -336,6 +337,12 @@ public partial class PoolLabDbv1Context : DbContext
             entity.HasOne(d => d.MentorInfo).WithMany(p => p.Courses)
                 .HasForeignKey(d => d.MentorId)
                 .HasConstraintName("FK_Course_MentorInfo")
+                .OnDelete(DeleteBehavior.NoAction);
+
+
+            entity.HasOne(d => d.Account).WithMany(p => p.Courses)
+                .HasForeignKey(d => d.AccountId)
+                .HasConstraintName("FK_Course_Account")
                 .OnDelete(DeleteBehavior.NoAction);
         });
 

@@ -13,11 +13,19 @@ public partial class Course
 
     public decimal? Price { get; set; }
 
+    public string? Schedule {  get; set; }
+
+    public DateOnly? StartDate { get; set; }
+
     public string? Level { get; set; }
 
     public int? Quantity { get; set; }
 
+    public int? NoOfUser { get; set; }
+
     public Guid? StoreId { get; set; }
+
+    public Guid? AccountId { get; set; }
 
     public Guid? MentorId { get; set; }
 
@@ -30,6 +38,8 @@ public partial class Course
     public virtual ICollection<RegisteredCourse> RegisteredCourses { get; set; } = new List<RegisteredCourse>();
 
     public virtual Store? Store { get; set; }
+
+    public virtual Account? Account { get; set; }
 
     public virtual MentorInfo? MentorInfo { get; set; }
 }

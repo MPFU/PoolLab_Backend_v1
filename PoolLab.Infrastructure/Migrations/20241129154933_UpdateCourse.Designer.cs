@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PoolLab.Infrastructure;
 
@@ -11,9 +12,11 @@ using PoolLab.Infrastructure;
 namespace PoolLab.Infrastructure.Migrations
 {
     [DbContext(typeof(PoolLabDbv1Context))]
-    partial class PoolLabDbv1ContextModelSnapshot : ModelSnapshot
+    [Migration("20241129154933_UpdateCourse")]
+    partial class UpdateCourse
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -339,18 +342,9 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Property<decimal?>("Deposit")
                         .HasColumnType("decimal(11, 0)");
 
-                    b.Property<bool?>("IsRecurring")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("BIT")
-                        .HasDefaultValue(false);
-
                     b.Property<string>("Message")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
-
-                    b.Property<Guid?>("RecurringId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("RecurringId");
 
                     b.Property<string>("Status")
                         .HasMaxLength(50)
@@ -382,8 +376,6 @@ namespace PoolLab.Infrastructure.Migrations
                     b.HasIndex("ConfigId");
 
                     b.HasIndex("CustomerId");
-
-                    b.HasIndex("RecurringId");
 
                     b.HasIndex("StoreId");
 
@@ -491,8 +483,8 @@ namespace PoolLab.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateOnly?>("StartDate")
-                        .HasColumnType("date");
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("datetime");
 
                     b.Property<string>("Status")
                         .HasMaxLength(50)
@@ -1311,12 +1303,6 @@ namespace PoolLab.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_Booking_Account");
 
-                    b.HasOne("PoolLab.Core.Models.Booking", "Recurring")
-                        .WithMany("RecurringBookings")
-                        .HasForeignKey("RecurringId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_Booking_Recurring");
-
                     b.HasOne("PoolLab.Core.Models.Store", "Store")
                         .WithMany("Bookings")
                         .HasForeignKey("StoreId")
@@ -1332,8 +1318,6 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Navigation("ConfigTable");
 
                     b.Navigation("Customer");
-
-                    b.Navigation("Recurring");
 
                     b.Navigation("Store");
                 });
@@ -1606,11 +1590,6 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Navigation("BilliardTypeAreas");
 
                     b.Navigation("Bookings");
-                });
-
-            modelBuilder.Entity("PoolLab.Core.Models.Booking", b =>
-                {
-                    b.Navigation("RecurringBookings");
                 });
 
             modelBuilder.Entity("PoolLab.Core.Models.Company", b =>
