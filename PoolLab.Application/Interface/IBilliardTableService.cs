@@ -31,5 +31,7 @@ namespace PoolLab.Application.Interface
         Task<string?> GetTableByQRCode(GetByQRCode getByQR);
 
         Task UpdateBidaTableStatusAuto();
+
+        Task<List<GetBilliardTableDTO>?> SearchTableForRecurring(SearchTableRecurringDTO searchDTO);
     }
 }

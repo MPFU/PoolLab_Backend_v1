@@ -199,6 +199,40 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> SearchTableForRecurring([FromBody] SearchTableRecurringDTO searchDTO)
+        {
+            try
+            {
+
+                var requestResult = await _billiardTableService.SearchTableForRecurring(searchDTO);
+                if (requestResult == null)
+                {
+                    return StatusCode(400, new FailResponse()
+                    {
+                        Status = 400,
+                        Message = "Không tìm thấy bàn chơi nào phù hợp với các yêu cầu trên!"
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Tìm kiếm thành công.",
+                    Data = requestResult
+                });
+
+            }
+            catch (Exception ex)
+            {
+                return Conflict(new FailResponse()
+                {
+                    Status = Conflict().StatusCode,
+                    Message = "Tìm bàn thất bại.",
+                    Errors = ex.Message
+                });
+            }
+        }
+
+        [HttpPost]
         public async Task<IActionResult> CreateNewTable([FromBody] NewBilliardTableDTO accDTO)
         {
             try

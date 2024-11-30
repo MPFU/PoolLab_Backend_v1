@@ -654,14 +654,14 @@ namespace PoolLab.Application.Interface
 
             var bookingsToReserve = await _unitOfWork.BookingRepo.GetAllBookingInDate(now);
 
-            if(bookingsToReserve != null)
+            if (bookingsToReserve != null)
             {
-                foreach(var booking in bookingsToReserve )
+                foreach (var booking in bookingsToReserve)
                 {
                     UpdateStatusTableDTO tableDTO = new UpdateStatusTableDTO();
                     tableDTO.Status = "Bàn Đặt";
                     var result = await UpdateStatusTable((Guid)booking.BilliardTableId, tableDTO);
-                    if(result != null)
+                    if (result != null)
                     {
                         Console.WriteLine(result);
                     }
@@ -677,7 +677,7 @@ namespace PoolLab.Application.Interface
                     UpdateStatusTableDTO tableDTO = new UpdateStatusTableDTO();
                     tableDTO.Status = "Bàn Trống";
                     var up = await UpdateStatusTable((Guid)bookings.BilliardTableId, tableDTO);
-                    if(up != null)
+                    if (up != null)
                     {
                         Console.WriteLine(up);
                     }
@@ -690,6 +690,92 @@ namespace PoolLab.Application.Interface
                         Console.WriteLine(up1);
                     }
                 }
+            }
+        }
+
+        public async Task<List<GetBilliardTableDTO>?> SearchTableForRecurring(SearchTableRecurringDTO searchDTO)
+        {
+            try
+            {
+                //Lấy tất cả bàn phù hợp
+                var table = await _unitOfWork.BilliardTableRepo.GetAllBidaTableForRecurring(searchDTO.StoreId, searchDTO.AreaId, searchDTO.BilliardTypeId);
+
+                if (table != null)
+                {
+                    DateTime utcNow = DateTime.UtcNow;
+                    TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                    var now = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+                    DateTime currentDate = new DateTime(now.Year, now.Month, 1);
+
+                    //NGÀY ĐẶT THEO THÁNG
+                    var parts = searchDTO.MonthBooking.Split('/');
+                    int month = int.Parse(parts[0]);
+                    int year = int.Parse(parts[1]);
+
+                    DateTime dateStart = new DateTime(year, month, 1);
+                    DateTime dateEnd = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+
+                    if (currentDate >= dateStart)
+                    {
+                        return null;
+                    }
+
+                    //THỜI GIAN ĐẶT THEO THÁNG
+                    TimeOnly timeStart = TimeOnly.Parse(searchDTO.StartTime);
+                    TimeOnly timeEnd = TimeOnly.Parse(searchDTO.EndTime);
+
+                    if (timeStart >= timeEnd)
+                    {
+                        return null;
+                    }
+
+                    //CHUYỂN THÀNH THỨ TRONG TUẦN
+                    var days = searchDTO.RecurrenceDays.Select(day => Enum.Parse<DayOfWeek>(day)).ToList();
+
+                    //LẤY TẤT CẢ LỊCH ĐẶT TRONG THÁNG
+                    var book = await _unitOfWork.BookingRepo.GetAllBookingInMonth(dateStart, dateEnd, timeStart, timeEnd);
+
+                    if (book == null)
+                    {
+                        return _mapper.Map<List<GetBilliardTableDTO>?>(table);
+                    }
+
+                    List<Booking> newBook = new List<Booking>();
+
+                    //Kiểm tra lịch đặt của bàn
+                    for (DateTime date = dateStart; date <= dateEnd; date = date.AddDays(1))
+                    {
+                        if (days.Contains(date.DayOfWeek))
+                        {
+                            foreach (var books in book)
+                            {
+                                if(books.BookingDate == DateOnly.FromDateTime(date))
+                                {
+                                    newBook.Add(books);
+                                }
+                            }
+                        }
+                    }
+                   
+                    foreach(var tables in table.ToList())
+                    {
+                        foreach(var news in newBook.ToList())
+                        {
+                            if(news.BilliardTableId == tables.Id)
+                            {
+                                table.Remove(tables);
+                            }
+                        }
+                    }
+
+                    return _mapper.Map<List<GetBilliardTableDTO>?>(table);
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
     }
