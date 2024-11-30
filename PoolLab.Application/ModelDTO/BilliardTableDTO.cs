@@ -34,7 +34,7 @@ namespace PoolLab.Application.ModelDTO
 
         public BilliardTableDTO()
         {
-            
+
         }
     }
 
@@ -109,14 +109,14 @@ namespace PoolLab.Application.ModelDTO
 
     public class UpdateStatusTableDTO
     {
-        public string? Status { get; set;}
+        public string? Status { get; set; }
     }
 
     public class ActiveTable
     {
         public Guid BilliardTableID { get; set; }
         public Guid CustomerID { get; set; }
-        public string? CustomerTime {  get; set; }
+        public string? CustomerTime { get; set; }
     }
 
     public class GetByQRCode
@@ -160,5 +160,22 @@ namespace PoolLab.Application.ModelDTO
         public DateTime? UpdatedDate { get; set; }
 
         public string? Status { get; set; }
+    }
+
+    public class SearchTableRecurringDTO
+    {
+        public Guid? StoreId { get; set; }
+
+        public Guid? AreaId { get; set; }
+
+        public Guid? BilliardTypeId { get; set; }
+
+        public string StartTime { get; set; }
+
+        public string EndTime { get; set; }
+
+        public List<string> RecurrenceDays { get; set; } = new List<string>();
+
+        public string MonthBooking { get; set; }
     }
 }

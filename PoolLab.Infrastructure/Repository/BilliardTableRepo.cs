@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace PoolLab.Infrastructure.Interface
 {
-    public class BilliardTableRepo : GenericRepo<BilliardTable> , IBilliardTableRepo
+    public class BilliardTableRepo : GenericRepo<BilliardTable>, IBilliardTableRepo
     {
         public BilliardTableRepo(PoolLabDbv1Context dbContext) : base(dbContext)
         {
@@ -20,7 +20,7 @@ namespace PoolLab.Infrastructure.Interface
             var table = await _dbContext.BilliardTables
                 .Where(x => x.Name.Equals(name) && x.StoreId.Equals(storeID))
                 .Select(x => x.Id)
-                .FirstOrDefaultAsync();      
+                .FirstOrDefaultAsync();
             if (id != null && table != Guid.Empty)
             {
                 return table.Equals(id) ? false : true;
@@ -29,7 +29,7 @@ namespace PoolLab.Infrastructure.Interface
             {
                 return true;
             }
-            return  false;
+            return false;
         }
 
         public async Task<Booking?> CheckTableBooking(Guid id, DateTime dateTime)
@@ -58,6 +58,19 @@ namespace PoolLab.Infrastructure.Interface
                 .ToListAsync();
         }
 
+        public async Task<List<BilliardTable>?> GetAllBidaTableForRecurring(Guid? StoreId, Guid? AreaId, Guid? BilliardTypeId)
+        {
+            //Lấy tất cả các bàn phù hợp
+            return await _dbContext.BilliardTables
+                .Where(x => x.StoreId == StoreId && x.AreaId == AreaId)
+                .Where(x => x.BilliardTypeId == BilliardTypeId && x.Status != "Bảo Trì")
+                .Include(x => x.BilliardType)
+                .Include(x => x.Area)
+                .Include(x => x.Price)
+                .Include(x => x.Store)
+                .ToListAsync();
+        }
+
         public async Task<BilliardTable?> GetBidaTableByID(Guid id)
         {
             return await _dbContext.BilliardTables
@@ -65,7 +78,7 @@ namespace PoolLab.Infrastructure.Interface
                 .Include(x => x.BilliardType)
                 .Include(x => x.Area)
                 .Include(x => x.Store)
-                .Where(x => x.Id.Equals(id))              
+                .Where(x => x.Id.Equals(id))
                 .FirstOrDefaultAsync();
         }
 

@@ -28,5 +28,7 @@ namespace PoolLab.Core.Interface
         Task<Booking?> GetBookingRecurringById(Guid id);
 
         Task<IEnumerable<Booking>?> GetAllRecurringBookingCus(Guid id, DateTime startDate, DateTime endDate);
+
+        Task<IEnumerable<Booking>?> GetAllBookingInMonth(DateTime startDate, DateTime endDate, TimeOnly timeStart, TimeOnly timeEnd);
     }
 }

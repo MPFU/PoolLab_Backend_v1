@@ -20,5 +20,7 @@ namespace PoolLab.Core.Interface
         Task<decimal?> GetPriceOfTable(Guid? id);
 
         Task<IEnumerable<BilliardTable>?> GetAllBidaTable();
+
+        Task<List<BilliardTable>?> GetAllBidaTableForRecurring(Guid? StoreId, Guid? AreaId, Guid? BilliardTypeId);
     }
 }

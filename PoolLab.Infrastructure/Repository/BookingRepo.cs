@@ -178,5 +178,15 @@ namespace PoolLab.Infrastructure.Interface
                 .Where(x => x.IsRecurring == true)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<Booking>?> GetAllBookingInMonth(DateTime startDate, DateTime endDate, TimeOnly timeStart, TimeOnly timeEnd)
+        {
+            return await _dbContext.Bookings
+                .Where(x => x.Status.Equals("Đã Đặt"))
+                .Where(x => x.BookingDate >= DateOnly.FromDateTime(startDate) && x.BookingDate <= DateOnly.FromDateTime(endDate))
+                .Where(x => (x.TimeStart < timeEnd && x.TimeStart >= timeStart) || (x.TimeEnd > timeStart && x.TimeEnd <= timeEnd))
+                .Where(x => x.IsRecurring == false)
+                .ToListAsync();
+        }
     }
 }
