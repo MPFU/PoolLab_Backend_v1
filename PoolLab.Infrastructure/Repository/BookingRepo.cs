@@ -133,12 +133,12 @@ namespace PoolLab.Infrastructure.Interface
                         .FirstOrDefaultAsync();
         }
 
-        public async Task<string> CheckTableBookingInMonth(Guid tableId, DateTime dateStart, DateTime dateEnd, TimeOnly startTime, TimeOnly endTime)
+        public async Task<string> CheckTableBookingInMonth(Guid tableId, DateTime date, TimeOnly startTime, TimeOnly endTime)
         {
 
             var booking = await _dbContext.Bookings
                 .Where(x => x.Id == tableId && x.Status.Equals("Đã Đặt"))
-                .Where(x => x.BookingDate >= DateOnly.FromDateTime(dateStart) && x.BookingDate <= DateOnly.FromDateTime(dateEnd))
+                .Where(x => x.BookingDate == DateOnly.FromDateTime(date))
                 .Where(x => (x.TimeStart < endTime && x.TimeStart >= startTime) || (x.TimeEnd > startTime && x.TimeEnd <= endTime))
                 .Select(x => new
                 {
@@ -168,6 +168,15 @@ namespace PoolLab.Infrastructure.Interface
                 .Include (x => x.BilliardTable)
                 .Include (x => x.Store)
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<Booking>?> GetAllRecurringBookingCus(Guid id, DateTime startDate, DateTime endDate)
+        {
+            return await _dbContext.Bookings
+                .Where(x => x.CustomerId == id && x.Status.Equals("Đã Đặt"))
+                .Where(x => x.DateStart == startDate && x.DateEnd == endDate)
+                .Where(x => x.IsRecurring == true)
+                .ToListAsync();
         }
     }
 }

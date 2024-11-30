@@ -382,6 +382,31 @@ namespace PoolLab.Application.Interface
                 //CHUYỂN THÀNH THỨ TRONG TUẦN
                 var days = bookingReqDTO.RecurrenceDays.Select(day => Enum.Parse<DayOfWeek>(day)).ToList();
 
+
+                //Kiểm tra lịch đặt của khách
+                var bookCheck = await _unitOfWork.BookingRepo.GetAllRecurringBookingCus(cus.Id, dateStart, dateEnd);
+                if (bookCheck != null)
+                {
+                    foreach(var book in bookCheck)
+                    {
+                        var dayBook = book.DayOfWeek.Split(",");
+                        var dayBooks = dayBook.Select(day => Enum.Parse<DayOfWeek>(day)).ToList();
+                        foreach(var day in dayBooks)
+                        {
+                            foreach(var day1 in days)
+                            {
+                                if(day == day1)
+                                {
+                                    if ((book.TimeStart < timeEnd && book.TimeStart >= timeStart) || (book.TimeEnd > timeStart && book.TimeEnd <= timeEnd))
+                                    {
+                                        return $"Bạn đã có lịch đặt trước vào lúc {book.TimeStart} và kết thúc lúc {book.TimeEnd}!";
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 int bookingCount = 0;
 
                 //Kiểm tra lịch đặt của bàn
@@ -389,7 +414,7 @@ namespace PoolLab.Application.Interface
                 {
                     if (days.Contains(date.DayOfWeek))
                     {
-                        var checkBook = await _unitOfWork.BookingRepo.CheckTableBookingInMonth(table.Id, dateStart, dateEnd, timeStart, timeEnd);
+                        var checkBook = await _unitOfWork.BookingRepo.CheckTableBookingInMonth(table.Id, date, timeStart, timeEnd);
                         if (checkBook != null)
                         {
                             return checkBook;
