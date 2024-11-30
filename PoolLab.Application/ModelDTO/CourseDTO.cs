@@ -55,11 +55,32 @@ namespace PoolLab.Application.ModelDTO
 
         public int? Quantity { get; set; }
 
-        public int? NoOfUser { get; set; }
+        public Guid? StoreId { get; set; }
+
+        public Guid? AccountId { get; set; }
+    }
+
+    public class UpdateCourseDTO
+    {
+        public string? Title { get; set; }
+
+        public string? Descript { get; set; }
+
+        public decimal? Price { get; set; }
+
+        public string? Schedule { get; set; }
+
+        public string? StartDate { get; set; }
+
+        public string? Level { get; set; }
+
+        public int? Quantity { get; set; }
 
         public Guid? StoreId { get; set; }
 
         public Guid? AccountId { get; set; }
+
+        public string? Status { get; set; }
     }
 
     public class GetAllCoursesDTO
@@ -74,7 +95,7 @@ namespace PoolLab.Application.ModelDTO
 
         public string? Schedule { get; set; }
 
-        public DateTime? StartDate { get; set; }
+        public DateOnly? StartDate { get; set; }
 
         public string? Level { get; set; }
 

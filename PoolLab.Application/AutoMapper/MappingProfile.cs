@@ -100,7 +100,10 @@ namespace PoolLab.Application.AutoMapper
             CreateMap<CreateCourseDTO, Course>()
                .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => DateOnly.Parse(src.StartDate)))
                .ReverseMap();
-            CreateMap<Course, GetAllCoursesDTO > ()
+            CreateMap<UpdateCourseDTO, Course>()
+               .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => DateOnly.Parse(src.StartDate)))
+               .ReverseMap();
+            CreateMap<Course, GetAllCoursesDTO>()
                .ForMember(dest => dest.AccountName, opt => opt.MapFrom(src => src.Account.FullName))
                .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.Name))
                .ReverseMap();
