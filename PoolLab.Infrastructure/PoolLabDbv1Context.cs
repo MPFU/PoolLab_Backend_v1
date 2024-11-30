@@ -326,7 +326,6 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.Level).HasMaxLength(50);
             entity.Property(e => e.AccountId).HasColumnName("AccountID");
             entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
-            entity.Property(e => e.StartDate).HasColumnType("datetime");
             entity.Property(e => e.Schedule).HasMaxLength(100);
 
             entity.HasOne(d => d.Store).WithMany(p => p.Courses)

@@ -15,7 +15,7 @@ public partial class Course
 
     public string? Schedule {  get; set; }
 
-    public DateTime? StartDate { get; set; }
+    public DateOnly? StartDate { get; set; }
 
     public string? Level { get; set; }
 

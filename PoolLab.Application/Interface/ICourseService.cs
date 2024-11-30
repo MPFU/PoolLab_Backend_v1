@@ -13,6 +13,8 @@ namespace PoolLab.Application.Interface
     public interface ICourseService 
     {
         Task<PageResult<GetAllCoursesDTO>> GetAllCourses(CourseFilter courseFilter);
-        Task<string?> CreateCourseDTO(CreateCourseDTO create);
+        Task<string?> CreateCourse(CreateCourseDTO create);
+        Task<string?> UpdateCourse(Guid id, UpdateCourseDTO update);
+        Task<string?> DeleteCourse(Guid Id);
     }
 }
