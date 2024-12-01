@@ -1,4 +1,7 @@
-﻿using PoolLab.Application.Interface;
+﻿using AutoMapper;
+using PoolLab.Application.FilterModel;
+using PoolLab.Application.FilterModel.Helper;
+using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
 using PoolLab.Core.Interface;
 using PoolLab.Core.Models;
