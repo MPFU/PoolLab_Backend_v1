@@ -104,7 +104,7 @@ namespace PoolLab.Application.AutoMapper
                .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => TimeOnly.Parse(src.EndTime)))
                .ReverseMap();
             CreateMap<UpdateCourseDTO, Course>()
-               .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => DateOnly.Parse(src.StartDate)))
+               .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => DateOnly.Parse(src.StartDate)))              
                .ReverseMap();
             CreateMap<Course, GetAllCoursesDTO>()
                .ForMember(dest => dest.AccountName, opt => opt.MapFrom(src => src.Account.FullName))
@@ -112,6 +112,12 @@ namespace PoolLab.Application.AutoMapper
                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Store.Address))
                .ForMember(dest => dest.AccountAvatar, opt => opt.MapFrom(src => src.Account.AvatarUrl))
                .ReverseMap();
+
+            //RegisteredCourse
+            CreateMap<RegisteredCourseDTO, RegisteredCourse>().ReverseMap();
+            CreateMap<CreateRegisteredCourseDTO, RegisteredCourse>().ReverseMap();
+            CreateMap<UpdateRegisteredCourseDTO, RegisteredCourse>().ReverseMap();
+            CreateMap<GetAllRegisteredCourseDTO, RegisteredCourse>().ReverseMap();
 
             //BOOKING
             CreateMap<NewBookingRecurrDTO, Booking>().ReverseMap();

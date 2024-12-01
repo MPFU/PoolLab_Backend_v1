@@ -9,5 +9,6 @@ namespace PoolLab.Core.Interface
 {
     public interface IRegisterCourseRepo : IGenericRepo<RegisteredCourse>
     {
+        Task<IEnumerable<RegisteredCourse>> GetAllRegisteredCourses();
     }
 }

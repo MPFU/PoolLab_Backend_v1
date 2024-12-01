@@ -1,4 +1,5 @@
-﻿using PoolLab.Core.Interface;
+﻿using Microsoft.EntityFrameworkCore;
+using PoolLab.Core.Interface;
 using PoolLab.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,14 @@ namespace PoolLab.Infrastructure.Interface
     {
         public RegisterCourseRepo(PoolLabDbv1Context dbContext) : base(dbContext)
         {
+        }
+
+        public async Task<IEnumerable<RegisteredCourse>> GetAllRegisteredCourses()
+        {
+            return await _dbContext.RegisteredCourses
+                .Include(x => x.Course)
+                .Include(x => x.Store)
+                .ToListAsync();
         }
     }
 }
