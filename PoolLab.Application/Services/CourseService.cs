@@ -115,26 +115,26 @@ namespace PoolLab.Application.Interface
                 TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                 var a = TimeZoneInfo.ConvertTimeFromUtc(now, localTimeZone);
                 var date = DateOnly.FromDateTime(a);
-               
+
 
                 var check = _mapper.Map<Course>(create);
 
-                if(check.StartDate <= date)
+                if (check.StartDate <= date)
                 {
                     return "Ngày bắt đầu không hợp lệ!";
                 }
 
-                if(check.EndDate <= check.StartDate)
+                if (check.EndDate <= check.StartDate)
                 {
                     return "Ngày bắt đầu và kết thúc không hợp lệ!";
                 }
 
-                if(check.EndTime <= check.StartTime)
+                if (check.EndTime <= check.StartTime)
                 {
                     return "Thời gian bắt đầu và kết thúc không hợp lệ!";
                 }
 
-                if(check.Quantity == null || check.Quantity <= 0) 
+                if (check.Quantity == null || check.Quantity <= 0)
                 {
                     return "Số lượng khoá học không hợp lệ!";
                 }
@@ -180,12 +180,12 @@ namespace PoolLab.Application.Interface
                 if (check == null)
                 {
                     return "Không tìm thấy khoá học này.";
-                }                
-                
+                }
+
                 check.Title = !string.IsNullOrEmpty(update.Title) ? update.Title : check.Title;
                 check.Descript = !string.IsNullOrEmpty(update.Descript) ? update.Descript : check.Descript;
                 check.Schedule = !string.IsNullOrEmpty(update.Schedule) ? update.Schedule : check.Schedule;
-                check.Quantity = update.Quantity != null ? update.Quantity : check.Quantity;           
+                check.Quantity = update.Quantity != null ? update.Quantity : check.Quantity;
                 check.Price = update.Price != null ? update.Price : check.Price;
                 check.Level = !string.IsNullOrEmpty(update.Level) ? update.Level : check.Level;
                 check.AccountId = update.AccountId != null ? update.AccountId : check.AccountId;
@@ -229,9 +229,34 @@ namespace PoolLab.Application.Interface
             }
         }
 
-        //public async Task<string?> UpdateCourseNoOfUser()
-        //{
-            
-        //}
+        public async Task<string?> UpdateNoOfUser(Guid Id, int num)
+        {
+            try
+            {
+                var check = await _unitOfWork.CourseRepo.GetByIdAsync(Id);
+                if (check == null)
+                {
+                    return "Không tìm thấy khoá học này.";
+                }
+
+                if (num <= 0 || num == null)
+                {
+                    return "Số lượng đăng ký không hợp lệ!";
+                }
+
+                check.NoOfUser += num;
+                var result = await _unitOfWork.SaveAsync() > 0;
+                if (!result)
+                {
+                    return "Lưu thất bại.";
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+  
     }
 }
