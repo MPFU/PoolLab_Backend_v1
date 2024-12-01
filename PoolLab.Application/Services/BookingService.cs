@@ -111,6 +111,7 @@ namespace PoolLab.Application.Interface
                     paymentBookingDTO.Amount = deposit;
                     paymentBookingDTO.AccountId = book.CustomerId;
                     paymentBookingDTO.PaymentInfo = "Đặt Bàn";
+                    paymentBookingDTO.TypeCode = -1;
                     var pay = await _paymentService.CreateTransactionBooking(paymentBookingDTO);
                     if (pay != null)
                     {
@@ -301,6 +302,7 @@ namespace PoolLab.Application.Interface
                     paymentBookingDTO.Amount = book.Deposit;
                     paymentBookingDTO.AccountId = cus.Id;
                     paymentBookingDTO.PaymentInfo = "Hoàn Tiền";
+                    paymentBookingDTO.TypeCode = 1;
                     var pay = await _paymentService.CreateTransactionBooking(paymentBookingDTO);
                     if (pay != null)
                     {
@@ -617,6 +619,7 @@ namespace PoolLab.Application.Interface
                     paymentBookingDTO.Amount = booking.Deposit;
                     paymentBookingDTO.AccountId = cus.Id;
                     paymentBookingDTO.PaymentInfo = "Hoàn Tiền";
+                    paymentBookingDTO.TypeCode = 1;
                     var pay = await _paymentService.CreateTransactionBooking(paymentBookingDTO);
                     if (pay != null)
                     {

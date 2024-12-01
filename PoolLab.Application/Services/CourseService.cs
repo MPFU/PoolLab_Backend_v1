@@ -51,6 +51,9 @@ namespace PoolLab.Application.Interface
             if (courseFilter.AccountId != null)
                 result = result.Where(x => x.AccountId == courseFilter.AccountId);
 
+            if (courseFilter.StoreId != null)
+                result = result.Where(x => x.StoreId == courseFilter.StoreId);
+
             if (courseFilter.Quantity.HasValue)
                 result = result.Where(x => x.Quantity == courseFilter.Quantity);
 
@@ -118,6 +121,31 @@ namespace PoolLab.Application.Interface
 
                 var check = _mapper.Map<Course>(create);
 
+                if(check.StartDate <= date)
+                {
+                    return "Ngày bắt đầu không hợp lệ!";
+                }
+
+                if(check.EndDate <= check.StartDate)
+                {
+                    return "Ngày bắt đầu và kết thúc không hợp lệ!";
+                }
+
+                if(check.EndTime <= check.StartTime)
+                {
+                    return "Thời gian bắt đầu và kết thúc không hợp lệ!";
+                }
+
+                if(check.Quantity == null || check.Quantity <= 0) 
+                {
+                    return "Số lượng khoá học không hợp lệ!";
+                }
+
+                if (check.Price == null || check.Price <= 0)
+                {
+                    return "Học phí khoá học không hợp lệ!";
+                }
+
                 check.Id = Guid.NewGuid();
                 check.NoOfUser = 0;
                 check.CreatedDate = TimeZoneInfo.ConvertTimeFromUtc(now, localTimeZone);
@@ -139,7 +167,7 @@ namespace PoolLab.Application.Interface
             }
             catch (Exception ex)
             {
-                throw;
+                throw new Exception(ex.Message);
             }
         }
 
@@ -159,11 +187,11 @@ namespace PoolLab.Application.Interface
                 check.Title = !string.IsNullOrEmpty(update.Title) ? update.Title : check.Title;
                 check.Descript = !string.IsNullOrEmpty(update.Descript) ? update.Descript : check.Descript;
                 check.Schedule = !string.IsNullOrEmpty(update.Schedule) ? update.Schedule : check.Schedule;
-                check.Quantity = check.Quantity != null ? update.Quantity : check.Quantity;           
-                check.Price = check.Price != null ? update.Price : check.Price;
+                check.Quantity = update.Quantity != null ? update.Quantity : check.Quantity;           
+                check.Price = update.Price != null ? update.Price : check.Price;
                 check.Level = !string.IsNullOrEmpty(update.Level) ? update.Level : check.Level;
-                check.AccountId = check.AccountId != null ? update.AccountId : check.AccountId;
-                check.StoreId = check.StoreId != null ? update.StoreId : check.StoreId;
+                check.AccountId = update.AccountId != null ? update.AccountId : check.AccountId;
+                check.StoreId = update.StoreId != null ? update.StoreId : check.StoreId;
                 check.Status = !string.IsNullOrEmpty(update.Status) ? update.Status : check.Status;
                 check.UpdatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
 
@@ -176,7 +204,7 @@ namespace PoolLab.Application.Interface
             }
             catch (Exception ex)
             {
-                throw;
+                throw new Exception(ex.Message);
             }
         }
 
@@ -199,7 +227,7 @@ namespace PoolLab.Application.Interface
             }
             catch (Exception ex)
             {
-                throw;
+                throw new Exception(ex.Message);
             }
         }
     }
