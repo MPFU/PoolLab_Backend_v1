@@ -81,6 +81,8 @@ namespace PoolLab.Application.Interface
                 TotalPages = (int)Math.Ceiling((decimal)result.Count() / (decimal)registeredCourseFilter.PageSize)
             };
         }
+
+
         public async Task<string?> CreateRegisteredCourse(CreateRegisteredCourseDTO create)
         {
             try
@@ -107,7 +109,7 @@ namespace PoolLab.Application.Interface
             }
             catch (Exception ex)
             {
-                throw;
+                throw new Exception(ex.Message);
             }
         }
     }
