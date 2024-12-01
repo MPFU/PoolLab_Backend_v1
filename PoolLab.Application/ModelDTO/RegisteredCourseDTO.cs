@@ -31,8 +31,6 @@ namespace PoolLab.Application.ModelDTO
         public Guid? CourseId { get; set; }
 
         public Guid? StoreId { get; set; }
-
-        public string? Status { get; set; }
     }
 
     public class UpdateRegisteredCourseDTO
