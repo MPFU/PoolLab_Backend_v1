@@ -17,11 +17,13 @@ namespace PoolLab.Application.Interface
     {
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICourseService _courseService;
 
-        public RegisterCourseService(IMapper mapper, IUnitOfWork unitOfWork)
+        public RegisterCourseService(IMapper mapper, IUnitOfWork unitOfWork, ICourseService courseService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
+            _courseService = courseService;
         }
 
         public async Task<PageResult<GetAllRegisteredCourseDTO>> GetAllRegisteredCourses(RegisteredCourseFilter registeredCourseFilter)
@@ -92,8 +94,10 @@ namespace PoolLab.Application.Interface
                 var a = TimeZoneInfo.ConvertTimeFromUtc(now, localTimeZone);
                 //var date = DateOnly.FromDateTime(a);
 
-
+                
                 var check = _mapper.Map<RegisteredCourse>(create);
+
+                await _unitOfWork.BeginTransactionAsync();
 
                 check.Id = Guid.NewGuid();
                 check.Status = "Đang hoạt động";
@@ -105,10 +109,19 @@ namespace PoolLab.Application.Interface
                 {
                     return "Tạo mới đăng kí khoá học thất bại!";
                 }
+
+                var upNo = await _courseService.UpdateNoOfUser((Guid)check.CourseId, 1);
+                if(upNo != null)
+                {
+                    return upNo;
+                }
+
+                await _unitOfWork.CommitTransactionAsync();
                 return null;
             }
             catch (Exception ex)
             {
+                await _unitOfWork.RollbackTransactionAsync();
                 throw new Exception(ex.Message);
             }
         }
