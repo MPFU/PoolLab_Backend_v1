@@ -1,6 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore;
 using PoolLab.Application.FilterModel;
 using PoolLab.Application.FilterModel.Helper;
 using PoolLab.Application.Interface;
@@ -230,5 +228,10 @@ namespace PoolLab.Application.Interface
                 throw new Exception(ex.Message);
             }
         }
+
+        //public async Task<string?> UpdateCourseNoOfUser()
+        //{
+            
+        //}
     }
 }

@@ -1,4 +1,7 @@
-﻿using PoolLab.Core.Models;
+﻿using PoolLab.Application.FilterModel.Helper;
+using PoolLab.Application.FilterModel;
+using PoolLab.Application.ModelDTO;
+using PoolLab.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,5 +12,7 @@ namespace PoolLab.Application.Interface
 {
     public interface IRegisterCourseService 
     {
+        Task<PageResult<GetAllRegisteredCourseDTO>> GetAllRegisteredCourses(RegisteredCourseFilter registeredCourseFilter);
+        Task<string?> CreateRegisteredCourse(CreateRegisteredCourseDTO create);
     }
 }
