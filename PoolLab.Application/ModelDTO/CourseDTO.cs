@@ -51,6 +51,12 @@ namespace PoolLab.Application.ModelDTO
 
         public string? StartDate { get; set; }
 
+        public string? EndDate { get; set; }
+
+        public string? StartTime { get; set; }
+
+        public string? EndTime { get; set; }
+
         public string? Level { get; set; }
 
         public int? Quantity { get; set; }
@@ -97,6 +103,12 @@ namespace PoolLab.Application.ModelDTO
 
         public DateOnly? StartDate { get; set; }
 
+        public DateOnly? EndDate { get; set; }
+
+        public TimeOnly? StartTime { get; set; }
+
+        public TimeOnly? EndTime { get; set; }
+
         public string? Level { get; set; }
 
         public int? Quantity { get; set; }
@@ -107,9 +119,13 @@ namespace PoolLab.Application.ModelDTO
 
         public string? StoreName { get; set; }
 
+        public string? Address { get; set; }
+
         public Guid? AccountId { get; set; }
 
         public string? AccountName { get; set; }
+
+        public string? AccountAvatar {  get; set; }
 
         public Guid? MentorId { get; set; }
 
