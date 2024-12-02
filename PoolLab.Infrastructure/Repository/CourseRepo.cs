@@ -23,5 +23,14 @@ namespace PoolLab.Infrastructure.Interface
                 .Include(x => x.RegisteredCourses)
                 .ToListAsync();
         }
+
+        public async Task<Course?> GetCourseByID(Guid id)
+        {
+            return await _dbContext.Courses
+                .Where(x => x.Id.Equals(id))
+                .Include(x => x.Account)
+                .Include(x => x.Store)
+                .FirstOrDefaultAsync();
+        }
     }
 }

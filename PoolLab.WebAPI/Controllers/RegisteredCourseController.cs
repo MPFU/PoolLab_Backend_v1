@@ -77,5 +77,65 @@ namespace PoolLab.WebAPI.Controllers
                 });
             }
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateRegisteredCourse(Guid id, [FromBody] UpdateRegisteredCourseDTO updateRegisteredCourse)
+        {
+            try
+            {
+                var update = await _registeredCourseService.UpdateRegisteredCourse(id, updateRegisteredCourse);
+                if (update != null)
+                {
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = update
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Cập nhật đăng kí khoá học thành công."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteRegisteredCourse(Guid id)
+        {
+            try
+            {
+                var check = await _registeredCourseService.DeleteRegisteredCourse(id);
+                if (check != null)
+                {
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = check
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Xoá đăng kí khoá học thành công."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
     }
 }
