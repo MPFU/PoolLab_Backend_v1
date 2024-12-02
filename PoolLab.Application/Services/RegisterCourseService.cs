@@ -94,14 +94,14 @@ namespace PoolLab.Application.Interface
                 var a = TimeZoneInfo.ConvertTimeFromUtc(now, localTimeZone);
                 //var date = DateOnly.FromDateTime(a);
 
-                
+
                 var check = _mapper.Map<RegisteredCourse>(create);
 
                 await _unitOfWork.BeginTransactionAsync();
 
                 check.Id = Guid.NewGuid();
                 check.Status = "Đang hoạt động";
-                check.CreatedDate = TimeZoneInfo.ConvertTimeFromUtc(now, localTimeZone);       
+                check.CreatedDate = TimeZoneInfo.ConvertTimeFromUtc(now, localTimeZone);
 
                 await _unitOfWork.RegisterCourseRepo.AddAsync(check);
                 var result = await _unitOfWork.SaveAsync() > 0;
@@ -111,7 +111,7 @@ namespace PoolLab.Application.Interface
                 }
 
                 var upNo = await _courseService.UpdateNoOfUser((Guid)check.CourseId, 1);
-                if(upNo != null)
+                if (upNo != null)
                 {
                     return upNo;
                 }
@@ -122,6 +122,66 @@ namespace PoolLab.Application.Interface
             catch (Exception ex)
             {
                 await _unitOfWork.RollbackTransactionAsync();
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<string?> UpdateRegisteredCourse(Guid id, UpdateRegisteredCourseDTO update)
+        {
+            try
+            {
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+
+                var check = await _unitOfWork.RegisterCourseRepo.GetByIdAsync(id);
+                if (check == null)
+                {
+                    return "Không tìm thấy khoá học này.";
+                }
+
+                check.Status = !string.IsNullOrEmpty(update.Status) ? update.Status : check.Status;
+                check.CourseId = update.CourseId != null ? update.CourseId : check.CourseId;
+                check.StudentId = update.StudentId != null ? update.StudentId : check.StudentId;
+                check.StoreId = update.StoreId != null ? update.StoreId : check.StoreId;
+                check.UpdatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+
+                var result = await _unitOfWork.SaveAsync() > 0;
+                if (!result)
+                {
+                    return "Lưu thất bại.";
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<string?> DeleteRegisteredCourse(Guid id)
+        {
+            try
+            {
+                var check = await _unitOfWork.RegisterCourseRepo.GetByIdAsync(id);
+                if (check == null)
+                {
+                    return "Không tìm thấy đăng kí khoá học này.";
+                }
+                _unitOfWork.RegisterCourseRepo.Delete(check);
+                var result = await _unitOfWork.SaveAsync() > 0;
+                if (!result)
+                {
+                    return "Lưu thất bại.";
+                }
+                var downNo = await _courseService.UpdateMinusNoOfUser((Guid)check.CourseId, 1);
+                if (downNo != null)
+                {
+                    return downNo;
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
                 throw new Exception(ex.Message);
             }
         }
