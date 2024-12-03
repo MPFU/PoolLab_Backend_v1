@@ -14,5 +14,7 @@ namespace PoolLab.Application.Interface
     {
         Task<PageResult<GetAllRegisteredCourseDTO>> GetAllRegisteredCourses(RegisteredCourseFilter registeredCourseFilter);
         Task<string?> CreateRegisteredCourse(CreateRegisteredCourseDTO create);
+        Task<string?> UpdateRegisteredCourse(Guid id, UpdateRegisteredCourseDTO update);
+        Task<string?> DeleteRegisteredCourse(Guid id);
     }
 }

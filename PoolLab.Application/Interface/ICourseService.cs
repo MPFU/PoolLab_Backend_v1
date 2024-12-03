@@ -16,7 +16,8 @@ namespace PoolLab.Application.Interface
         Task<string?> CreateCourse(CreateCourseDTO create);
         Task<string?> UpdateCourse(Guid id, UpdateCourseDTO update);
         Task<string?> DeleteCourse(Guid Id);
-
         Task<string?> UpdateNoOfUser(Guid Id, int num);
+        Task<string?> UpdateMinusNoOfUser(Guid Id, int num);
+        Task<GetAllCoursesDTO?> GetCourseById(Guid Id);
     }
 }

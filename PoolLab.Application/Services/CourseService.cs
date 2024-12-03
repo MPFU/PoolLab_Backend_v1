@@ -244,6 +244,11 @@ namespace PoolLab.Application.Interface
                     return "Số lượng đăng ký không hợp lệ!";
                 }
 
+                if (check.NoOfUser >= check.Quantity)
+                {
+                    return "Đã vượt quá số người đăng kí!";
+                }
+
                 check.NoOfUser += num;
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)
@@ -257,6 +262,44 @@ namespace PoolLab.Application.Interface
                 throw new Exception(ex.Message);
             }
         }
-  
+
+        public async Task<string?> UpdateMinusNoOfUser(Guid Id, int num)
+        {
+            try
+            {
+                var check = await _unitOfWork.CourseRepo.GetByIdAsync(Id);
+                if (check == null)
+                {
+                    return "Không tìm thấy khoá học này.";
+                }
+
+                if (num <= 0 || num == null)
+                {
+                    return "Số lượng đăng ký không hợp lệ!";
+                }
+
+                if (check.NoOfUser <= 0)
+                {
+                    return "Không có học viên nào!";
+                }
+
+                check.NoOfUser -= num;
+                var result = await _unitOfWork.SaveAsync() > 0;
+                if (!result)
+                {
+                    return "Lưu thất bại.";
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<GetAllCoursesDTO?> GetCourseById(Guid Id)
+        {         
+            return _mapper.Map<GetAllCoursesDTO>(await _unitOfWork.CourseRepo.GetCourseByID(Id));
+        }
     }
 }
