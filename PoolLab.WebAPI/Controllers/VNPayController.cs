@@ -22,10 +22,18 @@ namespace PoolLab.WebAPI.Controllers
         public async Task<IActionResult> CreatePayment([FromBody] CreateVNPayDTO request)
         {
             var paymentUrl = await _vNPayService.CreatePaymentUrl(request, HttpContext);
-            return Ok(new SucceededRespone()
+            if (paymentUrl.Contains("http"))
             {
-                Status = Ok().StatusCode,
-                Data = paymentUrl
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Data = paymentUrl
+                });
+            }
+            return BadRequest(new FailResponse()
+            {
+                Status = BadRequest().StatusCode,
+                Message = paymentUrl
             });
         }
 
@@ -52,7 +60,8 @@ namespace PoolLab.WebAPI.Controllers
             }
             return Ok(new SucceededRespone{
                 Status = Ok().StatusCode,
-                Message= "Nạp tiền thành công"
+                Message= "Nạp tiền thành công",
+                Data= response
             });
         }
 
