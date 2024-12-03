@@ -43,9 +43,32 @@ namespace PoolLab.Application.Interface
                     return "Tạo giao dịch thất bại!";
                 }
                 return null;
-            }catch(DbUpdateException)
+            }catch(Exception ex)
             {
-                throw;
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<string?> CreateTransactionDeposit(PaymentDepositDTO deposiDTO)
+        {
+            try
+            {
+                var pay = _mapper.Map<Transaction>(deposiDTO);
+                pay.Id = Guid.NewGuid();
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                pay.PaymentDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+                await _unitOfWork.PaymentRepo.AddAsync(pay);
+                var result = await _unitOfWork.SaveAsync() > 0;
+                if (!result)
+                {
+                    return "Tạo giao dịch thất bại!";
+                }
+                return pay.Id.ToString();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
 
@@ -105,6 +128,30 @@ namespace PoolLab.Application.Interface
                 TotalItem = query.Count(),
                 TotalPages = (int)Math.Ceiling((decimal)query.Count() / (decimal)paymentFilter.PageSize)
             };
+        }
+
+        public async Task<string?> UpdateTransactionStatus(Guid Id, string status)
+        {
+            try
+            {
+                var pay = await _unitOfWork.PaymentRepo.GetByIdAsync(Id);
+                if (pay == null)
+                {
+                    return "Không tìm thấy giao dịch này!";
+                }
+                pay.Status = status;
+                _unitOfWork.PaymentRepo.Update(pay);
+                var result = await _unitOfWork.SaveAsync() > 0;
+                if (!result)
+                {
+                    return "Cập nhật giao dịch thất bại!";
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

@@ -86,7 +86,7 @@ public partial class PoolLabDbv1Context : DbContext
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", true, true)
             .Build();
-        connectionString = config.GetConnectionString("AzureDB");
+        connectionString = config.GetConnectionString("PhucDatabase");
         return connectionString;
     }
 
@@ -613,10 +613,9 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.Descript).HasMaxLength(1000);
             entity.Property(e => e.Name).HasMaxLength(50);
             entity.Property(e => e.Price).HasColumnType("decimal(11, 0)");
+            entity.Property(e => e.NewPrice).HasColumnType("decimal(11, 0)");
             entity.Property(e => e.Status).HasMaxLength(50);
             entity.Property(e => e.SubTypeId).HasColumnName("SubTypeID");
-            entity.Property(e => e.TimeEnd).HasColumnType("datetime");
-            entity.Property(e => e.TimeStart).HasColumnType("datetime");
             entity.Property(e => e.Unit).HasMaxLength(50);
             entity.Property(e => e.UpdateDate).HasColumnType("datetime");
 

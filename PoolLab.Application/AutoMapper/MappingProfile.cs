@@ -153,6 +153,7 @@ namespace PoolLab.Application.AutoMapper
 
             //PAYMENT
             CreateMap<PaymentBookingDTO, Transaction>().ReverseMap();
+            CreateMap<PaymentDepositDTO, Transaction>().ReverseMap();
             CreateMap<Transaction, PaymentDTO>()
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Account.UserName))
                 .ReverseMap();
