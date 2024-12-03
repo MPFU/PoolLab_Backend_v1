@@ -144,18 +144,7 @@ namespace PoolLab.Application.Interface
                 {
                     return "Nạp tiền thất bại!";
                 }
-
-                PaymentBookingDTO paymentDTO = new PaymentBookingDTO();
-                paymentDTO.PaymentMethod = "Online";
-                paymentDTO.Amount = amount;
-                paymentDTO.AccountId = cus.Id;
-                paymentDTO.TypeCode = 1;
-                paymentDTO.PaymentInfo = "Nạp Tiền";
-                var pay = await _paymentService.CreateTransactionBooking(paymentDTO);
-                if (pay != null)
-                {
-                    return pay;
-                }
+             
                 return null ;
             }
             catch(DbUpdateException)

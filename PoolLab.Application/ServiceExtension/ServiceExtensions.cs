@@ -49,6 +49,7 @@ namespace PoolLab.Application.ServiceExtension
             services.AddScoped<IQRCodeGenerate, QRCodeService>();
             services.AddScoped<IConfigTableService, ConfigTableService>();
             services.AddScoped<IBidaTypeAreaService, BidaTypeAreaService>();
+            services.AddScoped<IVNPayService, VNPayService>();
 
             services.AddScoped(x => new BlobServiceClient(configuration.GetConnectionString("BlobStorage")));
 

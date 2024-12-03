@@ -13,13 +13,13 @@ public partial class Subscription
 
     public decimal? Price { get; set; }
 
+    public int? Discount { get; set; }
+
+    public decimal? NewPrice { get; set; }
+
     public Guid? SubTypeId { get; set; }
 
     public string? Unit { get; set; }
-
-    public DateTime? TimeStart { get; set; }
-
-    public DateTime? TimeEnd { get; set; }
 
     public DateTime? CreatedDate { get; set; }
 

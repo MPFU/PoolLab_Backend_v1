@@ -15,5 +15,9 @@ namespace PoolLab.Application.Interface
         Task<string?> CreateTransactionBooking(PaymentBookingDTO paymentBookingDTO);
 
         Task<PageResult<PaymentDTO>> GetAllTransaction(PaymentFilter paymentFilter);
+
+        Task<string?> CreateTransactionDeposit(PaymentDepositDTO deposiDTO);
+
+        Task<string?> UpdateTransactionStatus(Guid Id, string status);
     }
 }
