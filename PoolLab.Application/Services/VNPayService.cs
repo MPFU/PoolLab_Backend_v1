@@ -163,8 +163,6 @@ namespace PoolLab.Application.Services
                     };
                 }
                
-                await _unitOfWork.CommitTransactionAsync();
-
                 return new VnPaymentResponseModel
                 {
                     Success = false,
