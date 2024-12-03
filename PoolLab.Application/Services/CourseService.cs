@@ -150,11 +150,6 @@ namespace PoolLab.Application.Interface
                 check.Status = "Đang hoạt động";
                 check.MentorId = null;
 
-                if (check.StartDate < date)
-                {
-                    return "Ngày tạo khoá học của bạn không hợp lệ!";
-                }
-
                 await _unitOfWork.CourseRepo.AddAsync(check);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)
