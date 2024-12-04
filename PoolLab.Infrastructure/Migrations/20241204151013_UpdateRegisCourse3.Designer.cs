@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PoolLab.Infrastructure;
 
@@ -11,9 +12,11 @@ using PoolLab.Infrastructure;
 namespace PoolLab.Infrastructure.Migrations
 {
     [DbContext(typeof(PoolLabDbv1Context))]
-    partial class PoolLabDbv1ContextModelSnapshot : ModelSnapshot
+    [Migration("20241204151013_UpdateRegisCourse3")]
+    partial class UpdateRegisCourse3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -881,7 +884,7 @@ namespace PoolLab.Infrastructure.Migrations
 
                     b.Property<Guid?>("EnrollCourseId")
                         .HasColumnType("uniqueidentifier")
-                        .HasColumnName("EnrollCourseId");
+                        .HasColumnName("RegisterCourseId");
 
                     b.Property<bool?>("IsRegistered")
                         .ValueGeneratedOnAdd()
@@ -924,8 +927,6 @@ namespace PoolLab.Infrastructure.Migrations
                     b.HasIndex("EnrollCourseId");
 
                     b.HasIndex("StoreId");
-
-                    b.HasIndex("StudentId");
 
                     b.ToTable("RegisteredCourse", (string)null);
                 });
@@ -1545,19 +1546,11 @@ namespace PoolLab.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_RegisteredCourse_Store");
 
-                    b.HasOne("PoolLab.Core.Models.Account", "Student")
-                        .WithMany("RegisteredCourses")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_RegisteredCourse_Student");
-
                     b.Navigation("Course");
 
                     b.Navigation("EnrollCourse");
 
                     b.Navigation("Store");
-
-                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("PoolLab.Core.Models.Review", b =>
@@ -1634,8 +1627,6 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Navigation("Orders");
 
                     b.Navigation("Payments");
-
-                    b.Navigation("RegisteredCourses");
 
                     b.Navigation("Reviews");
                 });

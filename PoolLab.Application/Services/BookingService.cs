@@ -476,7 +476,7 @@ namespace PoolLab.Application.Interface
                 }
 
                 //Tạo booking định kì
-                var reBook = new Booking();
+                var reBook = new BookingDTO();
                 reBook.Id = Guid.NewGuid();
                 reBook.CustomerId = cus.Id;
                 reBook.AreaId = table.AreaId;
@@ -493,7 +493,7 @@ namespace PoolLab.Application.Interface
                 reBook.IsRecurring = true;
                 reBook.Deposit = bookPrice;
                 reBook.DayOfWeek = string.Join(",", bookingReqDTO.RecurrenceDays);
-                await _unitOfWork.BookingRepo.AddAsync(reBook);
+                await _unitOfWork.BookingRepo.AddAsync(_mapper.Map<Booking>(reBook));
                 var result1 = await _unitOfWork.SaveAsync() > 0;
                 if (!result1)
                 {

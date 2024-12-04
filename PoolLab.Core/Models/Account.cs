@@ -62,4 +62,6 @@ public partial class Account
     public virtual Subscription? Sub { get; set; }
 
     public virtual ICollection<AccountVoucher> AccountVouchers { get; set; } = new List<AccountVoucher>();
+
+    public virtual ICollection<RegisteredCourse> RegisteredCourses { get; set; } = new List<RegisteredCourse>();
 }

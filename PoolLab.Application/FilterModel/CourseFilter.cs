@@ -12,29 +12,11 @@ namespace PoolLab.Application.FilterModel
     {
         public string? Title { get; set; }
 
-        public string? Descript { get; set; }
-
-        public decimal? Price { get; set; }
-
-        public string? Schedule { get; set; }
-
-        public DateTime? StartDate { get; set; }
-
-        public string? Level { get; set; }
-
-        public int? Quantity { get; set; }
-
-        public int? NoOfUser { get; set; }
-
         public Guid? StoreId { get; set; }
 
         public Guid? AccountId { get; set; }
 
-        public Guid? MentorId { get; set; }
-
-        public DateTime? CreatedDate { get; set; }
-
-        public DateTime? UpdatedDate { get; set; }
+        public string? AccountName { get; set; }
 
         public string? Status { get; set; }
     }

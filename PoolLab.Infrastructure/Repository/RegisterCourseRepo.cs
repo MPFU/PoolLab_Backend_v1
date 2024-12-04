@@ -19,8 +19,35 @@ namespace PoolLab.Infrastructure.Interface
         {
             return await _dbContext.RegisteredCourses
                 .Include(x => x.Course)
+                .ThenInclude(y => y.Account)
                 .Include(x => x.Store)
+                .Include(x => x.Student)
                 .ToListAsync();
+        }
+
+        public async Task<IEnumerable<RegisteredCourse>?> GetAllRegisterCourseCus(Guid id, DateTime startDate, DateTime endDate)
+        {
+            return await _dbContext.RegisteredCourses
+                .Where(x => x.StudentId == id && x.IsRegistered == true)
+                .Where(x => x.StartDate == startDate && x.EndDate == endDate)
+                .Where(x => x.Status.Equals("Kích Hoạt"))
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<RegisteredCourse>?> GetAllRegisterCourseByEnrollID(Guid id)
+        {
+            return await _dbContext.RegisteredCourses.Where(x => x.EnrollCourseId == id && x.Status.Equals("Kích Hoạt")).ToListAsync();
+        }
+
+        public async Task<RegisteredCourse?> GetRegisterdCourseById(Guid id)
+        {
+            return await _dbContext.RegisteredCourses
+                .Include(x => x.Course)
+                .ThenInclude(y => y.Account)
+                .Include(x => x.Store)
+                .Include(x => x.Student)
+                .Include(x => x.RegisteredCourses)
+                .Where(x => x.Id == id).FirstOrDefaultAsync();
         }
     }
 }

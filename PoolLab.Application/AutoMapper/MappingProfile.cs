@@ -97,14 +97,8 @@ namespace PoolLab.Application.AutoMapper
 
             //Course
             CreateMap<CourseDTO, Course>().ReverseMap();
-            CreateMap<CreateCourseDTO, Course>()
-               .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => DateOnly.Parse(src.StartDate)))
-               .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => DateOnly.Parse(src.EndDate)))
-               .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => TimeOnly.Parse(src.StartTime)))
-               .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => TimeOnly.Parse(src.EndTime)))
-               .ReverseMap();
             CreateMap<UpdateCourseDTO, Course>()
-               .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => DateOnly.Parse(src.StartDate)))              
+               .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => DateOnly.Parse(src.StartDate)))
                .ReverseMap();
             CreateMap<Course, GetAllCoursesDTO>()
                .ForMember(dest => dest.AccountName, opt => opt.MapFrom(src => src.Account.FullName))
@@ -117,7 +111,23 @@ namespace PoolLab.Application.AutoMapper
             CreateMap<RegisteredCourseDTO, RegisteredCourse>().ReverseMap();
             CreateMap<CreateRegisteredCourseDTO, RegisteredCourse>().ReverseMap();
             CreateMap<UpdateRegisteredCourseDTO, RegisteredCourse>().ReverseMap();
-            CreateMap<GetAllRegisteredCourseDTO, RegisteredCourse>().ReverseMap();
+            CreateMap<RegisteredCourse, GetEnrollDTO>()
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Student.UserName))
+                .ForMember(dest => dest.Fullname, opt => opt.MapFrom(src => src.Student.FullName))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Store.Address))
+                .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.Name))
+                .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Course.Title))
+                .ForMember(dest => dest.MentorName, opt => opt.MapFrom(src => src.Course.Account.UserName))
+                .ReverseMap();
+            CreateMap<RegisteredCourse, GetAllRegisteredCourseDTO>()
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Student.UserName))
+                .ForMember(dest => dest.Fullname, opt => opt.MapFrom(src => src.Student.FullName))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Store.Address))
+                .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.Name))
+                .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Course.Title))
+                .ForMember(dest => dest.MentorName, opt => opt.MapFrom(src => src.Course.Account.UserName))
+                .ReverseMap();
+            CreateMap<CreateSingleRegisterCourseDTO, RegisteredCourse>().ReverseMap();
 
             //BOOKING
             CreateMap<NewBookingRecurrDTO, Booking>().ReverseMap();

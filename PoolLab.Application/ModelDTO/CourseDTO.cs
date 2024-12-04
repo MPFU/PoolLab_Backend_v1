@@ -18,7 +18,13 @@ namespace PoolLab.Application.ModelDTO
 
         public string? Schedule { get; set; }
 
-        public DateTime? StartDate { get; set; }
+        public DateOnly? StartDate { get; set; }
+
+        public DateOnly? EndDate { get; set; }
+
+        public TimeOnly? StartTime { get; set; }
+
+        public TimeOnly? EndTime { get; set; }
 
         public string? Level { get; set; }
 
@@ -47,11 +53,9 @@ namespace PoolLab.Application.ModelDTO
 
         public decimal? Price { get; set; }
 
-        public string? Schedule { get; set; }
+        public List<string> Schedule { get; set; } = new List<string>();
 
-        public string? StartDate { get; set; }
-
-        public string? EndDate { get; set; }
+        public string? CourseMonth { get; set; }
 
         public string? StartTime { get; set; }
 

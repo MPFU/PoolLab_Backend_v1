@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PoolLab.Infrastructure;
 
@@ -11,9 +12,11 @@ using PoolLab.Infrastructure;
 namespace PoolLab.Infrastructure.Migrations
 {
     [DbContext(typeof(PoolLabDbv1Context))]
-    partial class PoolLabDbv1ContextModelSnapshot : ModelSnapshot
+    [Migration("20241204082231_UpdateRegisterCourse")]
+    partial class UpdateRegisterCourse
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -879,10 +882,6 @@ namespace PoolLab.Infrastructure.Migrations
                         .HasPrecision(0)
                         .HasColumnType("time(0)");
 
-                    b.Property<Guid?>("EnrollCourseId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("EnrollCourseId");
-
                     b.Property<bool?>("IsRegistered")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("BIT")
@@ -890,6 +889,10 @@ namespace PoolLab.Infrastructure.Migrations
 
                     b.Property<decimal?>("Price")
                         .HasColumnType("decimal(11,0)");
+
+                    b.Property<Guid?>("RegisterCourseId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("RegisterCourseId");
 
                     b.Property<string>("Schedule")
                         .HasMaxLength(100)
@@ -921,11 +924,9 @@ namespace PoolLab.Infrastructure.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.HasIndex("EnrollCourseId");
+                    b.HasIndex("RegisterCourseId");
 
                     b.HasIndex("StoreId");
-
-                    b.HasIndex("StudentId");
 
                     b.ToTable("RegisteredCourse", (string)null);
                 });
@@ -1530,34 +1531,23 @@ namespace PoolLab.Infrastructure.Migrations
                     b.HasOne("PoolLab.Core.Models.Course", "Course")
                         .WithMany("RegisteredCourses")
                         .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_RegisteredCourse_Course");
 
                     b.HasOne("PoolLab.Core.Models.RegisteredCourse", "EnrollCourse")
                         .WithMany("RegisteredCourses")
-                        .HasForeignKey("EnrollCourseId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasForeignKey("RegisterCourseId")
                         .HasConstraintName("FK_RegisteredCourse_EnrollCourse");
 
                     b.HasOne("PoolLab.Core.Models.Store", "Store")
                         .WithMany("RegisteredCourses")
                         .HasForeignKey("StoreId")
-                        .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_RegisteredCourse_Store");
-
-                    b.HasOne("PoolLab.Core.Models.Account", "Student")
-                        .WithMany("RegisteredCourses")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_RegisteredCourse_Student");
 
                     b.Navigation("Course");
 
                     b.Navigation("EnrollCourse");
 
                     b.Navigation("Store");
-
-                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("PoolLab.Core.Models.Review", b =>
@@ -1634,8 +1624,6 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Navigation("Orders");
 
                     b.Navigation("Payments");
-
-                    b.Navigation("RegisteredCourses");
 
                     b.Navigation("Reviews");
                 });

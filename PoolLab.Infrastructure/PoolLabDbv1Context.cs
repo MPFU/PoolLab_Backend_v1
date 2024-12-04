@@ -544,14 +544,35 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.StoreId).HasColumnName("StoreID");
             entity.Property(e => e.StudentId).HasColumnName("StudentID");
             entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+            entity.Property(e => e.StartDate).HasColumnType("datetime");
+            entity.Property(e => e.EndDate).HasColumnType("datetime");
+            entity.Property(e => e.StartTime).HasPrecision(0);
+            entity.Property(e => e.EndTime).HasPrecision(0);
+            entity.Property(e => e.Price).HasColumnType("decimal(11,0)");
+            entity.Property(e => e.Schedule).HasMaxLength(100);
+            entity.Property(e => e.EnrollCourseId).HasColumnName("EnrollCourseId");
+            entity.Property(e => e.IsRegistered).HasColumnType("BIT").HasDefaultValue(false);
 
             entity.HasOne(d => d.Course).WithMany(p => p.RegisteredCourses)
                 .HasForeignKey(d => d.CourseId)
-                .HasConstraintName("FK_RegisteredCourse_Course");
+                .HasConstraintName("FK_RegisteredCourse_Course")
+                .OnDelete(DeleteBehavior.NoAction); ;
+
 
             entity.HasOne(d => d.Store).WithMany(p => p.RegisteredCourses)
                 .HasForeignKey(d => d.StoreId)
-                .HasConstraintName("FK_RegisteredCourse_Store");
+                .HasConstraintName("FK_RegisteredCourse_Store")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(d => d.EnrollCourse).WithMany(p => p.RegisteredCourses)
+                .HasForeignKey(d => d.EnrollCourseId)
+                .HasConstraintName("FK_RegisteredCourse_EnrollCourse")
+                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(d => d.Student).WithMany(p => p.RegisteredCourses)
+               .HasForeignKey(d => d.StudentId)
+               .HasConstraintName("FK_RegisteredCourse_Student")
+               .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<Review>(entity =>

@@ -12,8 +12,10 @@ namespace PoolLab.Application.Interface
 {
     public interface IRegisterCourseService 
     {
+        Task<GetEnrollDTO> GetRegisterdCourseById(Guid id);
         Task<PageResult<GetAllRegisteredCourseDTO>> GetAllRegisteredCourses(RegisteredCourseFilter registeredCourseFilter);
         Task<string?> CreateRegisteredCourse(CreateRegisteredCourseDTO create);
+        Task<string?> CancelRegisteredCourse(Guid id);
         Task<string?> UpdateRegisteredCourse(Guid id, UpdateRegisteredCourseDTO update);
         Task<string?> DeleteRegisteredCourse(Guid id);
     }
