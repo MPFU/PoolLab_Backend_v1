@@ -34,29 +34,17 @@ namespace PoolLab.Application.Interface
             if (!string.IsNullOrEmpty(courseFilter.Title))
                 result = result.Where(x => x.Title.Contains(courseFilter.Title, StringComparison.OrdinalIgnoreCase));
 
-            if (!string.IsNullOrEmpty(courseFilter.Schedule))
-                result = result.Where(x => x.Schedule.Contains(courseFilter.Schedule, StringComparison.OrdinalIgnoreCase));
-
-            if (!string.IsNullOrEmpty(courseFilter.Descript))
-                result = result.Where(x => x.Descript.Contains(courseFilter.Descript, StringComparison.OrdinalIgnoreCase));
-
             if (!string.IsNullOrEmpty(courseFilter.Status))
                 result = result.Where(x => x.Status.Contains(courseFilter.Status, StringComparison.OrdinalIgnoreCase));
 
-            if (!string.IsNullOrEmpty(courseFilter.Level))
-                result = result.Where(x => x.Level.Contains(courseFilter.Level, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(courseFilter.AccountName))
+                result = result.Where(x => x.AccountName.Contains(courseFilter.AccountName, StringComparison.OrdinalIgnoreCase));
 
             if (courseFilter.AccountId != null)
                 result = result.Where(x => x.AccountId == courseFilter.AccountId);
 
             if (courseFilter.StoreId != null)
                 result = result.Where(x => x.StoreId == courseFilter.StoreId);
-
-            if (courseFilter.Quantity.HasValue)
-                result = result.Where(x => x.Quantity == courseFilter.Quantity);
-
-            if (courseFilter.NoOfUser.HasValue)
-                result = result.Where(x => x.NoOfUser == courseFilter.NoOfUser);
 
             //Sorting
             if (!string.IsNullOrEmpty(courseFilter.SortBy))
@@ -114,43 +102,70 @@ namespace PoolLab.Application.Interface
                 DateTime now = DateTime.UtcNow;
                 TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                 var a = TimeZoneInfo.ConvertTimeFromUtc(now, localTimeZone);
-                var date = DateOnly.FromDateTime(a);
 
+                DateOnly currentDate = DateOnly.FromDateTime(a);
 
-                var check = _mapper.Map<Course>(create);
+                //THỜI GIAN ĐẶT THEO THÁNG
+                TimeOnly timeStart = TimeOnly.Parse(create.StartTime);
+                TimeOnly timeEnd = TimeOnly.Parse(create.EndTime);
 
-                if (check.StartDate <= date)
+                if (timeStart >= timeEnd)
                 {
-                    return "Ngày bắt đầu không hợp lệ!";
+                    return "Giờ chơi bắt đầu và kết thúc không hợp lệ!";
                 }
 
-                if (check.EndDate <= check.StartDate)
+                //NGÀY ĐẶT THEO THÁNG
+                var parts = create.CourseMonth.Split('/');
+                int month = int.Parse(parts[0]);
+                int year = int.Parse(parts[1]);
+
+                DateOnly dateStart = new DateOnly(year, month, 1);
+
+                DateOnly dateEnd = new DateOnly(year, month, DateTime.DaysInMonth(year, month));
+
+                if (currentDate > dateStart)
                 {
-                    return "Ngày bắt đầu và kết thúc không hợp lệ!";
+                    return "Khoá học chỉ có thể bắt đầu vào tháng tiếp theo!";
                 }
 
-                if (check.EndTime <= check.StartTime)
+                if(currentDate == dateEnd)
                 {
-                    return "Thời gian bắt đầu và kết thúc không hợp lệ!";
+                    var currentTime = TimeOnly.FromDateTime(a);
+
+                    if (currentTime >= timeStart)
+                    {
+                        return "Thời gian bắt đầu của khoá học đã muộn hơn thời điểm hiện tại để bắt đầu trong tháng này!";
+                    }
                 }
 
-                if (check.Quantity == null || check.Quantity <= 0)
+                if (create.Quantity == null || create.Quantity <= 0)
                 {
                     return "Số lượng khoá học không hợp lệ!";
                 }
 
-                if (check.Price == null || check.Price <= 0)
+                if (create.Price == null || create.Price <= 0)
                 {
                     return "Học phí khoá học không hợp lệ!";
                 }
 
-                check.Id = Guid.NewGuid();
-                check.NoOfUser = 0;
-                check.CreatedDate = TimeZoneInfo.ConvertTimeFromUtc(now, localTimeZone);
-                check.Status = "Đang hoạt động";
-                check.MentorId = null;
-
-                await _unitOfWork.CourseRepo.AddAsync(check);
+                CourseDTO course = new CourseDTO();
+                course.Id = Guid.NewGuid();
+                course.NoOfUser = 0;
+                course.CreatedDate = a;
+                course.Status = "Kích Hoạt";
+                course.StartDate = dateStart;
+                course.EndDate = dateEnd;
+                course.StartTime = timeStart;
+                course.EndTime = timeEnd;
+                course.Title = create.Title;
+                course.AccountId = create.AccountId;
+                course.StoreId = create.StoreId;
+                course.Price = create.Price;
+                course.Quantity = create.Quantity;
+                course.Descript = create.Descript;
+                course.Level = create.Level;
+                course.Schedule = string.Join(",", create.Schedule);
+                await _unitOfWork.CourseRepo.AddAsync(_mapper.Map<Course>(course));
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)
                 {
@@ -239,12 +254,14 @@ namespace PoolLab.Application.Interface
                     return "Số lượng đăng ký không hợp lệ!";
                 }
 
-                if (check.NoOfUser >= check.Quantity)
+                check.NoOfUser += num;
+
+                if(check.NoOfUser == check.Quantity)
                 {
-                    return "Đã vượt quá số người đăng kí!";
+                    check.Status = "Vô Hiệu";
                 }
 
-                check.NoOfUser += num;
+                _unitOfWork.CourseRepo.Update(check);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)
                 {
@@ -262,6 +279,11 @@ namespace PoolLab.Application.Interface
         {
             try
             {
+                DateTime now = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                var a = TimeZoneInfo.ConvertTimeFromUtc(now, localTimeZone);
+                var currentDate = DateOnly.FromDateTime(a);
+
                 var check = await _unitOfWork.CourseRepo.GetByIdAsync(Id);
                 if (check == null)
                 {
@@ -273,12 +295,22 @@ namespace PoolLab.Application.Interface
                     return "Số lượng đăng ký không hợp lệ!";
                 }
 
-                if (check.NoOfUser <= 0)
+                check.NoOfUser -= num;
+
+                if (check.NoOfUser < 0)
                 {
-                    return "Không có học viên nào!";
+                    check.NoOfUser = 0;
                 }
 
-                check.NoOfUser -= num;
+                if(check.StartDate.Value.AddDays(-1) >= currentDate)
+                {
+                    if(check.Status.Equals("Vô Hiệu"))
+                    {
+                        check.Status = "Kích Hoạt";
+                    }
+                }
+
+                _unitOfWork.CourseRepo.Update(check);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)
                 {

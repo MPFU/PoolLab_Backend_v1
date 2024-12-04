@@ -18,6 +18,36 @@ namespace PoolLab.WebAPI.Controllers
             _registeredCourseService = registeredCourseService;
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetRegisteredCoursesById(Guid id)
+        {
+            try
+            {
+                var registeredCourseList = await _registeredCourseService.GetRegisterdCourseById(id);
+                if (registeredCourseList == null)
+                {
+                    return NotFound(new FailResponse()
+                    {
+                        Status = NotFound().StatusCode,
+                        Message = "Không có đăng kí khoá học nào."
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Data = registeredCourseList
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetAllRegisteredCourses([FromQuery] RegisteredCourseFilter registeredCourseFilter)
         {
@@ -66,6 +96,36 @@ namespace PoolLab.WebAPI.Controllers
                 {
                     Status = Ok().StatusCode,
                     Message = "Tạo đăng kí khoá học thành công."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> CancelRegisteredCourse(Guid id)
+        {
+            try
+            {
+                var update = await _registeredCourseService.CancelRegisteredCourse(id);
+                if (update != null)
+                {
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = update
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Huỷ khoá học thành công."
                 });
             }
             catch (Exception ex)
