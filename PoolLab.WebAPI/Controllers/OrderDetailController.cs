@@ -17,6 +17,38 @@ namespace PoolLab.WebAPI.Controllers
             _orderDetailService = orderDetailService;
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetAllOrderDetailByTableID(Guid id)
+        {
+            try
+            {
+                var orderDetails = await _orderDetailService.GetAllOrderDetailByTableID(id);
+                if (orderDetails == null)
+                {
+                    return NotFound(new FailResponse
+                    {
+                        Status = NotFound().StatusCode,
+                        Message = "Không tìm thấy hoá đơn chi tiết của bàn này!"
+                    });
+                }
+                return Ok(new SucceededRespone
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Tìm kiếm thành công.",
+                    Data = orderDetails
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = "Tìm kiếm thất bại!",
+                    Errors = ex.Message
+                });
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateNewOrderDetail([FromBody] AddNewOrderDetailDTO orderDetailDTO)
         {
@@ -50,21 +82,25 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpPost("{id}")]
-        public async Task<IActionResult> AddNewProductToOrder(Guid id,[FromBody] List<AddOrderDetailDTO> orderDetailDTO)
+        public async Task<IActionResult> AddNewProductToOrder(Guid id, [FromBody] List<AddOrderDetailDTO> orderDetailDTO)
         {
             try
             {
 
-                var requestResult = await _orderDetailService.AddNewProductToOrder(id,orderDetailDTO);
+                var requestResult = await _orderDetailService.AddNewProductToOrder(id, orderDetailDTO);
                 if (requestResult != null)
                 {
-                    return (Decimal.TryParse(requestResult, out _) )
+                    return (Decimal.TryParse(requestResult, out _))
                         ?
                         Ok(new SucceededRespone()
                         {
                             Status = Ok().StatusCode,
                             Message = "Đặt sản phẩm thành công.",
-                            Data = Decimal.Parse(requestResult)
+                            Data = new
+                            {
+                              OrderDetails = await _orderDetailService.GetAllOrderDetailByTableID(id),
+                              TotalPrice = Decimal.Parse(requestResult)
+                            }
                         })
                         :
                         StatusCode(400, new FailResponse()
@@ -79,7 +115,7 @@ namespace PoolLab.WebAPI.Controllers
                 {
                     Status = BadRequest().StatusCode,
                     Message = "Mã bàn hoặc danh sách các sản phẩm bị lỗi!"
-                }) ;
+                });
 
             }
             catch (Exception ex)

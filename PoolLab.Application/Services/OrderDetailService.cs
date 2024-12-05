@@ -29,6 +29,24 @@ namespace PoolLab.Application.Interface
             _paymentService = paymentService;
         }
 
+        public async Task<IEnumerable<OrderDetailDTO>?> GetAllOrderDetailByTableID(Guid id)
+        {
+            try
+            {
+                var order = await _unitOfWork.OrderRepo.GetOrderByCusOrTable(id);
+
+                if (order != null)
+                {
+                    return _mapper.Map<IEnumerable<OrderDetailDTO>>(await _unitOfWork.OrderDetailRepo.GetOrderDetailByOrderOrTable(order.Id));
+                }
+
+                return null;
+            }catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<string?> AddNewOrderDetail(AddNewOrderDetailDTO orderDetailDTO)
         {
             try
@@ -43,9 +61,9 @@ namespace PoolLab.Application.Interface
                 }
                 return null;
             }
-            catch (DbUpdateException)
+            catch (Exception ex)
             {
-                throw;
+                throw new Exception(ex.Message);
             }
         }
 
@@ -58,6 +76,8 @@ namespace PoolLab.Application.Interface
                 {
                     return "Không tìm thấy hoá đơn của bàng này!";
                 }
+
+                await _unitOfWork.BeginTransactionAsync();
 
                 // Đối với member
                 if (order.CustomerId != null)
@@ -124,6 +144,7 @@ namespace PoolLab.Application.Interface
 
                         var newOrderDe = _mapper.Map<AddNewOrderDetailDTO>(orderDetails);
                         newOrderDe.OrderId = order.Id;
+                        newOrderDe.BilliardTableId = order.BilliardTableId;
                         var addNew = await AddNewOrderDetail(newOrderDe);
                         if (addNew != null)
                         {
@@ -163,12 +184,13 @@ namespace PoolLab.Application.Interface
                 }
 
                 
-
+                await _unitOfWork.CommitTransactionAsync();
                 return order.TotalPrice.ToString();
             }
-            catch (DbUpdateException)
+            catch (Exception ex)
             {
-                throw;
+                await _unitOfWork.RollbackTransactionAsync();
+                throw new Exception(ex.Message);
             }
         }
     }

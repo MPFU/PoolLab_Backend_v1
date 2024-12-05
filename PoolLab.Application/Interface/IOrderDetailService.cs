@@ -13,5 +13,7 @@ namespace PoolLab.Application.Interface
         Task<string?> AddNewOrderDetail(AddNewOrderDetailDTO orderDetailDTO);
 
         Task<string?> AddNewProductToOrder(Guid bidaID, List<AddOrderDetailDTO> orderDetailDTOs);
+
+        Task<IEnumerable<OrderDetailDTO>?> GetAllOrderDetailByTableID(Guid id);
     }
 }
