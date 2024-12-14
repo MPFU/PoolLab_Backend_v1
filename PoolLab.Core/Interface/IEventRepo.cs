@@ -9,5 +9,8 @@ namespace PoolLab.Core.Interface
 {
     public interface IEventRepo : IGenericRepo<Event>
     {
+        Task<IEnumerable<Event>> GetAllEvent();
+
+        Task<Event?> GetEventById(Guid Id);
     }
 }

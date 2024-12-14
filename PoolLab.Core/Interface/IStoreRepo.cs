@@ -9,7 +9,7 @@ namespace PoolLab.Core.Interface
 {
     public interface IStoreRepo : IGenericRepo<Store>
     {
-
+        Task<bool> CheckNameDuplicate(Guid? storeid, string name);
         Task<Store?> GetStoreByName(string name);
     }
 }

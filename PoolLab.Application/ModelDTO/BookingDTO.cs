@@ -53,11 +53,7 @@ namespace PoolLab.Application.ModelDTO
     {
         public Guid? CustomerId { get; set; }
 
-        public Guid? BilliardTypeId { get; set; }
-
-        public Guid? StoreId { get; set; }
-
-        public Guid? AreaId { get; set; }
+        public Guid? BilliardTableId { get; set; }
 
         public string? Message { get; set; }
 

@@ -33,5 +33,7 @@ namespace PoolLab.Application.Interface
         Task UpdateBidaTableStatusAuto();
 
         Task<List<GetBilliardTableDTO>?> SearchTableForRecurring(SearchTableRecurringDTO searchDTO);
+
+        Task<List<GetBilliardTableDTO>?> SearchTableForBooking(SearchTableBookingDTO searchTable);
     }
 }

@@ -54,7 +54,7 @@ namespace PoolLab.Application.Services
             {
                 var acc = await _accountService.AddNewUser(registerData);
                 return acc;
-            }catch (DbUpdateException ex)
+            }catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }

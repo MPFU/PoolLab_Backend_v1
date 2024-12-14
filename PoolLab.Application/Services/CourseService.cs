@@ -18,6 +18,7 @@ namespace PoolLab.Application.Interface
     {
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
+        
 
         public CourseService(IMapper mapper, IUnitOfWork unitOfWork)
         {
@@ -327,6 +328,63 @@ namespace PoolLab.Application.Interface
         public async Task<GetAllCoursesDTO?> GetCourseById(Guid Id)
         {         
             return _mapper.Map<GetAllCoursesDTO>(await _unitOfWork.CourseRepo.GetCourseByID(Id));
+        }
+
+        public async Task<string?> CancelCourse(Guid Id)
+        {
+            try
+            {
+                var course = await _unitOfWork.CourseRepo.GetCourseByID(Id);
+                if (course == null)
+                {
+                    return "Không tìm thấy khoá học này!";
+                }
+
+                await _unitOfWork.BeginTransactionAsync();
+
+                var register = await _unitOfWork.RegisterCourseRepo.GetRegisterCourseByCourseorStudentID(course.Id);
+                if (register != null)
+                {
+                    foreach (var regis in register)
+                    {
+                        var enrollList = await _unitOfWork.RegisterCourseRepo.GetAllRegisterCourseByEnrollID(regis.Id);
+
+                        if (enrollList == null)
+                        {
+                            return "Không tìm thấy danh sách học của khoá học này!";
+                        }
+
+                        //Xoá danh sách khoá học
+                        foreach (var en in enrollList)
+                        {
+                            _unitOfWork.RegisterCourseRepo.Delete(en);
+                            var result2 = await _unitOfWork.SaveAsync() > 0;
+                        }
+
+                        regis.Status = "Đã Huỷ";
+                        
+                        _unitOfWork.RegisterCourseRepo.Update(regis);
+                        var result1 = await _unitOfWork.SaveAsync() > 0;
+                    }
+                }
+
+                course.Status = "Vô Hiệu";
+                course.NoOfUser = 0;
+                _unitOfWork.CourseRepo.Update(course);
+                var result = await _unitOfWork.SaveAsync() > 0;
+                if (!result)
+                {
+                    return "Huỷ Khoá Học Thất Bại!";
+                }
+
+                await _unitOfWork.CommitTransactionAsync();
+
+                return null;
+            }catch (Exception ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

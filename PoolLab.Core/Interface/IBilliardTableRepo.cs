@@ -9,7 +9,7 @@ namespace PoolLab.Core.Interface
 {
     public interface IBilliardTableRepo : IGenericRepo<BilliardTable>
     {
-        Task<BilliardTable?> GetBidaTableByID(Guid id);  
+        Task<BilliardTable?> GetBidaTableByID(Guid id);
 
         Task<bool> CheckDuplicateName(Guid? id, string name, Guid? storeID);
 
@@ -22,5 +22,9 @@ namespace PoolLab.Core.Interface
         Task<IEnumerable<BilliardTable>?> GetAllBidaTable();
 
         Task<List<BilliardTable>?> GetAllBidaTableForRecurring(Guid? StoreId, Guid? AreaId, Guid? BilliardTypeId);
+
+        Task<List<BilliardTable>?> GetAllBidaTableForDate(Guid? StoreId, Guid? AreaId, Guid? BilliardTypeId);
+
+        Task<List<BilliardTable>?> GetAllBidaTableForSameDate(Guid? StoreId, Guid? AreaId, Guid? BilliardTypeId);
     }
 }

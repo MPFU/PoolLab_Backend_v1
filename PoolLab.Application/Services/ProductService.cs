@@ -161,16 +161,16 @@ namespace PoolLab.Application.Interface
                 }
                 check.Name = !string.IsNullOrEmpty(create.Name) ? create.Name : check.Name;
                 check.Descript = !string.IsNullOrEmpty(create.Descript) ? create.Descript : check.Descript;
-                check.Quantity = check.Quantity != null ? create.Quantity : check.Quantity;
-                check.MinQuantity = check.MinQuantity != null ? create.MinQuantity : check.MinQuantity;
-                check.Price = check.Price != null ? create.Price : check.Price;
-                check.ProductGroupId = check.ProductGroupId != null ? create.ProductGroupId : check.ProductGroupId;
-                check.UnitId = check.UnitId != null ? create.UnitId : check.UnitId;
-                check.ProductTypeId = check.ProductType != null ? create.ProductTypeId : check.ProductTypeId;
+                check.Quantity = create.Quantity != null ? create.Quantity : check.Quantity;
+                check.MinQuantity = create.MinQuantity != null ? create.MinQuantity : check.MinQuantity;
+                check.Price = create.Price != null ? create.Price : check.Price;
+                check.ProductGroupId = create.ProductGroupId != null ? create.ProductGroupId : check.ProductGroupId;
+                check.UnitId = create.UnitId != null ? create.UnitId : check.UnitId;
+                check.ProductTypeId = create.ProductTypeId != null ? create.ProductTypeId : check.ProductTypeId;
                 check.ProductImg = !string.IsNullOrEmpty(create.ProductImg) ? create.ProductImg : check.ProductImg;
                 check.Status = !string.IsNullOrEmpty(create.Status) ? create.Status : check.Status;
                 check.UpdatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
-
+                _unitOfWork.ProductRepo.Update(check);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)
                 {

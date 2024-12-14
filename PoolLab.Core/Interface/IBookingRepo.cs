@@ -21,7 +21,7 @@ namespace PoolLab.Core.Interface
 
         Task<IEnumerable<Booking>> GetAllBookingDelayInDate(DateTime now);
 
-        Task<string> CheckTableBookingInMonth(Guid tableId, DateTime date, TimeOnly startTime, TimeOnly endTime);
+        Task<Booking?> CheckTableBookingInMonth(Guid tableId, DateTime date, TimeOnly startTime, TimeOnly endTime);
 
         Task<IEnumerable<Booking>?> GetAllRecurringBooking(Guid id);
 
@@ -30,5 +30,9 @@ namespace PoolLab.Core.Interface
         Task<IEnumerable<Booking>?> GetAllRecurringBookingCus(Guid id, DateTime startDate, DateTime endDate);
 
         Task<IEnumerable<Booking>?> GetAllBookingInMonth(DateTime startDate, DateTime endDate, TimeOnly timeStart, TimeOnly timeEnd);
+
+        Task<List<Booking>?> GetBookingInDate(DateOnly bookingDate, TimeOnly timeStart, TimeOnly timeEnd);
+
+        Task<Booking?> CheckAccountOrTableBooking(Guid id, DateOnly bookingDate, TimeOnly timeStart, TimeOnly timeEnd);
     }
 }

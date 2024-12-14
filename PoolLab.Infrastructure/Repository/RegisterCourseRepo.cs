@@ -49,5 +49,13 @@ namespace PoolLab.Infrastructure.Interface
                 .Include(x => x.RegisteredCourses)
                 .Where(x => x.Id == id).FirstOrDefaultAsync();
         }
+
+        public async Task<IEnumerable<RegisteredCourse>?> GetRegisterCourseByCourseorStudentID(Guid id)
+        {
+            return await _dbContext.RegisteredCourses
+                .Where(x => x.CourseId == id || x.StudentId == id)
+                .Where(x => x.IsRegistered == true && x.Status.Equals("Kích Hoạt"))
+                .ToListAsync();
+        }
     }
 }

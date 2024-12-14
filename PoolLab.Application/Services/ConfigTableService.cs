@@ -76,6 +76,9 @@ namespace PoolLab.Application.Services
                 check.TimeHold = configDTO.TimeHold != null ? configDTO.TimeHold : check.TimeHold;
                 check.Deposit = configDTO.Deposit != null ? configDTO.Deposit : check.Deposit;
                 check.TimeCancelBook = configDTO.TimeCancelBook != null ? configDTO.TimeCancelBook : check.TimeCancelBook;
+                check.TimeAllowBook = configDTO.TimeAllowBook != null ? configDTO.TimeAllowBook : check.TimeAllowBook;
+                check.DayLimit = configDTO.DayLimit != null ? configDTO .DayLimit : check.DayLimit;
+                check.MonthLimit = configDTO.MonthLimit != null ? configDTO.MonthLimit : check.MonthLimit;
                 DateTime utcNow = DateTime.UtcNow;
                 TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                 check.UpdateDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);

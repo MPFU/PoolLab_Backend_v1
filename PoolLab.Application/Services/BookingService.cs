@@ -35,51 +35,107 @@ namespace PoolLab.Application.Interface
         {
             try
             {
-                var book = _mapper.Map<Booking>(newBookingDTO);
-
                 DateTime utcNow = DateTime.UtcNow;
                 TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                 var dateTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
-                var date = DateOnly.FromDateTime(dateTime);
-                var time = TimeOnly.FromDateTime(dateTime);
 
-                if (book.TimeStart >= book.TimeEnd)
-                {
-                    return "Giờ chơi của bạn không hợp lệ!";
-                }
+                //Ngày và thời gian hiện tại
+                var currentDate = DateOnly.FromDateTime(dateTime);
+                var currentTime = TimeOnly.FromDateTime(dateTime);
 
-                if (book.BookingDate == date)
-                {
-                    if (book.TimeStart <= time || book.TimeStart <= time.AddMinutes(30))
-                    {
-                        return "Giờ chơi của bạn không hợp lệ!";
-                    }
-                }
-                else if (book.BookingDate < date)
-                {
-                    return "Ngày đặt của bạn không hợp lệ!";
-                }
+                //Ngày và thời gian đặt
+                var bookingDate = DateOnly.Parse(newBookingDTO.BookingDate);
+                var timeStart = TimeOnly.Parse(newBookingDTO.TimeStart);
+                var timeEnd = TimeOnly.Parse(newBookingDTO.TimeEnd);
 
-
-
-                var check = await _unitOfWork.BookingRepo.CheckAccountHasBooking(book);
-                if (check)
-                {
-                    return "Bạn đã có lịch đặt bàn trong thời gian này!";
-                }
-
-                var table = await _unitOfWork.BookingRepo.GetTableNotBooking(book);
-                if (table == null)
-                {
-                    return "Không còn bàn trống cho khung giờ này!";
-                }
-                var config = await _unitOfWork.ConfigTableRepo.GetConfigTableByNameAsync("Cài đặt");
+                //Lấy cấu hình của hệ thống
+                var config = await _configTableService.GetConfigTableByName();
                 if (config == null)
                 {
                     return "Cài đặt hệ thống bị lỗi!";
                 }
 
-                TimeSpan timePlay = (TimeSpan)(book.TimeEnd - book.TimeStart);
+                //Khách hàng
+                var cus = await _unitOfWork.AccountRepo.GetByIdAsync((Guid)newBookingDTO.CustomerId);
+                if (cus == null)
+                {
+                    return "Không tìm thấy thành viên này!";
+                }
+                if (cus.Status != "Kích Hoạt")
+                {
+                    return "Tài khoản của bạn không được kích hoạt để thực hiện tính năng này!";
+                }
+
+                //Bàn chơi
+                var table = await _unitOfWork.BilliardTableRepo.GetBidaTableByID((Guid)newBookingDTO.BilliardTableId);
+                if (table == null)
+                {
+                    return "Không tìm thấy bàn chơi này!";
+                }
+                if (table.Status.Equals("Bảo Trì"))
+                {
+                    return "Bàn này hiện đang bảo trì không thể phục vụ!";
+                }
+
+                //Chi nhánh
+                var store = await _unitOfWork.StoreRepo.GetByIdAsync((Guid)table.StoreId);
+                if (store == null)
+                {
+                    return "Không tìm thấy chi nhánh này!";
+                }
+                if(store.Status.Equals("Dừng Hoạt Động"))
+                {
+                    return "Chi nhánh này không còn hoạt động";
+                }
+
+                //Lấy ngày giới hạn đặt
+                var dayLimit = currentDate.AddDays((int)config.DayLimit);
+
+                //Kiểm tra tính hợp lệ
+                if(dayLimit < bookingDate)
+                {
+                    return $"Bạn chỉ có thể đặt bàn trước trong vòng {config.DayLimit} ngày trở lại!";
+                }
+
+                if (timeStart >= timeEnd)
+                {
+                    return "Giờ chơi của bạn không hợp lệ!";
+                }
+
+                if (bookingDate == currentDate)
+                {
+                    if (timeStart <= currentTime || timeStart <= currentTime.AddMinutes((double)config.TimeAllowBook))
+                    {
+                        return $"Giờ chơi của bạn phải bắt đầu ít nhất sau {config.TimeAllowBook} phút từ thời điểm đặt bàn!";
+                    }
+
+                    if(table.Status != "Bàn Trống")
+                    {
+                        return "Bàn chơi hiện không trống để phục vụ!";
+                    }
+                }
+
+                else if (bookingDate < currentDate)
+                {
+                    return "Ngày đặt của bạn không hợp lệ!";
+                }
+
+                //Kiểm tra lịch đặt bàn
+                var check = await _unitOfWork.BookingRepo.CheckAccountOrTableBooking(table.Id, bookingDate, timeStart,timeEnd);
+                if (check != null)
+                {
+                    return "Bạn đã có lịch đặt bàn trong thời gian này!";
+                }
+
+                //Kiểm tra lịch đặt của khách
+                var checkAcc = await _unitOfWork.BookingRepo.CheckAccountOrTableBooking(cus.Id, bookingDate, timeStart, timeEnd);
+                if (checkAcc != null)
+                {
+                    return "Bạn đã có lịch đặt trước trong khoảng thời gian này!";
+                }
+               
+
+                TimeSpan timePlay = (TimeSpan)(timeEnd - timeStart);
 
                 var bookTime = (decimal)Math.Abs(timePlay.TotalHours);
 
@@ -91,17 +147,18 @@ namespace PoolLab.Application.Interface
                     ? ((bookTime * table.Price.OldPrice) / 100) * config.Deposit * 3
                     : ((bookTime * table.Price.OldPrice) / 100) * config.Deposit * 5;
 
-                var deposit = Math.Round((decimal)bookPrice, 2);
-                var customer = await _unitOfWork.AccountRepo.GetAccountBalanceByID((Guid)book.CustomerId);
+                var deposit = Math.Round((decimal)bookPrice, 0, MidpointRounding.AwayFromZero);
 
-                if (customer != null && customer < deposit)
+                if ( cus.Balance < deposit)
                 {
-                    return $"Số dư của bạn không đủ. Bạn cần nạp thêm ít nhất {deposit - customer}!";
+                    return $"Số dư của bạn không đủ. Bạn cần nạp thêm ít nhất {deposit - cus.Balance}!";
                 }
-                else if (customer != null && deposit <= customer)
+                else 
                 {
-                    var price = customer - deposit;
-                    var up = await _accountService.UpdateBalance((Guid)book.CustomerId, (decimal)price);
+                    var price = cus.Balance - deposit;
+                    price = Math.Round((decimal)price, 0, MidpointRounding.AwayFromZero);
+
+                    var up = await _accountService.UpdateBalance((Guid)cus.Id, (decimal)price);
                     if (up != null)
                     {
                         return up;
@@ -109,7 +166,7 @@ namespace PoolLab.Application.Interface
                     PaymentBookingDTO paymentBookingDTO = new PaymentBookingDTO();
                     paymentBookingDTO.PaymentMethod = "Qua Ví";
                     paymentBookingDTO.Amount = deposit;
-                    paymentBookingDTO.AccountId = book.CustomerId;
+                    paymentBookingDTO.AccountId = cus.Id;
                     paymentBookingDTO.PaymentInfo = "Đặt Bàn";
                     paymentBookingDTO.TypeCode = -1;
                     var pay = await _paymentService.CreateTransactionBooking(paymentBookingDTO);
@@ -118,28 +175,33 @@ namespace PoolLab.Application.Interface
                         return pay;
                     }
                 }
-                else
-                {
-                    return "Không tìm thấy tài khoản người chơi!";
-                }
 
-                book.ConfigId = config.Id;
-                book.BilliardTableId = table.Id;
-                book.Id = Guid.NewGuid();
-                book.CreatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
-                book.Deposit = deposit;
-                book.Status = "Đã Đặt";
-                await _unitOfWork.BookingRepo.AddAsync(book);
+                BookingDTO bookingDTO = new BookingDTO();
+                bookingDTO.CustomerId = cus.Id;
+                bookingDTO.StoreId = table.StoreId;
+                bookingDTO.AreaId = table.AreaId;
+                bookingDTO.BilliardTypeId = table.BilliardTypeId;
+                bookingDTO.BookingDate = bookingDate;
+                bookingDTO.TimeStart = timeStart;
+                bookingDTO.TimeEnd = timeEnd;
+                bookingDTO.IsRecurring = false;
+                bookingDTO.ConfigId = config.Id;
+                bookingDTO.BilliardTableId = table.Id;
+                bookingDTO.Id = Guid.NewGuid();
+                bookingDTO.CreatedDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+                bookingDTO.Deposit = deposit;
+                bookingDTO.Status = "Đã Đặt";
+                await _unitOfWork.BookingRepo.AddAsync(_mapper.Map<Booking>(bookingDTO));
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (result)
                 {
-                    return book.Id.ToString();
+                    return bookingDTO.Id.ToString();
                 }
                 return null;
             }
-            catch (DbUpdateException)
+            catch (Exception e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
         }
 
@@ -246,9 +308,9 @@ namespace PoolLab.Application.Interface
                 }
                 return null;
             }
-            catch (DbUpdateException)
+            catch (Exception e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
         }
 
@@ -277,6 +339,8 @@ namespace PoolLab.Application.Interface
 
                 var nowTime = TimeOnly.FromDateTime(now);
                 var nowDate = DateOnly.FromDateTime(now);
+
+                await _unitOfWork.BeginTransactionAsync();
 
                 if ((dateBook <= nowDate && nowTime > timeBook.AddMinutes((double)config.TimeCancelBook)) && answer.Answer == null)
                 {
@@ -328,11 +392,15 @@ namespace PoolLab.Application.Interface
                         return "Cập nhật thất bại!";
                     }
                 }
+
+                await _unitOfWork.CommitTransactionAsync();
+
                 return null;
             }
-            catch (DbUpdateException)
+            catch (Exception ex)
             {
-                throw;
+                await _unitOfWork.RollbackTransactionAsync();
+                throw new Exception(ex.Message);
             }
         }
 
@@ -345,6 +413,13 @@ namespace PoolLab.Application.Interface
                 var now = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
                 DateTime currentDate = new DateTime(now.Year, now.Month, 1);
 
+                //Tính tiền cọc
+                var config = await _configTableService.GetConfigTableByName();
+                if (config == null)
+                {
+                    return "Không tìm thấy cấu hình hệ thống!";
+                }
+
                 //NGÀY ĐẶT THEO THÁNG
                 var parts = bookingReqDTO.MonthBooking.Split('/');
                 int month = int.Parse(parts[0]);
@@ -352,6 +427,12 @@ namespace PoolLab.Application.Interface
 
                 DateTime dateStart = new DateTime(year, month, 1);
                 DateTime dateEnd = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+                DateTime dateLimit = currentDate.AddMonths((int)config.MonthLimit);
+
+                if (dateLimit < dateEnd)
+                {
+                    return $"Bạn chỉ có thể đặt bàn không quá {config.MonthLimit} tháng!";
+                }
 
                 if (currentDate >= dateStart)
                 {
@@ -373,6 +454,10 @@ namespace PoolLab.Application.Interface
                 {
                     return "Không tìm thấy thành viên này!";
                 }
+                if(cus.Status != "Kích Hoạt")
+                {
+                    return "Tài khoản của bạn không được kích hoạt để thực hiện tác vụ này!";
+                }
 
                 //BÀN CHƠI
                 var table = await _unitOfWork.BilliardTableRepo.GetBidaTableByID(bookingReqDTO.TableId);
@@ -386,25 +471,14 @@ namespace PoolLab.Application.Interface
 
 
                 //Kiểm tra lịch đặt của khách
-                var bookCheck = await _unitOfWork.BookingRepo.GetAllRecurringBookingCus(cus.Id, dateStart, dateEnd);
-                if (bookCheck != null)
+                for (DateTime date = dateStart; date <= dateEnd; date = date.AddDays(1))
                 {
-                    foreach(var book in bookCheck)
+                    if (days.Contains(date.DayOfWeek))
                     {
-                        var dayBook = book.DayOfWeek.Split(",");
-                        var dayBooks = dayBook.Select(day => Enum.Parse<DayOfWeek>(day)).ToList();
-                        foreach(var day in dayBooks)
+                        var checkBook = await _unitOfWork.BookingRepo.CheckTableBookingInMonth(cus.Id, date, timeStart, timeEnd);
+                        if (checkBook != null)
                         {
-                            foreach(var day1 in days)
-                            {
-                                if(day == day1)
-                                {
-                                    if ((book.TimeStart < timeEnd && book.TimeStart >= timeStart) || (book.TimeEnd > timeStart && book.TimeEnd <= timeEnd))
-                                    {
-                                        return $"Bạn đã có lịch đặt trước vào lúc {book.TimeStart} và kết thúc lúc {book.TimeEnd}!";
-                                    }
-                                }
-                            }
+                            return $"Bạn đã có lịch đặt vào ngày {checkBook.BookingDate} lúc {checkBook.TimeStart} đến {checkBook.TimeEnd}";
                         }
                     }
                 }
@@ -419,21 +493,15 @@ namespace PoolLab.Application.Interface
                         var checkBook = await _unitOfWork.BookingRepo.CheckTableBookingInMonth(table.Id, date, timeStart, timeEnd);
                         if (checkBook != null)
                         {
-                            return checkBook;
+                            return $"Bàn chơi này đã có lịch đặt vào ngày {checkBook.BookingDate} lúc {checkBook.TimeStart} đến {checkBook.TimeEnd}";
                         }
                         bookingCount++;
                     }
-                }
-
-                //Tính tiền cọc
-                var config = await _configTableService.GetConfigTableByName();
-                if (config == null)
-                {
-                    return "Không tìm thấy cấu hình hệ thống!";
-                }
+                }           
 
                 TimeSpan timePlay = timeEnd - timeStart;
 
+                //Tính tiền cọc
                 var bookTime = (decimal)Math.Abs(timePlay.TotalHours);
 
                 var bookPrice = bookTime <= 2

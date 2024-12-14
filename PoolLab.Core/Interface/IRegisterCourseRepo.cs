@@ -16,5 +16,7 @@ namespace PoolLab.Core.Interface
         Task<IEnumerable<RegisteredCourse>?> GetAllRegisterCourseByEnrollID(Guid id);
 
         Task<RegisteredCourse?> GetRegisterdCourseById(Guid id);
+
+        Task<IEnumerable<RegisteredCourse>?> GetRegisterCourseByCourseorStudentID(Guid id);
     }
 }

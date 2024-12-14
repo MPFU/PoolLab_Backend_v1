@@ -10,35 +10,36 @@ namespace PoolLab.WebAPI.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class StoreController : ControllerBase
+    public class EventController : ControllerBase
     {
-        private readonly IStoreService _storeService;
+        private readonly IEventService _eventService;
         private readonly IAzureBlobService _azureBlobService;
 
-        public StoreController(IStoreService store, IAzureBlobService azureBlobService)
+        public EventController(IEventService eventService, IAzureBlobService azureBlobService)
         {
-            _storeService = store;
+            _eventService = eventService;
             _azureBlobService = azureBlobService;
+
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetStoreByID(Guid id)
+        public async Task<IActionResult> GetEventById(Guid Id)
         {
             try
             {
-                var roleList = await _storeService.GetStoreById(id);
-                if (roleList == null)
+                var events = await _eventService.GetEventById(Id);
+                if (events == null)
                 {
                     return NotFound(new FailResponse()
                     {
                         Status = NotFound().StatusCode,
-                        Message = "Không tìm thấy cửa tiệm này trong danh sách!"
+                        Message = "Không có bài đăng sự kiện nào."
                     });
                 }
                 return Ok(new SucceededRespone()
                 {
                     Status = Ok().StatusCode,
-                    Data = roleList
+                    Data = events
                 });
             }
             catch (Exception ex)
@@ -46,29 +47,30 @@ namespace PoolLab.WebAPI.Controllers
                 return BadRequest(new FailResponse()
                 {
                     Status = BadRequest().StatusCode,
-                    Message = ex.Message
+                    Message = "Thất bại",
+                    Errors = ex.Message
                 });
             }
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllStore([FromQuery] StoreFilter storeFilter)
+        public async Task<IActionResult> GetAllEvent([FromQuery]EventFilter eventFilter)
         {
             try
             {
-                var area = await _storeService.GetAllStore(storeFilter);
-                if (area == null || area.Items.Count() <= 0)
+                var events = await _eventService.GetAllEvent(eventFilter);
+                if (events == null || events.Items.Count() <= 0)
                 {
                     return NotFound(new FailResponse()
                     {
                         Status = NotFound().StatusCode,
-                        Message = "Không tìm thấy !"
+                        Message = "Không có sự kiện nào."
                     });
                 }
                 return Ok(new SucceededRespone()
                 {
                     Status = Ok().StatusCode,
-                    Data = area
+                    Data = events
                 });
             }
             catch (Exception ex)
@@ -82,37 +84,7 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddNewStore([FromBody] NewStoreDTO store)
-        {
-            try
-            {
-                var newStore = await _storeService.AddNewStore(store);
-                if (newStore != null)
-                {
-                    return BadRequest(new FailResponse()
-                    {
-                        Status = BadRequest().StatusCode,
-                        Message = newStore
-                    });
-                }
-                return Ok(new SucceededRespone()
-                {
-                    Status = Ok().StatusCode,
-                    Message = "Tạo thành công"
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new FailResponse()
-                {
-                    Status = BadRequest().StatusCode,
-                    Message = ex.Message
-                });
-            }
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> UploadStoreImg(IFormFile file)
+        public async Task<IActionResult> UploadFileEvent(IFormFile file)
         {
             try
             {
@@ -132,7 +104,7 @@ namespace PoolLab.WebAPI.Controllers
                         Message = "Tệp không phải là hình ảnh."
                     });
                 }
-                var containerName = "store"; // replace with your container name
+                var containerName = "thumbnail"; // replace with your container name
                 var uri = await _azureBlobService.UploadFileImageAsync(containerName, file);
 
                 return Ok(new SucceededRespone()
@@ -147,31 +119,30 @@ namespace PoolLab.WebAPI.Controllers
                 return StatusCode(500, new FailResponse()
                 {
                     Status = 500,
-                    Message = "Tải ảnh thất bại!",
-                    Errors =$"An error occurred while uploading the file: {ex.Message}"
+                    Message = $"An error occurred while uploading the file: {ex.Message}"
                 });
             }
         }
 
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateInfoStore(Guid id, [FromBody] NewStoreDTO newStoreDTO)
+        [HttpPost]
+        public async Task<IActionResult> CreateNewEvent(CreateEventDTO create)
         {
             try
             {
-                var newStore = await _storeService.UpdateStore(id, newStoreDTO);
-                if (newStore != null)
+                var events = await _eventService.AddNewEvent(create);
+                if (events != null)
                 {
                     return BadRequest(new FailResponse()
                     {
                         Status = BadRequest().StatusCode,
-                        Message = newStore
+                        Message = events
                     });
                 }
                 return Ok(new SucceededRespone()
                 {
                     Status = Ok().StatusCode,
-                    Message = "Cập nhật thành công!"
+                    Message = "Tạo bài đăng sự kiện thành công."
                 });
             }
             catch (Exception ex)
@@ -184,26 +155,84 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
-        
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteStore(Guid id)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateEventInfo(Guid id, [FromBody] CreateEventDTO createGroupProductDTO)
         {
             try
             {
-                var newStore = await _storeService.DeleteStore(id);
-                if (newStore != null)
+                var update = await _eventService.UpdateEventInfo(id, createGroupProductDTO);
+                if (update != null)
                 {
                     return BadRequest(new FailResponse()
                     {
                         Status = BadRequest().StatusCode,
-                        Message = newStore
+                        Message = update
                     });
                 }
                 return Ok(new SucceededRespone()
                 {
                     Status = Ok().StatusCode,
-                    Message = "Xoá thành công."
+                    Message = "Cập nhật thông tin bài đăng thành công."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateEventStatus(Guid id, [FromBody] UpdateStatusEventDTO createGroupProductDTO)
+        {
+            try
+            {
+                var update = await _eventService.UpdateStatusEvent(id, createGroupProductDTO);
+                if (update != null)
+                {
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = update
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Cập nhật thông tin bài đăng thành công."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteEvent(Guid id)
+        {
+            try
+            {
+                var check = await _eventService.DeleteEvent(id);
+                if (check != null)
+                {
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = check
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Xoá bài đăng thành công."
                 });
             }
             catch (Exception ex)

@@ -12,13 +12,19 @@ namespace PoolLab.Application.ModelDTO
 
         public string? Name { get; set; }
 
+        public int? TimeAllowBook { get; set; }
+
         public int? TimeDelay { get; set; }
 
         public int? TimeHold { get; set; }
 
+        public int? TimeCancelBook { get; set; }
+
         public int? Deposit { get; set; }
 
-        public int? TimeCancelBook { get; set; }
+        public int? MonthLimit { get; set; }
+
+        public int? DayLimit { get; set; }
 
         public DateTime? CreatedDate { get; set; }
 
@@ -29,12 +35,18 @@ namespace PoolLab.Application.ModelDTO
 
     public class NewConfigDTO
     {
+        public int? TimeAllowBook { get; set; }
+
         public int? TimeDelay { get; set; }
 
         public int? TimeHold { get; set; }
 
+        public int? TimeCancelBook { get; set; }
+
         public int? Deposit { get; set; }
 
-        public int? TimeCancelBook { get; set; }
+        public int? MonthLimit { get; set; }
+
+        public int? DayLimit { get; set; }
     }
 }

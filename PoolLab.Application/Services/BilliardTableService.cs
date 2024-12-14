@@ -82,6 +82,8 @@ namespace PoolLab.Application.Interface
                     return "Không tìm thấy thành viên này!";
                 }
 
+                await _unitOfWork.BeginTransactionAsync();
+
                 if (!string.IsNullOrEmpty(activeTable.CustomerTime))
                 {
                     TimeSpan timeCus = TimeSpan.Parse(activeTable.CustomerTime);
@@ -147,6 +149,8 @@ namespace PoolLab.Application.Interface
                     {
                         return "Kích hoạt thất bại!";
                     }
+
+                    await _unitOfWork.CommitTransactionAsync();
                     return $"{(int)timeCus.TotalHours:00}:{timeCus.Minutes:00}:{timeCus.Seconds:00}";
                 }
                 else
@@ -245,7 +249,7 @@ namespace PoolLab.Application.Interface
                                     {
                                         return "Kích hoạt thất bại!";
                                     }
-
+                                    await _unitOfWork.CommitTransactionAsync();
                                     return $"{(int)timeBook.TotalHours:00}:{timeBook.Minutes:00}:{timeBook.Seconds:00}";
                                 }
                             }
@@ -264,7 +268,7 @@ namespace PoolLab.Application.Interface
                             {
                                 return upBooking;
                             }
-
+                            await _unitOfWork.CommitTransactionAsync();
                             return $"Bạn đã kích hoạt trễ hơn {config.TimeDelay} thời gian giữ bàn. Hãy quét lại qrcode để kích hoạt như bình thường!";
                         }
                     }
@@ -273,11 +277,13 @@ namespace PoolLab.Application.Interface
                         return $"Lịch đặt của bạn đã bị huỷ do bạn kích hoạt trễ hơn thời gian giữ bàn. Hãy quét lại qrcode để kích hoạt như bình thường!";
                     }
                 }
+                await _unitOfWork.CommitTransactionAsync();
                 return null;
             }
-            catch (DbUpdateException)
+            catch (Exception ex)
             {
-                throw;
+                await _unitOfWork.RollbackTransactionAsync();
+                throw new Exception(ex.Message);
             }
         }
 
@@ -299,6 +305,8 @@ namespace PoolLab.Application.Interface
                 {
                     return "Bàn chơi này đang không trống để phục vụ!";
                 }
+
+                await _unitOfWork.BeginTransactionAsync();
 
                 AddNewPlayTimeDTO playTimeDTO = new AddNewPlayTimeDTO();
                 playTimeDTO.Status = "Đã Tạo";
@@ -328,11 +336,14 @@ namespace PoolLab.Application.Interface
                 {
                     return "Kích hoạt thất bại!";
                 }
+
+                await _unitOfWork.CommitTransactionAsync();
                 return null;
             }
-            catch (DbUpdateException)
+            catch (Exception e)
             {
-                throw;
+                await _unitOfWork.RollbackTransactionAsync();
+                throw new Exception(e.Message);
             }
         }
 
@@ -348,6 +359,8 @@ namespace PoolLab.Application.Interface
                         return "Tên bàn chơi bị trùng!";
                     }
                 }
+                await _unitOfWork.BeginTransactionAsync();
+
                 var bida = _mapper.Map<BilliardTable>(newBilliardTableDTO);
                 bida.Id = Guid.NewGuid();
                 DateTime utcNow = DateTime.UtcNow;
@@ -381,11 +394,14 @@ namespace PoolLab.Application.Interface
                 {
                     return "Tạo mới thất bại!";
                 }
+
+                await _unitOfWork.CommitTransactionAsync();
                 return null;
             }
-            catch (DbUpdateException)
+            catch (Exception e)
             {
-                throw;
+                await _unitOfWork.RollbackTransactionAsync();
+                throw new Exception(e.Message);
             }
         }
 
@@ -411,9 +427,9 @@ namespace PoolLab.Application.Interface
                 }
                 return null;
             }
-            catch (DbUpdateException)
+            catch (Exception e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
         }
 
@@ -514,9 +530,9 @@ namespace PoolLab.Application.Interface
                 }
                 return null;
             }
-            catch (DbUpdateException)
+            catch (Exception e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
         }
 
@@ -538,9 +554,9 @@ namespace PoolLab.Application.Interface
                 }
                 return null;
             }
-            catch (DbUpdateException)
+            catch (Exception e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
         }
 
@@ -749,19 +765,19 @@ namespace PoolLab.Application.Interface
                         {
                             foreach (var books in book)
                             {
-                                if(books.BookingDate == DateOnly.FromDateTime(date))
+                                if (books.BookingDate == DateOnly.FromDateTime(date))
                                 {
                                     newBook.Add(books);
                                 }
                             }
                         }
                     }
-                   
-                    foreach(var tables in table.ToList())
+
+                    foreach (var tables in table.ToList())
                     {
-                        foreach(var news in newBook.ToList())
+                        foreach (var news in newBook.ToList())
                         {
-                            if(news.BilliardTableId == tables.Id)
+                            if (news.BilliardTableId == tables.Id)
                             {
                                 table.Remove(tables);
                             }
@@ -777,6 +793,105 @@ namespace PoolLab.Application.Interface
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        public async Task<List<GetBilliardTableDTO>?> SearchTableForBooking(SearchTableBookingDTO searchTable)
+        {
+            try
+            {
+                DateTime utcNow = DateTime.UtcNow;
+                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                var dateTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+
+                //Ngày và thời gian hiện tại
+                var currentDate = DateOnly.FromDateTime(dateTime);
+                var currentTime = TimeOnly.FromDateTime(dateTime);
+
+                //Ngày và thời gian đặt
+                var bookingDate = DateOnly.Parse(searchTable.BookingDate);
+                var timeStart = TimeOnly.Parse(searchTable.StartTime);
+                var timeEnd = TimeOnly.Parse(searchTable.EndTime);
+
+                //Lấy cấu hình hệ thống
+                var config = await _configTableService.GetConfigTableByName();
+                if (config == null)
+                {
+                    return null;
+                }
+
+                //Lấy tất cả booking trong ngày
+                var booking = await _unitOfWork.BookingRepo.GetBookingInDate(bookingDate, timeStart, timeEnd);
+
+                if (timeStart >= timeEnd)
+                {
+                    return null;
+                }
+
+                if (bookingDate == currentDate)
+                {
+                    if (timeStart <= currentTime || timeStart <= currentTime.AddMinutes((double)config.TimeAllowBook))
+                    {
+                        return null;
+                    }
+
+                    //Lấy các bàn phù hợp 
+                    var table = await _unitOfWork.BilliardTableRepo.GetAllBidaTableForSameDate(searchTable.StoreId, searchTable.AreaId, searchTable.BilliardTypeId);
+
+                    if (booking == null)
+                    {
+                        return _mapper.Map<List<GetBilliardTableDTO>>(table);
+                    }
+
+                    foreach (var tables in table.ToList())
+                    {
+                        foreach (var books in booking.ToList())
+                        {
+                            if (books.BilliardTableId == tables.Id)
+                            {
+                                table.Remove(tables);
+                            }
+                        }
+
+                    }
+
+                    return _mapper.Map<List<GetBilliardTableDTO>?>(table);
+                }
+                else if (bookingDate < currentDate)
+                {
+                    return null;
+                }
+                else
+                {
+                    //Lấy các bàn phù hợp 
+                    var table = await _unitOfWork.BilliardTableRepo.GetAllBidaTableForDate(searchTable.StoreId, searchTable.AreaId, searchTable.BilliardTypeId);
+
+                    if (booking == null)
+                    {
+                        return _mapper.Map<List<GetBilliardTableDTO>>(table);
+                    }
+
+                    foreach (var tables in table.ToList())
+                    {
+                        foreach (var books in booking.ToList())
+                        {
+                            if (books.BilliardTableId == tables.Id)
+                            {
+                                table.Remove(tables);
+                            }
+                        }
+
+                    }
+
+                    return _mapper.Map<List<GetBilliardTableDTO>?>(table);
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
         }
     }
 }

@@ -36,7 +36,7 @@ namespace PoolLab.Application.Services
             var timeZoneById = TimeZoneInfo.FindSystemTimeZoneById(_configuration["TimeZoneId"]);
             var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
 
-            if (vNPayDTO.Amount <= 0 && vNPayDTO.Amount > 2000000)
+            if (vNPayDTO.Amount <= 0 && vNPayDTO.Amount > 10000000)
             {
                 return "Số tiền nạp không hợp lệ.\n Bạn chỉ có thể nạp lớn hơn 0 và bé hơn 2.000.000đ!";
             }

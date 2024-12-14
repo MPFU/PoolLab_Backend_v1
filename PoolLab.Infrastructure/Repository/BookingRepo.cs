@@ -133,26 +133,14 @@ namespace PoolLab.Infrastructure.Interface
                         .FirstOrDefaultAsync();
         }
 
-        public async Task<string> CheckTableBookingInMonth(Guid tableId, DateTime date, TimeOnly startTime, TimeOnly endTime)
+        public async Task<Booking?> CheckTableBookingInMonth(Guid tableId, DateTime date, TimeOnly startTime, TimeOnly endTime)
         {
 
-            var booking = await _dbContext.Bookings
-                .Where(x => x.Id == tableId && x.Status.Equals("Đã Đặt"))
-                .Where(x => x.BookingDate == DateOnly.FromDateTime(date))
+            return await _dbContext.Bookings
+                .Where(x => x.Id == tableId || x.CustomerId == tableId)
+                .Where(x => x.BookingDate == DateOnly.FromDateTime(date) && x.Status.Equals("Đã Đặt"))
                 .Where(x => (x.TimeStart < endTime && x.TimeStart >= startTime) || (x.TimeEnd > startTime && x.TimeEnd <= endTime))
-                .Select(x => new
-                {
-                    bookingDate = x.BookingDate,
-                    timeStart = x.TimeStart,
-                    timeEnd = x.TimeEnd
-                }).FirstOrDefaultAsync();
-
-            if(booking != null)
-            {
-                return $"Bàn chơi này đã có lịch đặt vào ngày {booking.bookingDate} lúc {booking.timeStart} đến {booking.timeEnd}";
-            }
-
-            return null;
+                .FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<Booking>?> GetAllRecurringBooking(Guid id)
@@ -187,6 +175,25 @@ namespace PoolLab.Infrastructure.Interface
                 .Where(x => (x.TimeStart < timeEnd && x.TimeStart >= timeStart) || (x.TimeEnd > timeStart && x.TimeEnd <= timeEnd))
                 .Where(x => x.IsRecurring == false)
                 .ToListAsync();
+        }
+
+        public async Task<Booking?> CheckAccountOrTableBooking(Guid id,DateOnly bookingDate, TimeOnly timeStart, TimeOnly timeEnd)
+        {
+            return await _dbContext.Bookings
+                          .Where(x => x.BookingDate == bookingDate &&
+                          ((x.TimeStart < timeEnd && x.TimeStart >= timeStart) || (x.TimeEnd > timeStart && x.TimeEnd <= timeEnd)))
+                          .Where(x => x.Status.Equals("Đã Đặt"))
+                          .Where(x => x.CustomerId == id || x.BilliardTableId == id)
+                          .FirstOrDefaultAsync();          
+        }
+
+        public async Task<List<Booking>?> GetBookingInDate( DateOnly bookingDate, TimeOnly timeStart, TimeOnly timeEnd)
+        {
+            return await _dbContext.Bookings
+                          .Where(x => x.BookingDate == bookingDate &&
+                          ((x.TimeStart < timeEnd && x.TimeStart >= timeStart) || (x.TimeEnd > timeStart && x.TimeEnd <= timeEnd)))
+                          .Where(x => x.Status.Equals("Đã Đặt"))
+                          .ToListAsync();
         }
     }
 }

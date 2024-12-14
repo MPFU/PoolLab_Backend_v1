@@ -15,9 +15,18 @@ namespace PoolLab.Infrastructure.Interface
         {
         }
 
+        public async Task<bool> CheckNameDuplicate(Guid? storeid, string name)
+        {
+            return storeid != null 
+                ? await _dbContext.Stores.AnyAsync(x => x.Name.Equals(name) && x.Id != storeid) 
+                : await _dbContext.Stores.AnyAsync(x => x.Name.Equals(name));
+        }
+
         public async Task<Store?> GetStoreByName(string name)
         {
             return await _dbContext.Stores.Where(x => x.Name.Equals(name)).FirstOrDefaultAsync();
         }
+
+       
     }
 }

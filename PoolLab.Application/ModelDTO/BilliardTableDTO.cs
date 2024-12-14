@@ -178,4 +178,19 @@ namespace PoolLab.Application.ModelDTO
 
         public string MonthBooking { get; set; }
     }
+
+    public class SearchTableBookingDTO
+    {
+        public Guid? StoreId { get; set; }
+
+        public Guid? AreaId { get; set; }
+
+        public Guid? BilliardTypeId { get; set; }
+
+        public string StartTime { get; set; }
+
+        public string EndTime { get; set; }
+
+        public string BookingDate { get; set; }
+    }
 }

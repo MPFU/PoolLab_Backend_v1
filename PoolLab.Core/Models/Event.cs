@@ -11,6 +11,8 @@ public partial class Event
 
     public string? Descript { get; set; }
 
+    public string? Thumbnail { get; set; }
+
     public Guid? ManagerId { get; set; }
 
     public Guid? StoreId { get; set; }

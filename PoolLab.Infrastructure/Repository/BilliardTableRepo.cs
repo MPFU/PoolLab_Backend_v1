@@ -86,5 +86,31 @@ namespace PoolLab.Infrastructure.Interface
         {
             return id != null ? await _dbContext.BilliardTables.Where(x => x.Id == id).Select(x => x.Price.OldPrice).FirstOrDefaultAsync() : null;
         }
+
+        public async Task<List<BilliardTable>?> GetAllBidaTableForDate(Guid? StoreId, Guid? AreaId, Guid? BilliardTypeId)
+        {
+            //Lấy tất cả các bàn phù hợp
+            return await _dbContext.BilliardTables
+                .Where(x => x.StoreId == StoreId && x.AreaId == AreaId)
+                .Where(x => x.BilliardTypeId == BilliardTypeId && x.Status != "Bảo Trì")
+                .Include(x => x.BilliardType)
+                .Include(x => x.Area)
+                .Include(x => x.Price)
+                .Include(x => x.Store)
+                .ToListAsync();
+        }
+
+        public async Task<List<BilliardTable>?> GetAllBidaTableForSameDate(Guid? StoreId, Guid? AreaId, Guid? BilliardTypeId)
+        {
+            //Lấy tất cả các bàn phù hợp
+            return await _dbContext.BilliardTables
+                .Where(x => x.StoreId == StoreId && x.AreaId == AreaId)
+                .Where(x => x.BilliardTypeId == BilliardTypeId && x.Status.Equals("Bàn Trống"))
+                .Include(x => x.BilliardType)
+                .Include(x => x.Area)
+                .Include(x => x.Price)
+                .Include(x => x.Store)
+                .ToListAsync();
+        }
     }
 }

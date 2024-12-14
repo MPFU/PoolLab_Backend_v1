@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PoolLab.Infrastructure;
 
@@ -11,9 +12,11 @@ using PoolLab.Infrastructure;
 namespace PoolLab.Infrastructure.Migrations
 {
     [DbContext(typeof(PoolLabDbv1Context))]
-    partial class PoolLabDbv1ContextModelSnapshot : ModelSnapshot
+    [Migration("20241205112317_UpdateEvent")]
+    partial class UpdateEvent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -428,13 +431,7 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime");
 
-                    b.Property<int?>("DayLimit")
-                        .HasColumnType("int");
-
                     b.Property<int?>("Deposit")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("MonthLimit")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -444,9 +441,6 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Property<string>("Status")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("TimeAllowBook")
-                        .HasColumnType("int");
 
                     b.Property<int?>("TimeCancelBook")
                         .HasColumnType("int");
@@ -546,7 +540,7 @@ namespace PoolLab.Infrastructure.Migrations
                         .HasColumnType("datetime");
 
                     b.Property<string>("Descript")
-                        .HasColumnType("nvarchar(MAX)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("ManagerId")
                         .HasColumnType("uniqueidentifier")

@@ -78,7 +78,7 @@ namespace PoolLab.Application.Interface
                 }
                 account.Id = Guid.NewGuid();
                 account.Email = createAccDTO.Email;
-                account.AvatarUrl = createAccDTO.AvatarUrl != null ? createAccDTO.AvatarUrl : "https://capstonepoollab.blob.core.windows.net/avatar/2755cb64-c635-421f-b695-bd0ba80608ed.jpg";
+                account.AvatarUrl = !string.IsNullOrEmpty(createAccDTO.AvatarUrl)  ? createAccDTO.AvatarUrl : "https://capstonepoollab.blob.core.windows.net/avatar/2755cb64-c635-421f-b695-bd0ba80608ed.jpg";
                 account.PhoneNumber = createAccDTO.PhoneNumber;
                 account.PasswordHash = BCrypt.Net.BCrypt.HashPassword(createAccDTO.PasswordHash);
                 account.UserName = createAccDTO.UserName;   
@@ -90,7 +90,7 @@ namespace PoolLab.Application.Interface
                 account.Balance = 0;
                 account.Tier = 0;
                 account.TotalTime = 0;
-                account.Status = "Kích hoạt";                              
+                account.Status = "Kích Hoạt";                              
                 var roleId = await _unitOfWork.RoleRepo.GetRoleByName(createAccDTO.RoleName);
                 if (roleId == null)
                 {

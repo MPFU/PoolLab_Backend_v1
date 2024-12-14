@@ -108,6 +108,36 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> CancelCourse(Guid id)
+        {
+            try
+            {
+                var update = await _courseService.CancelCourse(id);
+                if (update != null)
+                {
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = update
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Cập nhật khoá học thành công."
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
         [HttpDelete]
         public async Task<IActionResult> DeleteCourse(Guid id)
         {

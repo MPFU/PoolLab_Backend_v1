@@ -355,11 +355,14 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.ManagerId).HasColumnName("ManagerID");
             entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.Thumbnail).HasMaxLength(150);
             entity.Property(e => e.StoreId).HasColumnName("StoreID");
             entity.Property(e => e.TimeEnd).HasColumnType("datetime");
             entity.Property(e => e.TimeStart).HasColumnType("datetime");
             entity.Property(e => e.Title).HasMaxLength(100);
             entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+            entity.Property(e => e.Descript).HasColumnType("nvarchar(MAX)");
+
 
             entity.HasOne(d => d.Manager).WithMany(p => p.Events)
                 .HasForeignKey(d => d.ManagerId)
