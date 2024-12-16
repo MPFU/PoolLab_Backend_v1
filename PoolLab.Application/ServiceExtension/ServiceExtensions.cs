@@ -50,6 +50,9 @@ namespace PoolLab.Application.ServiceExtension
             services.AddScoped<IConfigTableService, ConfigTableService>();
             services.AddScoped<IBidaTypeAreaService, BidaTypeAreaService>();
             services.AddScoped<IVNPayService, VNPayService>();
+            services.AddScoped<IVoucherService, VoucherService>();
+            services.AddScoped<IAccountVoucherService, AccountVoucherService>();
+            services.AddScoped<IDashboardService, DashboardService>();
 
             services.AddScoped(x => new BlobServiceClient(configuration.GetConnectionString("BlobStorage")));
 

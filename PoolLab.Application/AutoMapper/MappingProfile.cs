@@ -221,6 +221,19 @@ namespace PoolLab.Application.AutoMapper
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Manager.UserName))
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.Manager.FullName))
                 .ReverseMap();
+
+            //VOUCHER
+            CreateMap<VoucherDTO, Voucher>().ReverseMap();
+            CreateMap<NewVoucherDTO, Voucher>().ReverseMap();
+
+            //ACCOUNT VOUCHER
+            CreateMap<AccountVoucherDTO, AccountVoucher>().ReverseMap();
+            CreateMap<AddNewAccountVoucherDTO, AccountVoucher>().ReverseMap();
+            CreateMap<AccountVoucher, GetAllAccountVoucherDTO>()
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Account.UserName))
+                .ForMember(dest => dest.VoucherName, opt => opt.MapFrom(src => src.Voucher.Name))
+                .ForMember(dest => dest.VouCode, opt => opt.MapFrom(src => src.Voucher.VouCode))
+                .ReverseMap();
         }
     }
 }

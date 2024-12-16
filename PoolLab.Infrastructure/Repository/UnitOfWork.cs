@@ -38,6 +38,8 @@ namespace PoolLab.Infrastructure.Interface
         private readonly ISubscriptionTypeRepo _subscriptionTypeRepo;
         private readonly IUnitRepo _unitRepo;
         private readonly IBidaTypeAreRepo _bidaTypeAreaRepo;
+        private readonly IVoucherRepo _voucherRepo;
+        private readonly IAccountVoucherRepo _accountVoucherRepo;
         private IDbContextTransaction _transaction;
 
 
@@ -69,7 +71,8 @@ namespace PoolLab.Infrastructure.Interface
             _subscriptionTypeRepo = new SubscriptionTypeRepo(_dbContext);
             _unitRepo = new UnitRepo(_dbContext);
             _bidaTypeAreaRepo = new BidaTypeAreaRepo(_dbContext);
-
+            _accountVoucherRepo = new AccountVoucherRepo(_dbContext);
+            _voucherRepo = new VoucherRepo(_dbContext);
         }
         public IAccountRepo AccountRepo => _accountRepo;
 
@@ -120,6 +123,10 @@ namespace PoolLab.Infrastructure.Interface
         public IUnitRepo UnitRepo => _unitRepo;
 
         public IBidaTypeAreRepo BidaTypeAreaRepo => _bidaTypeAreaRepo;
+
+        public IVoucherRepo VoucherRepo => _voucherRepo;
+
+        public IAccountVoucherRepo AccountVoucherRepo => _accountVoucherRepo;
 
         public void Dispose()
         {

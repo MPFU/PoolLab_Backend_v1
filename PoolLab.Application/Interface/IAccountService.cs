@@ -33,5 +33,7 @@ namespace PoolLab.Application.Interface
         Task<string?> DepositBalance(Guid Id, decimal amount);
 
         Task<string?> UpdateAccStatus(Guid Id, UpdateAccStatusDTO statusDTO);
+
+        Task<string?> UpdateAccPoint(Guid Id, int point);
     }
 }

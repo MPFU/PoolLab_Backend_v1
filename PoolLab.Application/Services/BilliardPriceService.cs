@@ -31,7 +31,7 @@ namespace PoolLab.Application.Interface
             {
                 var bida = _mapper.Map<BilliardPrice>(newBilliard);
                 bida.Id = Guid.NewGuid();
-                bida.Status = "Kích hoạt";
+                bida.Status = "Kích Hoạt";
                 await _unitOfWork.BilliardPriceRepo.AddAsync(bida);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)
@@ -39,9 +39,9 @@ namespace PoolLab.Application.Interface
                     return "Tạo mới thất bại!";
                 }
                 return null;
-            }catch (DbUpdateException) 
+            }catch (Exception e) 
             {
-                throw;
+                throw new Exception(e.Message);
             }
         }
 
@@ -62,9 +62,9 @@ namespace PoolLab.Application.Interface
                 }
                 return null;
             }
-            catch (DbUpdateException)
+            catch (Exception e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
         }
 
@@ -110,9 +110,9 @@ namespace PoolLab.Application.Interface
                 }
                 return null;
             }
-            catch (DbUpdateException)
+            catch (Exception e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
         }
 
@@ -134,9 +134,9 @@ namespace PoolLab.Application.Interface
                 }
                 return null;
             }
-            catch (DbUpdateException)
+            catch (Exception e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
         }
     }

@@ -374,9 +374,34 @@ namespace PoolLab.Application.Interface
                 }
                 return null;
             }
-            catch (DbUpdateException)
+            catch (Exception e)
             {
-                throw;
+                throw new Exception(e.Message);
+            }
+        }
+
+        public async Task<string?> UpdateAccPoint(Guid Id, int point)
+        {
+            try
+            {
+                var acc = await _unitOfWork.AccountRepo.GetByIdAsync(Id);
+                if(acc == null)
+                {
+                    return "Không tìm thấy tài khoản này!";
+                }
+
+                acc.Point = point;
+                _unitOfWork.AccountRepo.Update(acc);
+                var result = await _unitOfWork.SaveAsync() > 0;
+                if (!result)
+                {
+                    return "Cập nhật thất bại!";
+                }
+
+                return null;
+            }catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
     }

@@ -38,7 +38,10 @@ namespace PoolLab.Application.Interface
                 order.OrderCode = $"HD{Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper()}";
                 order.Status = "Đã Tạo";
                 order.TotalPrice = 0 ;
-                order.Discount = 0 ;
+                if(addNewOrderDTO.Discount == null)
+                {
+                    order.Discount = 0 ;
+                }
                 order.CustomerPay = 0;
                 order.ExcessCash = 0 ;
                 order.Id = Guid.NewGuid();
@@ -173,12 +176,24 @@ namespace PoolLab.Application.Interface
                 {
                     return "Số tiền khách trả không hợp lệ!";
                 }
+
+                //Tìm Hoá đơn
                 var order = await _unitOfWork.OrderRepo.GetByIdAsync(id);
                 if (order == null)
                 {
                     return "Không tìm thấy hoá đơn này!";
                 }
-
+               
+                //Kiểm tra play time
+                var playtime = await _unitOfWork.PlaytimeRepo.GetByIdAsync((Guid)order.PlayTimeId);
+                if (playtime == null)
+                {
+                    return "Không tìm thấy phiên chơi này!";
+                }
+                if(playtime.Status.Equals("Đã Tạo"))
+                {
+                    return "Bạn cần dừng chơi để thanh toán hoá đơn này!";
+                }
                 var table = await _unitOfWork.BilliardTableRepo.GetByIdAsync((Guid)order.BilliardTableId);
                 if (table == null)
                 {

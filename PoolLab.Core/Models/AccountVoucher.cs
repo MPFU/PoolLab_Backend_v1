@@ -14,6 +14,8 @@ namespace PoolLab.Core.Models
 
         public Guid? VoucherID { get; set; }
 
+        public int? Discount { get; set; }
+
         public bool? IsAvailable { get; set; }
 
         public virtual Account? Account { get; set; }

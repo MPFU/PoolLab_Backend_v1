@@ -677,6 +677,7 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
             entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.VouCode).HasMaxLength(100);
         });
 
         modelBuilder.Entity<AccountVoucher>(entity =>

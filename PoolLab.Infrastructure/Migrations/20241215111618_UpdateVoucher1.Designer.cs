@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PoolLab.Infrastructure;
 
@@ -11,9 +12,11 @@ using PoolLab.Infrastructure;
 namespace PoolLab.Infrastructure.Migrations
 {
     [DbContext(typeof(PoolLabDbv1Context))]
-    partial class PoolLabDbv1ContextModelSnapshot : ModelSnapshot
+    [Migration("20241215111618_UpdateVoucher1")]
+    partial class UpdateVoucher1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -40,6 +40,8 @@ namespace PoolLab.Application.ModelDTO
         public Guid? PlayTimeId { get; set; }
 
         public string? OrderBy {  get; set; }
+
+        public int? Discount { get; set; }
     }
 
     public class GetAllOrderDTO

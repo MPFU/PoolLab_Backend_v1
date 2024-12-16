@@ -1,4 +1,5 @@
-using PoolLab.Application.ServiceExtension;
+﻿using PoolLab.Application.ServiceExtension;
+using PoolLab.WebAPI.Hubs;
 using PoolLab.WebAPI.WebAPIExtension;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,9 @@ builder.Services.Configure<RouteOptions>(options =>
     options.LowercaseUrls = true;
     options.AppendTrailingSlash = false;
 });
+
+// Cấu hình dịch vụ SignalR
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -30,6 +34,9 @@ else
         c.RoutePrefix = string.Empty;
     });
 }
+
+// Thêm route cho SignalR
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.UseCors(opt =>
 {

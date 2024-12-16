@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using PoolLab.Application.FilterModel;
 using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
 using PoolLab.Application.Services;
+using PoolLab.WebAPI.Hubs;
 using PoolLab.WebAPI.ResponseModel;
 
 namespace PoolLab.WebAPI.Controllers
@@ -15,12 +18,14 @@ namespace PoolLab.WebAPI.Controllers
         private readonly IBilliardTableService _billiardTableService;
         private readonly IAzureBlobService _azureBlobService;
         private readonly IBidaTypeAreaService _bidaTypeAreaService;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public BilliardTableController(IBilliardTableService billiardTableService, IAzureBlobService azureBlobService, IBidaTypeAreaService bidaTypeAreaService)
+        public BilliardTableController(IBilliardTableService billiardTableService, IAzureBlobService azureBlobService, IBidaTypeAreaService bidaTypeAreaService, IHubContext<NotificationHub> hubContext)
         {
             _billiardTableService = billiardTableService;
             _azureBlobService = azureBlobService;
             _bidaTypeAreaService = bidaTypeAreaService;
+            _hubContext = hubContext;
         }
 
         [HttpGet("{id}")]
@@ -74,6 +79,7 @@ namespace PoolLab.WebAPI.Controllers
                                 BidaTable = await _billiardTableService.GetBilliardTableByID(getByQR.BilliardTableID),
                                 TimeCus = parts[0],
                                 BookingTime = parts[1]
+
                             }
                         });
                     }
@@ -422,6 +428,9 @@ namespace PoolLab.WebAPI.Controllers
                 {
                     if (requestResult.Contains(":") && !requestResult.Contains("!"))
                     {
+                        string message = $"Bàn {tableDTO} đã được kích hoạt thành công!";
+                        // Gửi thông báo tới tất cả các client kết nối với NotificationHub
+                        await _hubContext.Clients.All.SendAsync("ReceiveMessage", message);
                         return Ok(new SucceededRespone()
                         {
                             Status = Ok().StatusCode,

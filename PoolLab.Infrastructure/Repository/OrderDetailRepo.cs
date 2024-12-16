@@ -33,5 +33,13 @@ namespace PoolLab.Infrastructure.Interface
                 ? await _dbContext.OrderDetails.Where(x => x.OrderId == id).SumAsync(x => x.Price)
                 : null;
         }
+
+        public async Task<List<OrderDetail>?> GetTopSelling(Guid id)
+        {
+            return await _dbContext.OrderDetails
+                .Include(x => x.Order)
+                .Where(x => x.Order.StoreId == id)               
+                .ToListAsync();
+        }
     }
 }

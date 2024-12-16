@@ -14,5 +14,7 @@ namespace PoolLab.Core.Interface
         Task<OrderDetail?> GetOrderDetailByOrderAndProduct(Guid orderID, Guid productID);
 
         Task<decimal?> GetTotalPriceOrderDetail(Guid? id);
+
+        Task<List<OrderDetail>?> GetTopSelling(Guid id);
     }
 }

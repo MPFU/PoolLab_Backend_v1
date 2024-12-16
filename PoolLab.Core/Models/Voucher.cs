@@ -16,9 +16,9 @@ namespace PoolLab.Core.Models
 
         public int? Point {  get; set; }
 
-        public int? VouCode { get; set;}
+        public string? VouCode { get; set;}
 
-        public int? TypeCode { get; set; }
+        public int? Discount { get; set; }
 
         public DateTime? CreatedDate { get; set; }
 

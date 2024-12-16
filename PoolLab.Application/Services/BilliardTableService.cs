@@ -29,8 +29,9 @@ namespace PoolLab.Application.Interface
         private readonly IAccountService _accountService;
         private readonly IPlaytimeService _playtimeService;
         private readonly IPaymentService _paymentService;
+        private readonly IAccountVoucherService _accountVoucherService;
 
-        public BilliardTableService(IMapper mapper, IUnitOfWork unitOfWork, IQRCodeGenerate qRCodeGenerate, IAzureBlobService azureBlobService, IBidaTypeAreaService bidaTypeAreaService, IConfigTableService configTableService, IBookingService bookingService, IOrderService orderService, IAccountService accountService, IPlaytimeService playtimeService, IPaymentService paymentService)
+        public BilliardTableService(IMapper mapper, IUnitOfWork unitOfWork, IQRCodeGenerate qRCodeGenerate, IAzureBlobService azureBlobService, IBidaTypeAreaService bidaTypeAreaService, IConfigTableService configTableService, IBookingService bookingService, IOrderService orderService, IAccountService accountService, IPlaytimeService playtimeService, IPaymentService paymentService, IAccountVoucherService accountVoucherService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
@@ -43,6 +44,7 @@ namespace PoolLab.Application.Interface
             _accountService = accountService;
             _playtimeService = playtimeService;
             _paymentService = paymentService;
+            _accountVoucherService = accountVoucherService;
         }
 
 
@@ -65,6 +67,7 @@ namespace PoolLab.Application.Interface
 
                 var Time = TimeOnly.FromDateTime(now);
 
+                //Bàn chơi
                 var table = await _unitOfWork.BilliardTableRepo.GetBidaTableByID(activeTable.BilliardTableID);
                 if (table == null)
                 {
@@ -75,18 +78,68 @@ namespace PoolLab.Application.Interface
                     return "Bàn chơi này đang không trống để phục vụ!";
                 }
 
+                //Chi nhánh
+                var store = await _unitOfWork.StoreRepo.GetByIdAsync((Guid)table.StoreId);
+                if (store == null)
+                {
+                    return "Không tìm thấy chi nhánh của bàn!";
+                }
+                if(store.Status.Equals("Dừng Hoạt Động"))
+                {
+                    return "Chi nhánh này đã dừng hoạt động bạn không thể kích hoạt bàn thuộc chi nhánh này!";
+                }
+
                 //Customer Account
                 var cus = await _unitOfWork.AccountRepo.GetByIdAsync(activeTable.CustomerID);
                 if (cus == null)
                 {
                     return "Không tìm thấy thành viên này!";
                 }
+                if(cus.Status != "Kích Hoạt")
+                {
+                    return "Tài khoản của bạn không được kích hoạt để thực hiện tính năng này!";
+                }
 
                 await _unitOfWork.BeginTransactionAsync();
+
+                //Voucher
+                var discount = 0;
+                if(activeTable.AccountVoucherID != null)
+                {
+                    var accVou = await _unitOfWork.AccountVoucherRepo.GetByIdAsync((Guid)activeTable.AccountVoucherID);
+                    if (accVou == null)
+                    {
+                        return "Không tìm thấy khuyến mãi này!";
+                    }
+                    else
+                    {
+                        if(accVou.IsAvailable == false)
+                        {
+                            return "Phiếu giảm giá này không còn khả dụng!";
+                        }
+                        discount = (int)accVou.Discount;
+                        var upVou = await _accountVoucherService.UseAccountVoucher(accVou.Id);
+                        if (upVou != null)
+                        {
+                            return upVou;
+                        }
+                    }
+                }
+
+                
 
                 if (!string.IsNullOrEmpty(activeTable.CustomerTime))
                 {
                     TimeSpan timeCus = TimeSpan.Parse(activeTable.CustomerTime);
+
+                    TimeSpan currentTime = now.TimeOfDay;
+
+                    var checkTime = currentTime + timeCus;
+
+                    if(checkTime > store.TimeEnd.Value.ToTimeSpan())
+                    {
+                        return "Thời gian chơi của bạn đã vượt quá thời gian hoạt động của quán. \nXin hãy chọn lại hoặc quay lại bữa khác!";
+                    }
 
                     decimal totalPrice = (decimal)((decimal)timeCus.TotalHours * table.Price.OldPrice);
                     totalPrice = Math.Round(totalPrice, 0, MidpointRounding.AwayFromZero);
@@ -115,6 +168,7 @@ namespace PoolLab.Application.Interface
                     orderDTO.BilliardTableId = table.Id;
                     orderDTO.StoreId = table.StoreId;
                     orderDTO.PlayTimeId = Guid.Parse(crePlay);
+                    orderDTO.Discount = discount;
                     var creOrder = await _orderService.AddNewOrder(orderDTO);
                     if (!Guid.TryParse(creOrder, out _))
                     {
@@ -209,6 +263,7 @@ namespace PoolLab.Application.Interface
                                     orderDTO.BilliardTableId = table.Id;
                                     orderDTO.StoreId = table.StoreId;
                                     orderDTO.PlayTimeId = Guid.Parse(crePlay);
+                                    orderDTO.Discount = discount;
                                     var creOrder = await _orderService.AddNewOrder(orderDTO);
                                     if (!Guid.TryParse(creOrder, out _))
                                     {
@@ -656,9 +711,9 @@ namespace PoolLab.Application.Interface
                 }
 
             }
-            catch (DbUpdateException)
+            catch (Exception e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
         }
 

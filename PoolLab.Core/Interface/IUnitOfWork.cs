@@ -33,6 +33,9 @@ namespace PoolLab.Core.Interface
         ISubscriptionTypeRepo SubscriptionTypeRepo { get; }
         IUnitRepo UnitRepo { get; }
         IBidaTypeAreRepo BidaTypeAreaRepo { get; }
+        IVoucherRepo VoucherRepo { get; }
+        IAccountVoucherRepo AccountVoucherRepo { get; }
+
 
         Task BeginTransactionAsync();
         Task CommitTransactionAsync();
