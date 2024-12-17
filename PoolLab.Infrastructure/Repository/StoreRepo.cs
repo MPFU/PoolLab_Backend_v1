@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PoolLab.Core.Interface;
 using PoolLab.Core.Models;
+using System.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -93,7 +94,7 @@ namespace PoolLab.Infrastructure.Interface
 
                     var totalBooking = await _dbContext.Bookings
                         .Where(x => x.StoreId == storeId && x.Status != ("Đã Huỷ"))
-                        .Where(x => x.CreatedDate.Value.Date == date)
+                        .Where(x => x.CreatedDate.Value.Date == date.Date)
                         .SumAsync(x => x.Deposit);
 
                     var countOrder = await _dbContext.Orders
@@ -103,7 +104,7 @@ namespace PoolLab.Infrastructure.Interface
 
                     var countBooking = await _dbContext.Bookings
                         .Where(x => x.StoreId == storeId && x.Status != ("Đã Huỷ"))
-                        .Where(x => x.BookingDate.Value == DateOnly.FromDateTime(date))
+                        .Where(x => x.CreatedDate.Value.Date == date.Date)
                         .CountAsync();
 
                     monthlyRevenue.Add(new
@@ -126,7 +127,7 @@ namespace PoolLab.Infrastructure.Interface
 
                     var totalBooking = await _dbContext.Bookings
                         .Where(x => x.StoreId == storeId && x.Status != ("Đã Huỷ"))
-                        .Where(x => x.BookingDate.Value.Year == year && x.BookingDate.Value.Month == i)
+                        .Where(x => x.CreatedDate.Value.Year == year && x.CreatedDate.Value.Month == i)
                         .SumAsync(x => x.Deposit);
 
                     var countOrder = await _dbContext.Orders
@@ -136,7 +137,7 @@ namespace PoolLab.Infrastructure.Interface
 
                     var countBooking = await _dbContext.Bookings
                         .Where(x => x.StoreId == storeId && x.Status != ("Đã Huỷ"))
-                        .Where(x => x.BookingDate.Value.Year == year && x.BookingDate.Value.Month == i)
+                        .Where(x => x.CreatedDate.Value.Year == year && x.CreatedDate.Value.Month == i)
                         .CountAsync();
 
                     monthlyRevenue.Add(new
@@ -150,5 +151,49 @@ namespace PoolLab.Infrastructure.Interface
             }
             return monthlyRevenue;
         }
+
+        public async Task<decimal> TotalIncome()
+        {
+            var order = await _dbContext.Orders.Where(x => x.Status.Equals("Hoàn Thành")).SumAsync(x => x.TotalPrice);
+            var booking = await _dbContext.Bookings.Where(x => !x.Status.Equals("Đã Huỷ")).SumAsync(x => x.Deposit);
+            var result = order + booking;
+            if (result > 0)
+            {
+                return (decimal)result;
+            }
+            return 0;
+        }
+
+        public async Task<decimal> CountAllOrder()
+        {
+            return await _dbContext.Orders.CountAsync();
+        }
+
+        public async Task<decimal> CountAllBooking()
+        {
+            return await _dbContext.Bookings.CountAsync();
+        }
+
+        public async Task<decimal> CountAllReview()
+        {
+            return await _dbContext.Reviews.CountAsync();
+        }
+
+        public async Task<decimal> CountAllStaff()
+        {
+            return await _dbContext.Accounts.Include(x => x.Role).CountAsync();
+        }
+
+        public async Task<IEnumerable<Order>> GetAllOrderInYear(int year)
+        {
+            return await _dbContext.Orders.Where(x => x.OrderDate.Value.Year == year && x.Status.Equals("Hoàn Thành")).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Booking>> GetAllBookingInYear(int year)
+        {
+            return await _dbContext.Bookings.Where(x => x.CreatedDate.Value.Year == year && !x.Status.Equals("Đã Huỷ")).ToListAsync();
+        }
+
+      
     }
 }

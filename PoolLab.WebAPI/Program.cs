@@ -1,4 +1,5 @@
 ﻿using PoolLab.Application.ServiceExtension;
+using PoolLab.Infrastructure.Firebase;
 using PoolLab.WebAPI.Hubs;
 using PoolLab.WebAPI.WebAPIExtension;
 
@@ -15,6 +16,9 @@ builder.Services.Configure<RouteOptions>(options =>
 
 // Cấu hình dịch vụ SignalR
 builder.Services.AddSignalR();
+
+// Khởi tạo firebase
+FirebaseConfiguration.InitializeFirebase();
 
 var app = builder.Build();
 

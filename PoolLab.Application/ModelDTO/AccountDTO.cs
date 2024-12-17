@@ -186,4 +186,11 @@ namespace PoolLab.Application.ModelDTO
 
         public string? Status { get; set; }
     }
+
+    public class AccVerifyDTO
+    {
+        public Guid Id { get; set; }
+
+        public string Email { get; set; }
+    }
 }

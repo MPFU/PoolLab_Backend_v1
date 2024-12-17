@@ -137,9 +137,10 @@ namespace PoolLab.Infrastructure.Interface
         {
 
             return await _dbContext.Bookings
+                .Include(x => x.ConfigTable)
                 .Where(x => x.Id == tableId || x.CustomerId == tableId)
                 .Where(x => x.BookingDate == DateOnly.FromDateTime(date) && x.Status.Equals("Đã Đặt"))
-                .Where(x => (x.TimeStart < endTime && x.TimeStart >= startTime) || (x.TimeEnd > startTime && x.TimeEnd <= endTime))
+                .Where(x => (x.TimeStart.Value.AddMinutes((double)-x.ConfigTable.TimeHold) < endTime && x.TimeStart.Value.AddMinutes(-(double)x.ConfigTable.TimeHold) >= startTime) || (x.TimeEnd > startTime.AddMinutes(-(double)x.ConfigTable.TimeHold) && x.TimeEnd <= endTime))
                 .FirstOrDefaultAsync();
         }
 
@@ -180,8 +181,9 @@ namespace PoolLab.Infrastructure.Interface
         public async Task<Booking?> CheckAccountOrTableBooking(Guid id,DateOnly bookingDate, TimeOnly timeStart, TimeOnly timeEnd)
         {
             return await _dbContext.Bookings
+                          .Include(x => x.ConfigTable)
                           .Where(x => x.BookingDate == bookingDate &&
-                          ((x.TimeStart < timeEnd && x.TimeStart >= timeStart) || (x.TimeEnd > timeStart && x.TimeEnd <= timeEnd)))
+                          ((x.TimeStart.Value.AddMinutes((double)-x.ConfigTable.TimeHold) < timeEnd && x.TimeStart.Value.AddMinutes((double)-x.ConfigTable.TimeHold) >= timeStart) || (x.TimeEnd > timeStart.AddMinutes((double)-x.ConfigTable.TimeHold) && x.TimeEnd <= timeEnd)))
                           .Where(x => x.Status.Equals("Đã Đặt"))
                           .Where(x => x.CustomerId == id || x.BilliardTableId == id)
                           .FirstOrDefaultAsync();          

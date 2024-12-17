@@ -23,7 +23,7 @@ namespace PoolLab.Infrastructure.Interface
 
         public async Task<Event?> GetEventById(Guid Id)
         {
-            return await _dbContext.Events.Include(x => x.Store).Include(x => x.Manager).FirstOrDefaultAsync(x => x.Id == Id);
+            return await _dbContext.Events.Include(x => x.Manager).FirstOrDefaultAsync(x => x.Id == Id);
         }
     }
 }

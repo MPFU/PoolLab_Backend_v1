@@ -14,5 +14,6 @@ namespace PoolLab.Core.Interface
         Task<Account?> GetAccountLoginStaff(string email);
         Task<IEnumerable<Account>> GetAllAccounts();
         Task<decimal?> GetAccountBalanceByID(Guid id);
+        Task<Account?> GetAccountById(Guid id);
     }
 }

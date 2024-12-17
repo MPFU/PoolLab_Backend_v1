@@ -41,7 +41,7 @@ namespace PoolLab.Application.Interface
 
                 EventDTO eventDTO = new EventDTO();
                 
-                if (!string.IsNullOrEmpty(newEventDTO.TimeStart) && !string.IsNullOrEmpty(newEventDTO.TimeEnd))
+                if (!string.IsNullOrEmpty(newEventDTO.TimeStart) || !string.IsNullOrEmpty(newEventDTO.TimeEnd))
                 {
                     var timeStart = DateTime.ParseExact(newEventDTO.TimeStart, "yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None);
                     var timeEnd = DateTime.ParseExact(newEventDTO.TimeEnd, "yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None);
@@ -69,6 +69,7 @@ namespace PoolLab.Application.Interface
                 eventDTO.Title = newEventDTO.Title;
                 eventDTO.ManagerId = newEventDTO.ManagerId;
                 eventDTO.Descript = newEventDTO.Descript;
+                eventDTO.Thumbnail = newEventDTO.Thumbnail;
                 eventDTO.Status = "Đã Tạo";
                 eventDTO.CreatedDate = now;
                 await _unitOfWork.EventRepo.AddAsync(_mapper.Map<Event>(eventDTO));
@@ -218,11 +219,11 @@ namespace PoolLab.Application.Interface
                 events.ManagerId = newEventDTO.ManagerId != null ? newEventDTO.ManagerId : events.ManagerId;
 
                 events.TimeStart = !string.IsNullOrEmpty(newEventDTO.TimeStart)
-                        ? DateTime.ParseExact(newEventDTO.TimeStart, "yyyy-MM-ddTHH:mm:ss.fff", CultureInfo.InvariantCulture, DateTimeStyles.None)
+                        ? DateTime.ParseExact(newEventDTO.TimeStart, "yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None)
                         : events.TimeStart;
 
                 events.TimeEnd = !string.IsNullOrEmpty(newEventDTO.TimeEnd)
-                        ? DateTime.ParseExact(newEventDTO.TimeStart, "yyyy-MM-ddTHH:mm:ss.fff", CultureInfo.InvariantCulture, DateTimeStyles.None)
+                        ? DateTime.ParseExact(newEventDTO.TimeStart, "yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None)
                         : events.TimeEnd;
 
                 events.UpdatedDate = now;

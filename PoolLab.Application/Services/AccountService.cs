@@ -49,7 +49,7 @@ namespace PoolLab.Application.Interface
                 account.Point = 0;
                 account.Balance = 0;
                 account.Tier = 0;
-                account.Status = "Kích hoạt";
+                account.Status = "Kích Hoạt";
                 var role1 = await _unitOfWork.RoleRepo.GetRoleByName("Member");
                 account.RoleId = role1.Id;
                 await _unitOfWork.AccountRepo.AddAsync(account);
@@ -160,7 +160,10 @@ namespace PoolLab.Application.Interface
             {
                 if (BCrypt.Net.BCrypt.Verify(password, acc.PasswordHash))
                 {
-                    return _mapper.Map<AccountLoginDTO>(acc);
+                    if(acc.Status.Equals("Kích Hoạt"))
+                    {
+                        return _mapper.Map<AccountLoginDTO>(acc);
+                    }                   
                 }
             }
             return null;
@@ -195,7 +198,7 @@ namespace PoolLab.Application.Interface
                 result = result.Where(x => x.Status.Contains(accountFilter.Status, StringComparison.OrdinalIgnoreCase));
 
             if (!string.IsNullOrEmpty(accountFilter.RoleName))
-                result = result.Where(x => x.RoleName.Contains(accountFilter.RoleName, StringComparison.OrdinalIgnoreCase));
+                result = result.Where(x => x.RoleName.Equals(accountFilter.RoleName));
 
             if (accountFilter.RoleId != null)
                 result = result.Where(x => x.RoleId == accountFilter.RoleId);
@@ -261,7 +264,10 @@ namespace PoolLab.Application.Interface
             {
                 if(BCrypt.Net.BCrypt.Verify(loginAccDTO.Password, acc.PasswordHash))
                 {
-                    return _mapper.Map<GetLoginAccDTO>(acc);
+                    if(acc.Status.Equals("Kích Hoạt"))
+                    {
+                        return _mapper.Map<GetLoginAccDTO>(acc);
+                    }                    
                 }
             }
             return null;
@@ -271,7 +277,7 @@ namespace PoolLab.Application.Interface
         {
             try
             {
-                var acc = await _unitOfWork.AccountRepo.GetByIdAsync(Id);
+                var acc = await _unitOfWork.AccountRepo.GetAccountById(Id);
                 if (acc == null)
                 {
                     return "Không tìm thấy tài khoản này!";
@@ -281,7 +287,10 @@ namespace PoolLab.Application.Interface
                 {
                     return checkdup;
                 }
-                acc.Email = !string.IsNullOrEmpty(updateAccDTO.Email) ? updateAccDTO.Email : acc.Email;              
+                if (!acc.Role.Name.Equals("Member"))
+                {
+                    acc.Email = !string.IsNullOrEmpty(updateAccDTO.Email) ? updateAccDTO.Email : acc.Email;
+                }                             
                 acc.UserName = !string.IsNullOrEmpty(updateAccDTO.UserName)  ? updateAccDTO.UserName : acc.UserName;
                 acc.FullName = !string.IsNullOrEmpty(updateAccDTO.FullName) ? updateAccDTO.FullName : acc.FullName;
                 acc.AvatarUrl = !string.IsNullOrEmpty(updateAccDTO.AvatarUrl) ? updateAccDTO.AvatarUrl : acc.AvatarUrl;

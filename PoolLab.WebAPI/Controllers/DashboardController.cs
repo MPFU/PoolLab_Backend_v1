@@ -79,7 +79,7 @@ namespace PoolLab.WebAPI.Controllers
                 });
             }
         }
-        
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAllStaffOfStore(Guid id)
         {
@@ -109,8 +109,8 @@ namespace PoolLab.WebAPI.Controllers
                     Message = ex.Message
                 });
             }
-        }  
-        
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAllBookingOfStore(Guid id)
         {
@@ -140,8 +140,8 @@ namespace PoolLab.WebAPI.Controllers
                     Message = ex.Message
                 });
             }
-        } 
-        
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAllMemberOfStore(Guid id)
         {
@@ -172,7 +172,7 @@ namespace PoolLab.WebAPI.Controllers
                 });
             }
         }
-        
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAllReviewOfStore(Guid id)
         {
@@ -203,7 +203,7 @@ namespace PoolLab.WebAPI.Controllers
                 });
             }
         }
-        
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTopSellingProductByStore(Guid id)
         {
@@ -241,7 +241,7 @@ namespace PoolLab.WebAPI.Controllers
         {
             try
             {
-                if((incomeStoreDTO.StoreId == null || incomeStoreDTO.StoreId == Guid.Empty) || incomeStoreDTO.year == 0)
+                if ((incomeStoreDTO.StoreId == null || incomeStoreDTO.StoreId == Guid.Empty) || incomeStoreDTO.year == 0)
                 {
                     return BadRequest(new FailResponse()
                     {
@@ -249,7 +249,7 @@ namespace PoolLab.WebAPI.Controllers
                         Message = "Cần nhập đầy đủ chi nhánh và năm thống kê!"
                     });
                 }
-                var request = await _service.GetInComeOfStoreByFilter(incomeStoreDTO.StoreId,incomeStoreDTO.year,incomeStoreDTO.month);
+                var request = await _service.GetInComeOfStoreByFilter(incomeStoreDTO.StoreId, incomeStoreDTO.year, incomeStoreDTO.month);
                 if (request != null)
                 {
                     return Ok(new SucceededRespone()
@@ -274,5 +274,199 @@ namespace PoolLab.WebAPI.Controllers
                 });
             }
         }
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetTotalIncome()
+        {
+            try
+            {
+                var request = await _service.TotalIncome();
+                if (decimal.TryParse(request, out _))
+                {
+                    return Ok(new SucceededRespone()
+                    {
+                        Status = Ok().StatusCode,
+                        Message = "Thành công.",
+                        Data = request
+                    });
+                }
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = request
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllReview()
+        {
+            try
+            {
+                var request = await _service.CountAllReview();
+                if (decimal.TryParse(request, out _))
+                {
+                    return Ok(new SucceededRespone()
+                    {
+                        Status = Ok().StatusCode,
+                        Message = "Thành công.",
+                        Data = request
+                    });
+                }
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = request
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllOrder()
+        {
+            try
+            {
+                var request = await _service.CountAllOrder();
+                if (decimal.TryParse(request, out _))
+                {
+                    return Ok(new SucceededRespone()
+                    {
+                        Status = Ok().StatusCode,
+                        Message = "Thành công.",
+                        Data = request
+                    });
+                }
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = request
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllBooking()
+        {
+            try
+            {
+                var request = await _service.CountAllBooking();
+                if (decimal.TryParse(request, out _))
+                {
+                    return Ok(new SucceededRespone()
+                    {
+                        Status = Ok().StatusCode,
+                        Message = "Thành công.",
+                        Data = request
+                    });
+                }
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = request
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllStaff()
+        {
+            try
+            {
+                var request = await _service.CountAllStaff();
+                if (decimal.TryParse(request, out _))
+                {
+                    return Ok(new SucceededRespone()
+                    {
+                        Status = Ok().StatusCode,
+                        Message = "Thành công.",
+                        Data = request
+                    });
+                }
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = request
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllStoreHaveInComeInYear([FromQuery] int year)
+        {
+            try
+            {
+                if (year <= 0)
+                {
+                    return BadRequest(new FailResponse
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = "Giá trị năm nhập vào bị sai!"
+                    });
+                }
+                var request = await _service.GetBranchRevenue(year);
+
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Thành công.",
+                    Data = request
+                });
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
     }
 }

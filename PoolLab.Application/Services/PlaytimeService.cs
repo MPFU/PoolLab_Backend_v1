@@ -88,8 +88,12 @@ namespace PoolLab.Application.Interface
                     if (!string.IsNullOrEmpty(timeDTO.CustomerTime))
                     {
                         TimeSpan timeCus = TimeSpan.Parse(timeDTO.CustomerTime);
-                        //khách xài hết giờ trả về 0:0:0
-                        if (timeCus == TimeSpan.Zero)
+
+                        decimal timeStop = (decimal)timeCus.TotalHours;
+                        timeStop = Math.Round(timeStop, 5);
+
+                        //Khách chơi hết giờ
+                        if (play.TotalTime == timeStop)
                         {
 
                             var order = await _unitOfWork.OrderRepo.GetOrderByPlayTime(play.Id);
@@ -124,6 +128,19 @@ namespace PoolLab.Application.Interface
                                 if (upCus != null)
                                 {
                                     return upCus;
+                                }
+
+                                PaymentBookingDTO payment = new PaymentBookingDTO();
+                                payment.AccountId = cus.Id;
+                                payment.OrderId = order.Id;
+                                payment.PaymentMethod = "Qua Ví";
+                                payment.PaymentInfo = "Hoàn Tiền Khuyến Mãi";
+                                payment.TypeCode = 1;
+                                payment.Amount = change;
+                                var pay = await _paymentService.CreateTransactionBooking(payment);
+                                if (pay != null)
+                                {
+                                    return pay;
                                 }
 
                                 order.TotalPrice = Math.Round((decimal)totalPrice, 0, MidpointRounding.AwayFromZero);
@@ -164,10 +181,7 @@ namespace PoolLab.Application.Interface
                             if (order == null)
                             {
                                 return "Không tìm thấy hoá đơn này!";
-                            }
-
-                            decimal timeStop = (decimal)timeCus.TotalHours;
-                            timeStop = Math.Round(timeStop,5);
+                            }                           
 
                             var priceStop = table.Price.OldPrice * timeStop;
                             priceStop = Math.Round((decimal)priceStop,0,MidpointRounding.AwayFromZero);
@@ -207,7 +221,7 @@ namespace PoolLab.Application.Interface
                             }
                             else
                             {
-                                var totalPrice = order.TotalPrice + play.TotalPrice;
+                                var totalPrice = order.TotalPrice + priceStop;
                                 var point = (int)Math.Round((decimal)(totalPrice / 1000));
                                 cus.Point = cus.Point + point;
                                 var upPoint = await _accountService.UpdateAccPoint(cus.Id, (int)cus.Point);
@@ -226,7 +240,7 @@ namespace PoolLab.Application.Interface
                                 return "Cập nhật hoá đơn thất bại";
                             }
 
-                            var refund = cus.Balance + priceStop;
+                            var refund = cus.Balance + play.TotalPrice;
                             var upCus = await _accountService.UpdateBalance(cus.Id, (decimal)refund);
                             if(upCus != null)
                             {
@@ -239,7 +253,7 @@ namespace PoolLab.Application.Interface
                             payment.PaymentMethod = "Qua Ví";
                             payment.PaymentInfo = "Hoàn Tiền Dư";
                             payment.TypeCode = 1;
-                            payment.Amount = priceStop;
+                            payment.Amount = play.TotalPrice;
                             var pay = await _paymentService.CreateTransactionBooking(payment);
                             if(pay != null)
                             {
@@ -259,61 +273,62 @@ namespace PoolLab.Application.Interface
                     //Đối vơi khách sử dụng hết giờ chơi
                     else
                     {
-                        var order = await _unitOfWork.OrderRepo.GetOrderByPlayTime(play.Id);
-                        if (order == null)
-                        {
-                            return "Không tìm thấy hoá đơn này!";
-                        }
+                        //var order = await _unitOfWork.OrderRepo.GetOrderByPlayTime(play.Id);
+                        //if (order == null)
+                        //{
+                        //    return "Không tìm thấy hoá đơn này!";
+                        //}
 
-                        play.Status = "Hoàn Thành";
-                        _unitOfWork.PlaytimeRepo.Update(play);
-                        var upPlay = await _unitOfWork.SaveAsync() > 0;
-                        if (!upPlay)
-                        {
-                            return "Cập nhật phiên chơi thất bại";
-                        }
+                        //play.Status = "Hoàn Thành";
+                        //_unitOfWork.PlaytimeRepo.Update(play);
+                        //var upPlay = await _unitOfWork.SaveAsync() > 0;
+                        //if (!upPlay)
+                        //{
+                        //    return "Cập nhật phiên chơi thất bại";
+                        //}
 
-                        //Cộng điểm khuyến mãi, cập nhật tổng bill
-                        if (order.Discount > 0)
-                        {
-                            var totalPrice = (order.TotalPrice + play.TotalPrice) / 100 * order.Discount;
-                            var point = (int)Math.Round((decimal)(totalPrice / 1000));
-                            cus.Point = cus.Point + point;
-                            var upPoint = await _accountService.UpdateAccPoint(cus.Id, (int)cus.Point);
-                            if (upPoint != null)
-                            {
-                                return upPoint;
-                            }
-                            order.TotalPrice = Math.Round((decimal)totalPrice, 0, MidpointRounding.AwayFromZero);
-                        }
-                        else
-                        {
-                            var totalPrice = order.TotalPrice + play.TotalPrice;
-                            var point = (int)Math.Round((decimal)(totalPrice / 1000));
-                            cus.Point = cus.Point + point;
-                            var upPoint = await _accountService.UpdateAccPoint(cus.Id, (int)cus.Point);
-                            if (upPoint != null)
-                            {
-                                return upPoint;
-                            }
-                            order.TotalPrice = Math.Round((decimal)totalPrice, 0, MidpointRounding.AwayFromZero);
-                        }
+                        ////Cộng điểm khuyến mãi, cập nhật tổng bill
+                        //if (order.Discount > 0)
+                        //{
+                        //    var totalPrice = (order.TotalPrice + play.TotalPrice) / 100 * order.Discount;
+                        //    var point = (int)Math.Round((decimal)(totalPrice / 1000));
+                        //    cus.Point = cus.Point + point;
+                        //    var upPoint = await _accountService.UpdateAccPoint(cus.Id, (int)cus.Point);
+                        //    if (upPoint != null)
+                        //    {
+                        //        return upPoint;
+                        //    }
+                        //    order.TotalPrice = Math.Round((decimal)totalPrice, 0, MidpointRounding.AwayFromZero);
+                        //}
+                        //else
+                        //{
+                        //    var totalPrice = order.TotalPrice + play.TotalPrice;
+                        //    var point = (int)Math.Round((decimal)(totalPrice / 1000));
+                        //    cus.Point = cus.Point + point;
+                        //    var upPoint = await _accountService.UpdateAccPoint(cus.Id, (int)cus.Point);
+                        //    if (upPoint != null)
+                        //    {
+                        //        return upPoint;
+                        //    }
+                        //    order.TotalPrice = Math.Round((decimal)totalPrice, 0, MidpointRounding.AwayFromZero);
+                        //}
 
-                        order.Status = "Hoàn Thành";
-                        _unitOfWork.OrderRepo.Update(order);
-                        var upOrder = await _unitOfWork.SaveAsync() > 0;
-                        if (!upOrder)
-                        {
-                            return "Cập nhật hoá đơn thất bại";
-                        }
+                        //order.Status = "Hoàn Thành";
+                        //_unitOfWork.OrderRepo.Update(order);
+                        //var upOrder = await _unitOfWork.SaveAsync() > 0;
+                        //if (!upOrder)
+                        //{
+                        //    return "Cập nhật hoá đơn thất bại";
+                        //}
 
-                        table.Status = "Bàn Trống";
-                        _unitOfWork.BilliardTableRepo.Update(table);
-                        var UpTable = await _unitOfWork.SaveAsync() > 0;
-                        if (!UpTable)
-                        {
-                            return "Cập nhật bàn thất bại!";
-                        }
+                        //table.Status = "Bàn Trống";
+                        //_unitOfWork.BilliardTableRepo.Update(table);
+                        //var UpTable = await _unitOfWork.SaveAsync() > 0;
+                        //if (!UpTable)
+                        //{
+                        //    return "Cập nhật bàn thất bại!";
+                        //}
+                        return "Đây là bàn chơi của member bạn không thể dừng chơi bàn này!";
                     }
                 }
                 //Đối vơi khách vãng lai

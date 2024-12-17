@@ -29,5 +29,19 @@ namespace PoolLab.Core.Interface
         Task<IEnumerable<Booking>> GetAllBookingByStoreID(Guid storeId);
 
         Task<List<object>?> GetInComeOfStoreByFilter(Guid storeId, int year, int? month);
+
+        Task<decimal> TotalIncome();
+
+        Task<decimal> CountAllOrder();
+
+        Task<decimal> CountAllBooking();
+
+        Task<decimal> CountAllReview();
+
+        Task<decimal> CountAllStaff();
+
+        Task<IEnumerable<Order>> GetAllOrderInYear(int year);
+
+        Task<IEnumerable<Booking>> GetAllBookingInYear(int year);
     }
 }

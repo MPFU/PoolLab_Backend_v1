@@ -100,5 +100,10 @@ namespace PoolLab.Infrastructure.Interface
                 .Include(x => x.Role)
                 .ToListAsync();
         }
+
+        public async Task<Account?> GetAccountById(Guid id)
+        {
+            return await _dbContext.Accounts.Include(x => x.Role).Where(x => x.Id == id).FirstOrDefaultAsync();
+        }
     }
 }

@@ -216,8 +216,6 @@ namespace PoolLab.Application.AutoMapper
             .ForMember(dest => dest.TimeEnd, opt => opt.MapFrom(src => DateTime.ParseExact(src.TimeEnd, "yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None)))
             .ReverseMap();
             CreateMap<Event, GetEventDTO>()
-                 .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.Name))
-                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Store.Address))
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Manager.UserName))
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.Manager.FullName))
                 .ReverseMap();

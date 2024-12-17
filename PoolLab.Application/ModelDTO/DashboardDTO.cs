@@ -33,4 +33,32 @@ namespace PoolLab.Application.ModelDTO
     {
         public List<ProductReportDTO> Items { get; set; }
     }
+
+    public class BranchRevenueDto
+    {
+        public Guid BranchId { get; set; }
+
+        public string BranchName { get; set; }
+
+        public List<MonthRevenueDto> RevenueByMonth { get; set; }
+    }
+
+    public class MonthRevenueDto
+    {
+        public int Month { get; set;}
+
+        public decimal OrderRevenue { get; set; }
+
+        public decimal DepositRevenue { get; set; }
+
+        public decimal TotalRevenue { get; set; }
+    }
+
+    public class RevenueDto
+    {
+        public Guid BranchId { get; set; }
+        public int Month { get; set; }
+        public decimal OrderRevenue { get; set; }
+        public decimal DepositRevenue { get; set; }
+    }
 }

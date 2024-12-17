@@ -118,10 +118,10 @@ namespace PoolLab.Application.Interface
                     return "Không tìm thấy học viên này";
                 }
 
-                if (cus.FullName == null || cus.PhoneNumber == null)
-                {
-                    return "Hãy thêm đầy đủ họ tên và số điện thoại để tiện liên lạc!";
-                }
+                //if (cus.FullName == null || cus.PhoneNumber == null)
+                //{
+                //    return "Hãy thêm đầy đủ họ tên và số điện thoại để tiện liên lạc!";
+                //}
 
                 var course = await _unitOfWork.CourseRepo.GetByIdAsync((Guid)create.CourseId);
 

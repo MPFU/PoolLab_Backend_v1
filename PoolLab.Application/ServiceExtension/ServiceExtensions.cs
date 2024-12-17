@@ -53,6 +53,7 @@ namespace PoolLab.Application.ServiceExtension
             services.AddScoped<IVoucherService, VoucherService>();
             services.AddScoped<IAccountVoucherService, AccountVoucherService>();
             services.AddScoped<IDashboardService, DashboardService>();
+            services.AddScoped<IFirebaseAuthService, FirebaseAuthService>();
 
             services.AddScoped(x => new BlobServiceClient(configuration.GetConnectionString("BlobStorage")));
 

@@ -24,5 +24,17 @@ namespace PoolLab.Application.Interface
         Task<List<object>?> GetInComeOfStoreByFilter(Guid storeId, int year, int? month);
 
         Task<List<ProductReportDTO>> GetTopSellingProductByStore(Guid storeid);
+
+        Task<string?> TotalIncome();
+
+        Task<string?> CountAllOrder();
+
+        Task<string?> CountAllReview();
+
+        Task<string?> CountAllBooking();
+
+        Task<string?> CountAllStaff();
+
+        Task<List<BranchRevenueDto>> GetBranchRevenue(int year);
     }
 }

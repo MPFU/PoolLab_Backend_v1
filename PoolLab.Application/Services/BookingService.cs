@@ -124,14 +124,14 @@ namespace PoolLab.Application.Interface
                 var check = await _unitOfWork.BookingRepo.CheckAccountOrTableBooking(table.Id, bookingDate, timeStart,timeEnd);
                 if (check != null)
                 {
-                    return "Bạn đã có lịch đặt bàn trong thời gian này!";
+                    return $"Bàn đã có lịch đặt trước lúc {check.TimeStart} đến {check.TimeEnd}!";
                 }
 
                 //Kiểm tra lịch đặt của khách
                 var checkAcc = await _unitOfWork.BookingRepo.CheckAccountOrTableBooking(cus.Id, bookingDate, timeStart, timeEnd);
                 if (checkAcc != null)
                 {
-                    return "Bạn đã có lịch đặt trước trong khoảng thời gian này!";
+                    return $"Bạn đã có lịch đặt trước lúc {check.TimeStart} đến {check.TimeEnd}!";
                 }
                
 
