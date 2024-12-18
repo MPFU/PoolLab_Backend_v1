@@ -339,6 +339,10 @@ namespace PoolLab.Application.Interface
                     {
                         return "Không tìm thấy hoá đơn này!";
                     }
+                    if(order.CustomerId != null)
+                    {
+                        return "Đây là bàn chơi của member bạn không thể dừng chơi bàn này!";
+                    }
 
                     var timeStart = TimeOnly.FromDateTime((DateTime)play.TimeStart);
 

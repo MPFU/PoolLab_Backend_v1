@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PoolLab.Application.FilterModel;
 using PoolLab.Application.Interface;
@@ -10,6 +11,7 @@ namespace PoolLab.WebAPI.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize(Roles = "Member, Admin,Super Manager,Manager,Staff")]
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;

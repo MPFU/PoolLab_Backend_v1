@@ -75,7 +75,7 @@ namespace PoolLab.WebAPI.Controllers
                     return NotFound(new FailResponse()
                     {
                         Status = NotFound().StatusCode,
-                        Message = "Sai email hoặc mật khẩu (hoặc tài khoản của bạn chưa được kích hoạt)!"
+                        Message = "Sai email hoặc mật khẩu!"
                     });
                 }
                 return Ok(new SucceededRespone()

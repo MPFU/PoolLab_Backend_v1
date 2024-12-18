@@ -311,7 +311,7 @@ namespace PoolLab.Application.Interface
                             else if (Time < booking.TimeStart.Value.AddMinutes((double)-config.TimeHold))
                             {
                                 TimeSpan timeRange = booking.TimeStart.Value.AddMinutes((double)-config.TimeHold) - Time;
-                                return $"Bạn đã đến quá sớm. \n Hãy quay lại sau {timeRange}!";
+                                return $"Bạn đã đến quá sớm. \n Hãy quay lại sau {timeRange.Hours}:{timeRange.Minutes}:{timeRange.Seconds}!";
                             }
                         }
                         else

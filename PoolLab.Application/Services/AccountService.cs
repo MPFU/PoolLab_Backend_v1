@@ -45,7 +45,7 @@ namespace PoolLab.Application.Interface
                 DateTime utcNow = DateTime.UtcNow;
                 TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                 account.JoinDate = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
-                account.AvatarUrl = "https://capstonepoollab.blob.core.windows.net/avatar/2755cb64-c635-421f-b695-bd0ba80608ed.jpg";
+                account.AvatarUrl = "https://capstonepoollab.blob.core.windows.net/avatar/d2a7fc7f-fac6-415b-82cc-25bfe7ea9f13.jpg";
                 account.Point = 0;
                 account.Balance = 0;
                 account.Tier = 0;
@@ -78,7 +78,7 @@ namespace PoolLab.Application.Interface
                 }
                 account.Id = Guid.NewGuid();
                 account.Email = createAccDTO.Email;
-                account.AvatarUrl = !string.IsNullOrEmpty(createAccDTO.AvatarUrl)  ? createAccDTO.AvatarUrl : "https://capstonepoollab.blob.core.windows.net/avatar/2755cb64-c635-421f-b695-bd0ba80608ed.jpg";
+                account.AvatarUrl = !string.IsNullOrEmpty(createAccDTO.AvatarUrl)  ? createAccDTO.AvatarUrl : "https://capstonepoollab.blob.core.windows.net/avatar/d2a7fc7f-fac6-415b-82cc-25bfe7ea9f13.jpg";
                 account.PhoneNumber = createAccDTO.PhoneNumber;
                 account.PasswordHash = BCrypt.Net.BCrypt.HashPassword(createAccDTO.PasswordHash);
                 account.UserName = createAccDTO.UserName;   

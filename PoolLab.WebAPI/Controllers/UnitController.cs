@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
 using PoolLab.WebAPI.ResponseModel;
@@ -7,7 +8,7 @@ namespace PoolLab.WebAPI.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-
+    [Authorize(Roles = "Member, Admin,Super Manager,Manager,Staff")]
     public class UnitController : ControllerBase
     {
         private readonly IUnitService _unitService;

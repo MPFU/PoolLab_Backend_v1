@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
@@ -9,6 +10,7 @@ namespace PoolLab.WebAPI.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize(Roles = "Member, Admin,Super Manager,Manager,Staff")]
     public class CompanyController : ControllerBase
     { 
         private readonly ICompanyService _companyService;

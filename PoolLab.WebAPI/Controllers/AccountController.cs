@@ -5,12 +5,14 @@ using PoolLab.Application.FilterModel;
 using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
 using PoolLab.Application.Services;
+using PoolLab.Core.Models;
 using PoolLab.WebAPI.ResponseModel;
 
 namespace PoolLab.WebAPI.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize(Roles = "Member, Admin,Super Manager,Manager,Staff")]
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
