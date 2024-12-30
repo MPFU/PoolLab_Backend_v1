@@ -44,6 +44,7 @@ namespace PoolLab.Application.Interface
                 }
                 order.CustomerPay = 0;
                 order.ExcessCash = 0 ;
+                order.FinalPrice = 0;
                 order.Id = Guid.NewGuid();
                 if(addNewOrderDTO.CustomerId == null && String.IsNullOrEmpty(addNewOrderDTO.Username))
                 {
@@ -221,9 +222,9 @@ namespace PoolLab.Application.Interface
 
                 return null;
             }
-            catch(DbUpdateException) 
+            catch(Exception ex) 
             {
-                throw;
+                throw new Exception(ex.Message);
             }
         }
     }

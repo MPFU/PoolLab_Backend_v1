@@ -19,6 +19,39 @@ namespace PoolLab.WebAPI.Controllers
             _playtimeService = playtimeService;
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetPlayTimeByTable(Guid id)
+        {
+            try
+            {
+
+                var requestResult = await _playtimeService.GetPlaytimeByTableIdOrId(id);
+                if (requestResult == null)
+                {
+                    return NotFound(new FailResponse()
+                    {
+                        Status = 404,
+                        Message = "Không tìm thấy"
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Tìm kiếm thành công.",
+                    Data = requestResult
+                });
+
+            }
+            catch (Exception ex)
+            {
+                return Conflict(new FailResponse()
+                {
+                    Status = Conflict().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
         [HttpPut]
         public async Task<IActionResult> StopPlayTime([FromBody] StopTimeDTO stopTimeDTO)
         {

@@ -63,6 +63,7 @@ namespace PoolLab.Application.AutoMapper
             CreateMap<BilliardTable, GetAllTableDTO>()
                .ForMember(dest => dest.AreaName, opt => opt.MapFrom(src => src.Area.Name))
                .ForMember(dest => dest.BidaTypeName, opt => opt.MapFrom(src => src.BilliardType.Name))
+               .ForMember(dest => dest.OldPrice, opt => opt.MapFrom(src => src.Price.OldPrice))
                .ReverseMap();
 
             //COMPANY

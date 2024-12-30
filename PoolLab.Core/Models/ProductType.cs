@@ -12,4 +12,6 @@ public partial class ProductType
     public string? Descript { get; set; }
 
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();
+
+    public virtual ICollection<GroupProduct> GroupProducts { get; set; } = new List<GroupProduct>();
 }

@@ -21,5 +21,7 @@ namespace PoolLab.Infrastructure.Interface
                 ? await _dbContext.PlayTimes.Where(x => x.BilliardTableId == id && x.Status.Equals("Đã Tạo")).FirstOrDefaultAsync()
                 : null;
         }
+
+       
     }
 }

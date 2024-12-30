@@ -164,7 +164,7 @@ namespace PoolLab.Application.Services
                 {
                     BranchId = (Guid)g.Key.StoreId,
                     Month = g.Key.Month,
-                    OrderRevenue = (decimal)g.Sum(x => x.TotalPrice),
+                    OrderRevenue = (decimal)g.Sum(x => x.FinalPrice),
                     DepositRevenue = 0m
                 }).ToList();
 

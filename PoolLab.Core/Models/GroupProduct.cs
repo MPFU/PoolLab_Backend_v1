@@ -11,5 +11,9 @@ public partial class GroupProduct
 
     public string? Descript { get; set; }
 
+    public Guid? ProductTypeId { get; set; }
+
+    public virtual ProductType ProductType { get; set; }
+
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();
 }

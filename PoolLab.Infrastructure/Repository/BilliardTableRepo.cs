@@ -55,6 +55,7 @@ namespace PoolLab.Infrastructure.Interface
             return await _dbContext.BilliardTables
                 .Include(x => x.BilliardType)
                 .Include(x => x.Area)
+                .Include(x => x.Price)
                 .ToListAsync();
         }
 

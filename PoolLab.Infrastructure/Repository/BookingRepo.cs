@@ -197,5 +197,17 @@ namespace PoolLab.Infrastructure.Interface
                           .Where(x => x.Status.Equals("Đã Đặt"))
                           .ToListAsync();
         }
+
+        public async Task<IEnumerable<Booking>?> GetAllBookingTableOfDate(Guid tableId, DateTime currentDate)
+        {
+            var currDate = DateOnly.FromDateTime(currentDate);
+            var currTime = TimeOnly.FromDateTime(currentDate);  
+
+            return await _dbContext.Bookings
+                .Where(x => x.BilliardTableId == tableId && x.BookingDate == currDate)
+                .Where(x => x.TimeStart >= currTime && x.Status.Equals("Đã Đặt"))
+                .OrderBy(x => x.TimeStart)
+                .ToListAsync();
+        }
     }
 }

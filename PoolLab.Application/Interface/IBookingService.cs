@@ -28,6 +28,6 @@ namespace PoolLab.Application.Interface
 
         Task<GetRecurringBookingDTO?> GetRecurringBookingById(Guid id);
 
-        
+        Task<IEnumerable<BookingDTO>> GetAllBookingTableOfDay(Guid tableId);
     }
 }

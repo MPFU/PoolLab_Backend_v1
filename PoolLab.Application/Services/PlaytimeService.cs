@@ -4,6 +4,7 @@ using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
 using PoolLab.Core.Interface;
 using PoolLab.Core.Models;
+using PoolLab.Infrastructure.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,13 +20,15 @@ namespace PoolLab.Application.Interface
         private readonly IMapper _mapper;
         private readonly IAccountService _accountService;
         private readonly IPaymentService _paymentService;
+        private readonly ISignalRNotifier _signalRNotifier;
 
-        public PlaytimeService(IMapper mapper, IUnitOfWork unitOfWork, IAccountService accountService, IPaymentService paymentService)
+        public PlaytimeService(IMapper mapper, IUnitOfWork unitOfWork, IAccountService accountService, IPaymentService paymentService, ISignalRNotifier signalRNotifier)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _accountService = accountService;
             _paymentService = paymentService;
+            _signalRNotifier = signalRNotifier;
         }
 
         public async Task<string?> AddNewPlaytime(AddNewPlayTimeDTO addNewPlayTimeDTO)
@@ -76,6 +79,13 @@ namespace PoolLab.Application.Interface
                     return "Không tìm thấy phiên chơi này!";
                 }
 
+                //Lấy thông tin hoá đơn
+                var order = await _unitOfWork.OrderRepo.GetOrderByPlayTime(play.Id);
+                if (order == null)
+                {
+                    return "Không tìm thấy hoá đơn này!";
+                }
+
                 //Đối với member
                 if (timeDTO.CustomerID != null)
                 {
@@ -94,15 +104,10 @@ namespace PoolLab.Application.Interface
 
                         //Khách chơi hết giờ
                         if (play.TotalTime == timeStop)
-                        {
-
-                            var order = await _unitOfWork.OrderRepo.GetOrderByPlayTime(play.Id);
-                            if (order == null)
-                            {
-                                return "Không tìm thấy hoá đơn này!";
-                            }
+                        {                           
 
                             play.Status = "Hoàn Thành";
+                            play.TimeEnd = now;
                             _unitOfWork.PlaytimeRepo.Update(play);
                             var upPlay = await _unitOfWork.SaveAsync() > 0;
                             if (!upPlay)
@@ -113,7 +118,7 @@ namespace PoolLab.Application.Interface
                             //Cộng điểm khuyến mãi, cập nhật tổng bill
                             if (order.Discount > 0)
                             {
-                                var totalPrice = (order.TotalPrice + play.TotalPrice) / 100 * (100 - order.Discount);
+                                var totalPrice = order.TotalPrice + play.TotalPrice;
                                 var point = (int)Math.Round((decimal)(totalPrice / 1000));
                                 cus.Point = cus.Point + point;
                                 var upPoint = await _accountService.UpdateAccPoint(cus.Id, (int)cus.Point);
@@ -144,6 +149,10 @@ namespace PoolLab.Application.Interface
                                 }
 
                                 order.TotalPrice = Math.Round((decimal)totalPrice, 0, MidpointRounding.AwayFromZero);
+                                order.CustomerPay = totalPrice;
+                                order.Discount = change;
+                                order.FinalPrice = totalPrice - change;
+                                order.ExcessCash = change;
                             }
                             else
                             {
@@ -156,6 +165,8 @@ namespace PoolLab.Application.Interface
                                     return upPoint;
                                 }
                                 order.TotalPrice = Math.Round((decimal)totalPrice, 0, MidpointRounding.AwayFromZero);
+                                order.CustomerPay = totalPrice;
+                                order.FinalPrice = totalPrice;
                             }
                             
                             order.Status = "Hoàn Thành";
@@ -173,22 +184,24 @@ namespace PoolLab.Application.Interface
                             {
                                 return "Cập nhật bàn thất bại!";
                             }
+
+                            string message = $"{table.Name} đã dừng chơi.";
+
+                            // Gửi thông báo qua SignalR
+                            await _signalRNotifier.NotifyTableActivationAsync((Guid)table.StoreId, message);
                         }
                         // Khách còn dư giờ
                         else
-                        {
-                            var order = await _unitOfWork.OrderRepo.GetOrderByPlayTime(play.Id);
-                            if (order == null)
-                            {
-                                return "Không tìm thấy hoá đơn này!";
-                            }                           
-
+                        {                                                    
                             var priceStop = table.Price.OldPrice * timeStop;
                             priceStop = Math.Round((decimal)priceStop,0,MidpointRounding.AwayFromZero);
 
+                            var principal = play.TotalPrice;
+
                             play.Status = "Hoàn Thành";
-                            play.TotalPrice = play.TotalPrice - priceStop; //Tiền thừa
-                            play.TotalTime = play.TotalTime - timeStop;
+                            play.TotalPrice = priceStop; 
+                            play.TotalTime = timeStop;
+                            play.TimeEnd = now;
                             _unitOfWork.PlaytimeRepo.Update(play);
                             var upPlay = await _unitOfWork.SaveAsync() > 0;
                             if (!upPlay)
@@ -199,7 +212,7 @@ namespace PoolLab.Application.Interface
                             //Cộng điểm khuyến mãi, cập nhật tổng bill
                             if (order.Discount > 0)
                             {
-                                var totalPrice = (order.TotalPrice + play.TotalPrice) / 100 * (100 - order.Discount);
+                                var totalPrice = order.TotalPrice + priceStop;
                                 var point = (int)Math.Round((decimal)(totalPrice / 1000));
                                 cus.Point = cus.Point + point;
                                 var upPoint = await _accountService.UpdateAccPoint(cus.Id, (int)cus.Point);
@@ -208,7 +221,7 @@ namespace PoolLab.Application.Interface
                                     return upPoint;
                                 }
 
-                                var change = (order.TotalPrice + play.TotalPrice) / 100 * order.Discount;
+                                var change = (order.TotalPrice + priceStop) / 100 * order.Discount;
 
                                 var refund1 = cus.Balance + change;
 
@@ -218,6 +231,10 @@ namespace PoolLab.Application.Interface
                                     return upCus1;
                                 }
                                 order.TotalPrice = Math.Round((decimal)totalPrice, 0, MidpointRounding.AwayFromZero);
+                                order.FinalPrice = totalPrice;
+                                order.CustomerPay = principal;
+                                order.Discount = change;
+                                order.ExcessCash = change + (principal - totalPrice);
                             }
                             else
                             {
@@ -230,6 +247,9 @@ namespace PoolLab.Application.Interface
                                     return upPoint;
                                 }
                                 order.TotalPrice = Math.Round((decimal)totalPrice, 0, MidpointRounding.AwayFromZero);
+                                order.FinalPrice = totalPrice;
+                                order.CustomerPay = principal;
+                                order.ExcessCash += (principal - totalPrice);
                             }
 
                             order.Status = "Hoàn Thành";
@@ -240,7 +260,7 @@ namespace PoolLab.Application.Interface
                                 return "Cập nhật hoá đơn thất bại";
                             }
 
-                            var refund = cus.Balance + play.TotalPrice;
+                            var refund = cus.Balance + (principal - order.FinalPrice);
                             var upCus = await _accountService.UpdateBalance(cus.Id, (decimal)refund);
                             if(upCus != null)
                             {
@@ -253,7 +273,7 @@ namespace PoolLab.Application.Interface
                             payment.PaymentMethod = "Qua Ví";
                             payment.PaymentInfo = "Hoàn Tiền Dư";
                             payment.TypeCode = 1;
-                            payment.Amount = play.TotalPrice;
+                            payment.Amount = (principal - order.FinalPrice) + order.Discount ;
                             var pay = await _paymentService.CreateTransactionBooking(payment);
                             if(pay != null)
                             {
@@ -267,78 +287,17 @@ namespace PoolLab.Application.Interface
                             {
                                 return "Cập nhật bàn thất bại!";
                             }
+
+                            string message = $"{table.Name} đã dừng chơi.";
+
+                            // Gửi thông báo qua SignalR
+                            await _signalRNotifier.NotifyTableActivationAsync((Guid)table.StoreId, message);
                         }
-                    }
-
-                    //Đối vơi khách sử dụng hết giờ chơi
-                    else
-                    {
-                        //var order = await _unitOfWork.OrderRepo.GetOrderByPlayTime(play.Id);
-                        //if (order == null)
-                        //{
-                        //    return "Không tìm thấy hoá đơn này!";
-                        //}
-
-                        //play.Status = "Hoàn Thành";
-                        //_unitOfWork.PlaytimeRepo.Update(play);
-                        //var upPlay = await _unitOfWork.SaveAsync() > 0;
-                        //if (!upPlay)
-                        //{
-                        //    return "Cập nhật phiên chơi thất bại";
-                        //}
-
-                        ////Cộng điểm khuyến mãi, cập nhật tổng bill
-                        //if (order.Discount > 0)
-                        //{
-                        //    var totalPrice = (order.TotalPrice + play.TotalPrice) / 100 * order.Discount;
-                        //    var point = (int)Math.Round((decimal)(totalPrice / 1000));
-                        //    cus.Point = cus.Point + point;
-                        //    var upPoint = await _accountService.UpdateAccPoint(cus.Id, (int)cus.Point);
-                        //    if (upPoint != null)
-                        //    {
-                        //        return upPoint;
-                        //    }
-                        //    order.TotalPrice = Math.Round((decimal)totalPrice, 0, MidpointRounding.AwayFromZero);
-                        //}
-                        //else
-                        //{
-                        //    var totalPrice = order.TotalPrice + play.TotalPrice;
-                        //    var point = (int)Math.Round((decimal)(totalPrice / 1000));
-                        //    cus.Point = cus.Point + point;
-                        //    var upPoint = await _accountService.UpdateAccPoint(cus.Id, (int)cus.Point);
-                        //    if (upPoint != null)
-                        //    {
-                        //        return upPoint;
-                        //    }
-                        //    order.TotalPrice = Math.Round((decimal)totalPrice, 0, MidpointRounding.AwayFromZero);
-                        //}
-
-                        //order.Status = "Hoàn Thành";
-                        //_unitOfWork.OrderRepo.Update(order);
-                        //var upOrder = await _unitOfWork.SaveAsync() > 0;
-                        //if (!upOrder)
-                        //{
-                        //    return "Cập nhật hoá đơn thất bại";
-                        //}
-
-                        //table.Status = "Bàn Trống";
-                        //_unitOfWork.BilliardTableRepo.Update(table);
-                        //var UpTable = await _unitOfWork.SaveAsync() > 0;
-                        //if (!UpTable)
-                        //{
-                        //    return "Cập nhật bàn thất bại!";
-                        //}
-                        return "Đây là bàn chơi của member bạn không thể dừng chơi bàn này!";
                     }
                 }
                 //Đối vơi khách vãng lai
                 else
-                {
-                    var order = await _unitOfWork.OrderRepo.GetOrderByPlayTime(play.Id);
-                    if (order == null)
-                    {
-                        return "Không tìm thấy hoá đơn này!";
-                    }
+                {                   
                     if(order.CustomerId != null)
                     {
                         return "Đây là bàn chơi của member bạn không thể dừng chơi bàn này!";
@@ -366,6 +325,7 @@ namespace PoolLab.Application.Interface
                     decimal totalTime = Math.Abs((decimal)timeCus.TotalHours);
 
                     decimal totalPrice = (decimal)(totalTime * table.Price.OldPrice);
+
                     totalPrice = Math.Round(totalPrice, 0,MidpointRounding.AwayFromZero);
 
                     play.TotalPrice = totalPrice;
@@ -380,6 +340,7 @@ namespace PoolLab.Application.Interface
                     }
 
                     order.TotalPrice = order.TotalPrice + play.TotalPrice;
+                    order.FinalPrice = order.TotalPrice;
                     order.Status = "Đang Thanh Toán";
                     _unitOfWork.OrderRepo.Update(order);
                     var upOrder = await _unitOfWork.SaveAsync() > 0;
@@ -405,6 +366,9 @@ namespace PoolLab.Application.Interface
             return hours + (minutes / 60m) + (seconds / 3600m);
         }
 
-
+        public async Task<PlaytimeDTO?> GetPlaytimeByTableIdOrId(Guid id)
+        {
+            return _mapper.Map<PlaytimeDTO?> (await _unitOfWork.PlaytimeRepo.GetPlayTimeByOrderOrTable(id));
+        }
     }
 }

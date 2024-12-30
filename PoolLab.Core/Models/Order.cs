@@ -27,6 +27,8 @@ public partial class Order
 
     public decimal? TotalPrice { get; set; }
 
+    public decimal? FinalPrice { get; set; }
+
     public decimal? CustomerPay {  get; set; }
 
     public decimal? ExcessCash { get; set; }

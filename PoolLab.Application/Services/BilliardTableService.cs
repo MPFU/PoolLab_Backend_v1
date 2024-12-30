@@ -30,8 +30,9 @@ namespace PoolLab.Application.Interface
         private readonly IPlaytimeService _playtimeService;
         private readonly IPaymentService _paymentService;
         private readonly IAccountVoucherService _accountVoucherService;
+        private readonly ISignalRNotifier _signalRNotifier;
 
-        public BilliardTableService(IMapper mapper, IUnitOfWork unitOfWork, IQRCodeGenerate qRCodeGenerate, IAzureBlobService azureBlobService, IBidaTypeAreaService bidaTypeAreaService, IConfigTableService configTableService, IBookingService bookingService, IOrderService orderService, IAccountService accountService, IPlaytimeService playtimeService, IPaymentService paymentService, IAccountVoucherService accountVoucherService)
+        public BilliardTableService(IMapper mapper, IUnitOfWork unitOfWork, IQRCodeGenerate qRCodeGenerate, IAzureBlobService azureBlobService, IBidaTypeAreaService bidaTypeAreaService, IConfigTableService configTableService, IBookingService bookingService, IOrderService orderService, IAccountService accountService, IPlaytimeService playtimeService, IPaymentService paymentService, IAccountVoucherService accountVoucherService, ISignalRNotifier signalRNotifier)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
@@ -45,6 +46,7 @@ namespace PoolLab.Application.Interface
             _playtimeService = playtimeService;
             _paymentService = paymentService;
             _accountVoucherService = accountVoucherService;
+            _signalRNotifier = signalRNotifier; 
         }
 
 
@@ -136,9 +138,9 @@ namespace PoolLab.Application.Interface
 
                     var checkTime = currentTime + timeCus;
 
-                    if(checkTime > store.TimeEnd.Value.ToTimeSpan())
+                    if (checkTime > store.TimeEnd.Value.ToTimeSpan())
                     {
-                        return "Thời gian chơi của bạn đã vượt quá thời gian hoạt động của quán. \nXin hãy chọn lại hoặc quay lại bữa khác!";
+                        return "thời gian chơi của bạn đã vượt quá thời gian hoạt động của quán. \n Xin hãy chọn lại hoặc quay lại bữa khác!";
                     }
 
                     decimal totalPrice = (decimal)((decimal)timeCus.TotalHours * table.Price.OldPrice);
@@ -203,6 +205,11 @@ namespace PoolLab.Application.Interface
                     {
                         return "Kích hoạt thất bại!";
                     }
+
+                    string message = $"{table.Name} đã được kích hoạt.";
+
+                    // Gửi thông báo qua SignalR
+                    await _signalRNotifier.NotifyTableActivationAsync((Guid)table.StoreId, message);
 
                     await _unitOfWork.CommitTransactionAsync();
                     return $"{(int)timeCus.TotalHours:00}:{timeCus.Minutes:00}:{timeCus.Seconds:00}";
@@ -304,6 +311,12 @@ namespace PoolLab.Application.Interface
                                     {
                                         return "Kích hoạt thất bại!";
                                     }
+
+                                    string message = $"{table.Name} đã được kích hoạt.";
+
+                                    // Gửi thông báo qua SignalR
+                                    await _signalRNotifier.NotifyTableActivationAsync((Guid)table.StoreId, message);
+
                                     await _unitOfWork.CommitTransactionAsync();
                                     return $"{(int)timeBook.TotalHours:00}:{timeBook.Minutes:00}:{timeBook.Seconds:00}";
                                 }

@@ -382,6 +382,12 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Descript).HasMaxLength(400);
             entity.Property(e => e.Name).HasMaxLength(50);
+            entity.Property(e => e.ProductTypeId).HasColumnName("ProductTypeId");
+
+            entity.HasOne(d => d.ProductType).WithMany(p => p.GroupProducts)
+                .HasForeignKey(d => d.ProductTypeId)
+                .HasConstraintName("FK_GroupProducts_ProductType")
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<Order>(entity =>
@@ -402,6 +408,7 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.TotalPrice).HasColumnType("decimal(11, 0)");
             entity.Property(e => e.CustomerPay).HasColumnType("decimal(11, 0)");
             entity.Property(e => e.ExcessCash).HasColumnType("decimal(11, 0)");
+            entity.Property(e => e.FinalPrice).HasColumnType("decimal(11, 0)");
             entity.Property(e => e.OrderBy).HasMaxLength(100);
 
             entity.HasOne(d => d.Customer).WithMany(p => p.Orders)

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using PoolLab.Application.FilterModel;
 using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
 using PoolLab.Core.Interface;
@@ -24,9 +25,19 @@ namespace PoolLab.Application.Interface
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IEnumerable<GroupProductDTO?>> GetAllGroupProduct()
+        public async Task<IEnumerable<GroupProductDTO?>> GetAllGroupProduct(GroupProductFilter productFilter)
         {
-            return _mapper.Map<IEnumerable<GroupProductDTO?>>(await _unitOfWork.GroupProductRepo.GetAllAsync());
+            var groupProductList = _mapper.Map<IEnumerable<GroupProductDTO>>(await _unitOfWork.GroupProductRepo.GetAllAsync());
+            IQueryable<GroupProductDTO> result = groupProductList.AsQueryable();
+
+            //Filter
+            if (!string.IsNullOrEmpty(productFilter.Name))
+                result = result.Where(x => x.Name.Contains(productFilter.Name, StringComparison.OrdinalIgnoreCase));
+
+            if (productFilter.ProductTypeId != null)
+                result = result.Where(x => x.ProductTypeId == productFilter.ProductTypeId);
+
+            return result.ToList();
         }
 
         public async Task<string?> CreateGroupProduct(CreateGroupProductDTO create)
@@ -52,9 +63,9 @@ namespace PoolLab.Application.Interface
                 }
 
             }
-            catch (DbException)
+            catch (Exception e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
         }
 
@@ -73,29 +84,52 @@ namespace PoolLab.Application.Interface
                 {
                     return "Không tìm thấy nhóm sản phẩm này.";
                 }
-                if (createGroupProductDTO.Name.Trim() != null && createGroupProductDTO.Descript.Trim() == null ||
-                        createGroupProductDTO.Name.Trim() != null && createGroupProductDTO.Descript.Length == 0)
+
+                if(createGroupProductDTO.ProductTypeId != null)
                 {
+                    var proType = await _unitOfWork.ProductTypeRepo.GetByIdAsync((Guid)createGroupProductDTO.ProductTypeId);
+                    if (proType == null)
+                    {
+                        return "Không tìm thấy loại sản phẩm này!";
+                    }
+
+                    check.ProductTypeId = createGroupProductDTO.ProductTypeId;
+                }
+                //if (createGroupProductDTO.Name.Trim() != null && createGroupProductDTO.Descript.Trim() == null ||
+                //        createGroupProductDTO.Name.Trim() != null && createGroupProductDTO.Descript.Length == 0)
+                //{
+                //    check.Name = createGroupProductDTO.Name;
+                //    createGroupProductDTO.Descript = check.Descript;
+                //}
+                //else if (createGroupProductDTO.Descript.Trim() != null && createGroupProductDTO.Name.Trim() == null ||
+                //            createGroupProductDTO.Descript.Trim() != null && createGroupProductDTO.Name.Length == 0)
+                //{
+                //    check.Descript = createGroupProductDTO.Descript;
+                //    createGroupProductDTO.Name = check.Name;
+                //}
+                //else if (createGroupProductDTO.Name.Trim() == null && createGroupProductDTO.Descript.Trim() == null ||
+                //            createGroupProductDTO.Name.Length == 0 && createGroupProductDTO.Descript.Length == 0)
+                //{
+                //    createGroupProductDTO.Name = check.Name;
+                //    createGroupProductDTO.Descript = check.Descript;
+                //}
+                //else
+                //{
+                //    check.Name = createGroupProductDTO.Name;
+                //    check.Descript = createGroupProductDTO.Descript;
+                //}
+                if (!string.IsNullOrEmpty(createGroupProductDTO.Name))
+                {
+                    var check1 = await _unitOfWork.GroupProductRepo.CheckDuplicateName(createGroupProductDTO.Name);
+                    if (check1)
+                    {
+                        return "Tên nhóm sản phẩm bị trùng!";
+                    }
                     check.Name = createGroupProductDTO.Name;
-                    createGroupProductDTO.Descript = check.Descript;
                 }
-                else if (createGroupProductDTO.Descript.Trim() != null && createGroupProductDTO.Name.Trim() == null ||
-                            createGroupProductDTO.Descript.Trim() != null && createGroupProductDTO.Name.Length == 0)
-                {
-                    check.Descript = createGroupProductDTO.Descript;
-                    createGroupProductDTO.Name = check.Name;
-                }
-                else if (createGroupProductDTO.Name.Trim() == null && createGroupProductDTO.Descript.Trim() == null ||
-                            createGroupProductDTO.Name.Length == 0 && createGroupProductDTO.Descript.Length == 0)
-                {
-                    createGroupProductDTO.Name = check.Name;
-                    createGroupProductDTO.Descript = check.Descript;
-                }
-                else
-                {
-                    check.Name = createGroupProductDTO.Name;
-                    check.Descript = createGroupProductDTO.Descript;
-                }
+                check.Descript = !string.IsNullOrEmpty(createGroupProductDTO.Descript) ? createGroupProductDTO.Descript : check.Descript;
+
+                _unitOfWork.GroupProductRepo.Update(check);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)
                 {
@@ -103,9 +137,9 @@ namespace PoolLab.Application.Interface
                 }
                 return null;
             }
-            catch (DbUpdateException)
+            catch (Exception e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
         }
 
@@ -126,9 +160,9 @@ namespace PoolLab.Application.Interface
                 }
                 return null;
             }
-            catch (DbException)
+            catch (Exception e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
         }
     }

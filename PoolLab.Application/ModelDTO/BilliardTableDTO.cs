@@ -156,6 +156,8 @@ namespace PoolLab.Application.ModelDTO
 
         public string? AreaName { get; set; }
 
+        public decimal? OldPrice { get; set; }
+
         public DateTime? CreatedDate { get; set; }
 
         public DateTime? UpdatedDate { get; set; }

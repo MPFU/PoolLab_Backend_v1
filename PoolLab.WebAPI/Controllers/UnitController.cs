@@ -49,7 +49,7 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateProductType(CreateUnitDTO create)
+        public async Task<IActionResult> CreateNewUnit(CreateUnitDTO create)
         {
             try
             {

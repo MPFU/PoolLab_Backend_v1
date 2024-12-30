@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PoolLab.Infrastructure;
 
@@ -11,9 +12,11 @@ using PoolLab.Infrastructure;
 namespace PoolLab.Infrastructure.Migrations
 {
     [DbContext(typeof(PoolLabDbv1Context))]
-    partial class PoolLabDbv1ContextModelSnapshot : ModelSnapshot
+    [Migration("20241221114439_updateFinalPrice")]
+    partial class updateFinalPrice
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -602,13 +605,7 @@ namespace PoolLab.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<Guid?>("ProductTypeId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("ProductTypeId");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("ProductTypeId");
 
                     b.ToTable("GroupProduct", (string)null);
                 });
@@ -1456,17 +1453,6 @@ namespace PoolLab.Infrastructure.Migrations
                     b.Navigation("Store");
                 });
 
-            modelBuilder.Entity("PoolLab.Core.Models.GroupProduct", b =>
-                {
-                    b.HasOne("PoolLab.Core.Models.ProductType", "ProductType")
-                        .WithMany("GroupProducts")
-                        .HasForeignKey("ProductTypeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_GroupProducts_ProductType");
-
-                    b.Navigation("ProductType");
-                });
-
             modelBuilder.Entity("PoolLab.Core.Models.Order", b =>
                 {
                     b.HasOne("PoolLab.Core.Models.BilliardTable", "BilliardTable")
@@ -1762,8 +1748,6 @@ namespace PoolLab.Infrastructure.Migrations
 
             modelBuilder.Entity("PoolLab.Core.Models.ProductType", b =>
                 {
-                    b.Navigation("GroupProducts");
-
                     b.Navigation("Products");
                 });
 

@@ -56,7 +56,7 @@ namespace PoolLab.Infrastructure.Interface
 
         public async Task<decimal> IncomeInstore(Guid id)
         {
-            var order = await _dbContext.Orders.Where(x => x.StoreId == id && x.Status.Equals("Hoàn Thành")).SumAsync(x => x.TotalPrice);
+            var order = await _dbContext.Orders.Where(x => x.StoreId == id && x.Status.Equals("Hoàn Thành")).SumAsync(x => x.FinalPrice);
             var booking = await _dbContext.Bookings.Where(x => x.StoreId == id && x.Status != ("Đã Huỷ")).SumAsync(x => x.Deposit);
             var result = order + booking;
             if (result > 0)
@@ -90,7 +90,7 @@ namespace PoolLab.Infrastructure.Interface
                     var totalOrder = await _dbContext.Orders
                         .Where(x => x.StoreId == storeId && x.Status.Equals("Hoàn Thành"))
                         .Where(x => x.OrderDate.Value.Date == date.Date)
-                        .SumAsync(x => x.TotalPrice);
+                        .SumAsync(x => x.FinalPrice);
 
                     var totalBooking = await _dbContext.Bookings
                         .Where(x => x.StoreId == storeId && x.Status != ("Đã Huỷ"))
@@ -123,7 +123,7 @@ namespace PoolLab.Infrastructure.Interface
                     var totalOrder = await _dbContext.Orders
                         .Where(x => x.StoreId == storeId && x.Status.Equals("Hoàn Thành"))
                         .Where(x => x.OrderDate.Value.Year == year && x.OrderDate.Value.Month == i)
-                        .SumAsync(x => x.TotalPrice);
+                        .SumAsync(x => x.FinalPrice);
 
                     var totalBooking = await _dbContext.Bookings
                         .Where(x => x.StoreId == storeId && x.Status != ("Đã Huỷ"))
@@ -154,7 +154,7 @@ namespace PoolLab.Infrastructure.Interface
 
         public async Task<decimal> TotalIncome()
         {
-            var order = await _dbContext.Orders.Where(x => x.Status.Equals("Hoàn Thành")).SumAsync(x => x.TotalPrice);
+            var order = await _dbContext.Orders.Where(x => x.Status.Equals("Hoàn Thành")).SumAsync(x => x.FinalPrice);
             var booking = await _dbContext.Bookings.Where(x => !x.Status.Equals("Đã Huỷ")).SumAsync(x => x.Deposit);
             var result = order + booking;
             if (result > 0)

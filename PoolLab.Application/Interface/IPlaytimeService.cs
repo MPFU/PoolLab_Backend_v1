@@ -13,5 +13,7 @@ namespace PoolLab.Application.Interface
         Task<string?> AddNewPlaytime(AddNewPlayTimeDTO addNewPlayTimeDTO);
 
         Task<string?> StopPlayTime(StopTimeDTO timeDTO);
+
+        Task<PlaytimeDTO> GetPlaytimeByTableIdOrId(Guid id);
     }
 }

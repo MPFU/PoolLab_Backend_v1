@@ -64,6 +64,8 @@ namespace PoolLab.Application.ModelDTO
 
         public decimal? TotalPrice { get; set; }
 
+        public decimal? FinalPrice { get; set; }
+
         public string? Status { get; set; }
     }
 
@@ -98,9 +100,11 @@ namespace PoolLab.Application.ModelDTO
 
         public string? OrderBy { get; set; }
 
+        public decimal? TotalPrice { get; set; }
+
         public decimal? Discount { get; set; }
 
-        public decimal? TotalPrice { get; set; }
+        public decimal? FinalPrice { get; set; }
 
         public decimal? CustomerPay { get; set; }
 

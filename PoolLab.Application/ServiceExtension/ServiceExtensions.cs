@@ -6,6 +6,7 @@ using PoolLab.Application.Interface;
 using PoolLab.Application.Services;
 using PoolLab.Core.Interface;
 using PoolLab.Infrastructure.Interface;
+using PoolLab.Infrastructure.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,6 +55,7 @@ namespace PoolLab.Application.ServiceExtension
             services.AddScoped<IAccountVoucherService, AccountVoucherService>();
             services.AddScoped<IDashboardService, DashboardService>();
             services.AddScoped<IFirebaseAuthService, FirebaseAuthService>();
+            services.AddScoped<ISignalRNotifier, SignalRNotifier>();
 
             services.AddScoped(x => new BlobServiceClient(configuration.GetConnectionString("BlobStorage")));
 

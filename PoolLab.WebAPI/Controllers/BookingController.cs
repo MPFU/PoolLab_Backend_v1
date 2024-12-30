@@ -112,6 +112,36 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetAllBookingTableOfDay(Guid id)
+        {
+            try
+            {
+                var book = await _bookingService.GetAllBookingTableOfDay(id);
+                if (book == null)
+                {
+                    return NotFound(new FailResponse()
+                    {
+                        Status = NotFound().StatusCode,
+                        Message = "Không tìm thấy lịch đặt nào !"
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Data = book
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateNewBooking([FromBody] NewBookingDTO bookingDTO)
         {

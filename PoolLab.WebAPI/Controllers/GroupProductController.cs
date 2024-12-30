@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PoolLab.Application.FilterModel;
 using PoolLab.Application.Interface;
 using PoolLab.Application.ModelDTO;
 using PoolLab.WebAPI.ResponseModel;
@@ -19,11 +20,11 @@ namespace PoolLab.WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllGroupProduct()
+        public async Task<IActionResult> GetAllGroupProduct([FromQuery] GroupProductFilter productFilter)
         {
             try
             {
-                var group = await _groupProductService.GetAllGroupProduct();
+                var group = await _groupProductService.GetAllGroupProduct(productFilter);
                 if (group == null || group.Count() <= 0)
                 {
                     return NotFound(new FailResponse()

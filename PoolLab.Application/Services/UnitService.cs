@@ -68,34 +68,49 @@ namespace PoolLab.Application.Interface
         {
             try
             {
-                var check = await _unitOfWork.GroupProductRepo.GetByIdAsync(id);
+                var check = await _unitOfWork.UnitRepo.GetByIdAsync(id);
                 if (check == null)
                 {
                     return "Không tìm thấy đơn vị này.";
                 }
-                if (create.Name.Trim() != null && create.Descript.Trim() == null ||
-                        create.Name.Trim() != null && create.Descript.Length == 0)
+
+                //if (create.Name.Trim() != null && create.Descript.Trim() == null ||
+                //        create.Name.Trim() != null && create.Descript.Length == 0)
+                //{
+                //    check.Name = create.Name;
+                //    create.Descript = check.Descript;
+                //}
+                //else if (create.Descript.Trim() != null && create.Name.Trim() == null ||
+                //            create.Descript.Trim() != null && create.Name.Length == 0)
+                //{
+                //    check.Descript = create.Descript;
+                //    create.Name = check.Name;
+                //}
+                //else if (create.Name.Trim() == null && create.Descript.Trim() == null ||
+                //            create.Name.Length == 0 && create.Descript.Length == 0)
+                //{
+                //    create.Name = check.Name;
+                //    create.Descript = check.Descript;
+                //}
+                //else
+                //{
+                //    check.Name = create.Name;
+                //    check.Descript = create.Descript;
+                //}
+
+                if(!string.IsNullOrEmpty(create.Name))
                 {
+                    var namecheck = await GetUnitByName(check.Name);
+                    if (namecheck != null)
+                    {
+                        return "Tên đơn vị bị trùng.";
+                    }
                     check.Name = create.Name;
-                    create.Descript = check.Descript;
                 }
-                else if (create.Descript.Trim() != null && create.Name.Trim() == null ||
-                            create.Descript.Trim() != null && create.Name.Length == 0)
-                {
-                    check.Descript = create.Descript;
-                    create.Name = check.Name;
-                }
-                else if (create.Name.Trim() == null && create.Descript.Trim() == null ||
-                            create.Name.Length == 0 && create.Descript.Length == 0)
-                {
-                    create.Name = check.Name;
-                    create.Descript = check.Descript;
-                }
-                else
-                {
-                    check.Name = create.Name;
-                    check.Descript = create.Descript;
-                }
+
+                check.Descript = !string.IsNullOrEmpty(create.Descript) ? create.Descript : check.Descript;
+
+                _unitOfWork.UnitRepo.Update(check);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)
                 {
@@ -103,9 +118,9 @@ namespace PoolLab.Application.Interface
                 }
                 return null;
             }
-            catch (DbUpdateException)
+            catch (Exception e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
         }
 
@@ -126,9 +141,9 @@ namespace PoolLab.Application.Interface
                 }
                 return null;
             }
-            catch (DbException)
+            catch (Exception e)
             {
-                throw;
+                throw new Exception(e.Message);
             }
         }
     }

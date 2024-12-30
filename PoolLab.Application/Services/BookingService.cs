@@ -764,5 +764,14 @@ namespace PoolLab.Application.Interface
         {
             return _mapper.Map<GetRecurringBookingDTO>(await _unitOfWork.BookingRepo.GetBookingRecurringById(id));
         }
+
+        public async Task<IEnumerable<BookingDTO>> GetAllBookingTableOfDay(Guid tableId)
+        {
+            DateTime utcNow = DateTime.UtcNow;
+            TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            var now = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+
+            return _mapper.Map<IEnumerable<BookingDTO>>(await _unitOfWork.BookingRepo.GetAllBookingTableOfDate(tableId, now));
+        }
     }
 }

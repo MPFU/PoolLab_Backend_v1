@@ -14,6 +14,8 @@ namespace PoolLab.Application.ModelDTO
         public string? Name { get; set; }
 
         public string? Descript { get; set; }
+
+        public Guid? ProductTypeId { get; set; }
     }
 
     public class CreateGroupProductDTO
@@ -21,5 +23,7 @@ namespace PoolLab.Application.ModelDTO
         public string? Name { get; set; }
 
         public string? Descript { get; set; }
+
+        public Guid? ProductTypeId { get; set; }
     }
 }

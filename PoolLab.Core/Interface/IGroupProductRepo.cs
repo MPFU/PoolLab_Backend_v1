@@ -10,5 +10,7 @@ namespace PoolLab.Core.Interface
     public interface IGroupProductRepo : IGenericRepo<GroupProduct>
     {
         Task<GroupProduct> SearchByNameAsync(string name);
+
+        Task<bool> CheckDuplicateName(string name);
     }
 }

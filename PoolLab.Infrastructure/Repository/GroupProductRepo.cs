@@ -19,5 +19,10 @@ namespace PoolLab.Infrastructure.Interface
         {
             return await _dbContext.GroupProducts.FirstOrDefaultAsync(x => x.Name.Equals(name));
         }
+
+        public async Task<bool> CheckDuplicateName(string name)
+        {
+            return await _dbContext.GroupProducts.AnyAsync(x => x.Name.Equals(name));
+        }
     }
 }
