@@ -73,6 +73,12 @@ public partial class PoolLabDbv1Context : DbContext
 
     public virtual DbSet<BilliardTypeArea> BilliardTypeAreas { get; set; }
 
+    public virtual DbSet<TableIssues> TableIssues { get; set; }
+
+    public virtual DbSet<TableMaintenance> TableMaintenances { get; set; }
+
+    public virtual DbSet<Notification> Notifications { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         string connectionString = GetConnectionString();
@@ -87,7 +93,7 @@ public partial class PoolLabDbv1Context : DbContext
             .AddJsonFile("appsettings.json", true, true)
             .Build();
 
-        connectionString = config.GetConnectionString("AzureDB");
+        connectionString = config.GetConnectionString("PhucDatabase");
         return connectionString;
     }
 
@@ -100,7 +106,6 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.AvatarUrl).HasMaxLength(100);
             entity.Property(e => e.Balance).HasColumnType("decimal(11, 0)");
-            entity.Property(e => e.CompanyId).HasColumnName("CompanyID");
             entity.Property(e => e.Email).HasMaxLength(100);
             entity.Property(e => e.FullName).HasMaxLength(50);
             entity.Property(e => e.JoinDate).HasColumnType("datetime");
@@ -111,11 +116,6 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.SubId).HasColumnName("SubID");
             entity.Property(e => e.UserName).HasMaxLength(50);
             entity.Property(e => e.TimeTotal).HasPrecision(0);
-
-            entity.HasOne(d => d.Company).WithMany(p => p.Accounts)
-                .HasForeignKey(d => d.CompanyId)
-                .HasConstraintName("FK_Account_Company")
-                .OnDelete(DeleteBehavior.NoAction);
 
             entity.HasOne(d => d.Role).WithMany(p => p.Accounts)
                 .HasForeignKey(d => d.RoleId)
@@ -404,11 +404,13 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.Discount).HasColumnType("decimal(11, 1)");
             entity.Property(e => e.OrderDate).HasColumnType("datetime");
             entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.PaymentMethod).HasMaxLength(100);
             entity.Property(e => e.StoreId).HasColumnName("StoreID");
             entity.Property(e => e.TotalPrice).HasColumnType("decimal(11, 0)");
             entity.Property(e => e.CustomerPay).HasColumnType("decimal(11, 0)");
             entity.Property(e => e.ExcessCash).HasColumnType("decimal(11, 0)");
             entity.Property(e => e.FinalPrice).HasColumnType("decimal(11, 0)");
+            entity.Property(e => e.AdditionalFee).HasColumnType("decimal(11, 0)");
             entity.Property(e => e.OrderBy).HasMaxLength(100);
 
             entity.HasOne(d => d.Customer).WithMany(p => p.Orders)
@@ -430,6 +432,11 @@ public partial class PoolLabDbv1Context : DbContext
               .HasForeignKey(d => d.PlayTimeId)
               .HasConstraintName("FK_Order_PlayTime")
               .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(d => d.TableIssues).WithMany(p => p.Orders)
+             .HasForeignKey(d => d.TableIssuesId)
+             .HasConstraintName("FK_Order_TableIssues.")
+             .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<OrderDetail>(entity =>
@@ -472,6 +479,7 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.PaymentMethod).HasMaxLength(50);
             entity.Property(e => e.Status).HasMaxLength(50);
             entity.Property(e => e.SubId).HasColumnName("SubID");
+            entity.Property(e => e.TableIssuesId).HasColumnName("TableIssuesId");
 
             entity.HasOne(d => d.Account).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.AccountId)
@@ -484,6 +492,10 @@ public partial class PoolLabDbv1Context : DbContext
             entity.HasOne(d => d.Sub).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.SubId)
                 .HasConstraintName("FK_Transaction_Subscription");
+
+            entity.HasOne(d => d.TableIssues).WithMany(p => p.Transactions)
+             .HasForeignKey(d => d.TableIssuesId)
+             .HasConstraintName("FK_Transaction_TableIssues");
         });
 
         modelBuilder.Entity<PlayTime>(entity =>
@@ -620,7 +632,6 @@ public partial class PoolLabDbv1Context : DbContext
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Address).HasMaxLength(400);
-            entity.Property(e => e.CompanyId).HasColumnName("CompanyID");
             entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.Descript).HasMaxLength(1000);
             entity.Property(e => e.Name).HasMaxLength(100);
@@ -630,10 +641,6 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.StoreImg).HasMaxLength(100);
             entity.Property(e => e.TimeStart).HasPrecision(0);
             entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
-
-            entity.HasOne(d => d.Company).WithMany(p => p.Stores)
-                .HasForeignKey(d => d.CompanyId)
-                .HasConstraintName("FK_Store_Company");
         });
 
         modelBuilder.Entity<Subscription>(entity =>
@@ -723,6 +730,100 @@ public partial class PoolLabDbv1Context : DbContext
             entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
 
         });
+
+        modelBuilder.Entity<TableIssues>(entity =>
+        {
+            entity.ToTable("TableIssues");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.BilliardTableID).HasColumnName("BilliardTableID");
+            entity.Property(e => e.StoreId).HasColumnName("StoreId");
+            entity.Property(e => e.CustomerID).HasColumnName("CustomerID");
+            entity.Property(e => e.Descript).HasColumnType("nvarchar(MAX)");
+            entity.Property(e => e.ReportedBy).HasMaxLength(500);
+            entity.Property(e => e.EstimatedCost).HasColumnType("decimal(11, 0)");
+            entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.RepairStatus).HasMaxLength(50);
+            entity.Property(e => e.TableIssuesCode).HasMaxLength(100);
+            entity.Property(e => e.IssueImg).HasMaxLength(150);
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Customer).WithMany(p => p.TableIssues)
+               .HasForeignKey(d => d.CustomerID)
+               .OnDelete(DeleteBehavior.NoAction)
+               .HasConstraintName("FK_TableIssues_Customer");
+            
+            entity.HasOne(d => d.Store).WithMany(p => p.TableIssues)
+               .HasForeignKey(d => d.StoreId)
+               .OnDelete(DeleteBehavior.NoAction)
+               .HasConstraintName("FK_TableIssues_Store");
+
+            entity.HasOne(d => d.BilliardTable).WithMany(p => p.TableIssues)
+               .HasForeignKey(d => d.BilliardTableID)
+               .OnDelete(DeleteBehavior.NoAction)
+               .HasConstraintName("FK_AccountVouchers_BilliardTable");
+        });
+        
+        modelBuilder.Entity<TableMaintenance>(entity =>
+        {
+            entity.ToTable("TableMaintenance");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.BilliardTableID).HasColumnName("BilliardTableID");
+            entity.Property(e => e.StoreId).HasColumnName("StoreId");
+            entity.Property(e => e.TechnicianId).HasColumnName("TechnicianId");
+            entity.Property(e => e.TableIssuesId).HasColumnName("TableIssuesId");
+            entity.Property(e => e.Reason).HasColumnType("nvarchar(MAX)");
+            entity.Property(e => e.StartDate).HasColumnType("datetime");
+            entity.Property(e => e.EndDate).HasColumnType("datetime");
+            entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.EstimatedCost).HasColumnType("decimal(11, 0)");
+            entity.Property(e => e.TableMainCode).HasMaxLength(100);
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Technician).WithMany(p => p.TableMaintenances)
+               .HasForeignKey(d => d.TechnicianId)
+               .OnDelete(DeleteBehavior.NoAction)
+               .HasConstraintName("FK_TableMaintenance_Technician");
+            
+            entity.HasOne(d => d.Store).WithMany(p => p.TableMaintenances)
+               .HasForeignKey(d => d.StoreId)
+               .OnDelete(DeleteBehavior.NoAction)
+               .HasConstraintName("FK_TableMaintenance_Store");
+
+            entity.HasOne(d => d.BilliardTable).WithMany(p => p.TableMaintenances)
+               .HasForeignKey(d => d.BilliardTableID)
+               .OnDelete(DeleteBehavior.NoAction)
+               .HasConstraintName("FK_TableMaintenance_BilliardTable");
+
+            entity.HasOne(d => d.TableIssues).WithMany(p => p.TableMaintenances)
+             .HasForeignKey(d => d.TableIssuesId)
+             .OnDelete(DeleteBehavior.NoAction)
+             .HasConstraintName("FK_TableMaintenance_TableIssues");
+        });
+
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.ToTable("Notification");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.CustomerID).HasColumnName("CustomerID");
+            entity.Property(e => e.Descript).HasColumnType("nvarchar(MAX)");
+            entity.Property(e => e.IsRead).HasColumnType("BIT").HasDefaultValue(false);
+            entity.Property(e => e.ReadAt).HasColumnType("datetime");
+            entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.Title).HasMaxLength(150);
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Customer).WithMany(p => p.Notifications)
+             .HasForeignKey(d => d.CustomerID)
+             .OnDelete(DeleteBehavior.NoAction)
+             .HasConstraintName("FK_Notifications_Customer");
+        });
+
         OnModelCreatingPartial(modelBuilder);
     }
 

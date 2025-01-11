@@ -143,10 +143,6 @@ namespace PoolLab.Application.Services
             {
                 claims.Add(new Claim("storeId", account.StoreId.ToString()));
             }
-            else
-            {
-                claims.Add(new Claim("companyId", account.CompanyId.ToString()));
-            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes
                 (_configuration.GetSection("JwtSecurityToken:Key").Value));

@@ -36,5 +36,11 @@ namespace PoolLab.Core.Interface
         Task<Booking?> CheckAccountOrTableBooking(Guid id, DateOnly bookingDate, TimeOnly timeStart, TimeOnly timeEnd);
 
         Task<IEnumerable<Booking>> GetAllBookingTableOfDate(Guid tableId, DateTime currentDate);
+
+        Task<IEnumerable<Booking>?> GetAllBookingOfTableByIdOrCus(Guid id);
+
+        Task<IEnumerable<Booking>?> GetAllBookingOfTableInDateByIdOrCus(Guid id, DateOnly date);
+
+        Task<IEnumerable<Booking>?> GetAllBookingForRepairTable(Guid tableId, DateTime StartDate, DateTime EndDate);
     }
 }

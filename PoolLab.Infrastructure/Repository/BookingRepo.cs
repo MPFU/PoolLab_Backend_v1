@@ -78,6 +78,12 @@ namespace PoolLab.Infrastructure.Interface
 
         public async Task<BilliardTable?> GetTableNotBooking(Booking booking)
         {
+            DateTime utcNow = DateTime.UtcNow;
+            TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            var now = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+
+            var nowDate = DateOnly.FromDateTime(now);
+
             var bookings = await _dbContext.Bookings
                           .Where(x => x.BookingDate == booking.BookingDate &&
                           ((x.TimeStart < booking.TimeEnd && x.TimeStart >= booking.TimeStart) || (x.TimeEnd > booking.TimeStart && x.TimeEnd <= booking.TimeEnd)))
@@ -88,49 +94,51 @@ namespace PoolLab.Infrastructure.Interface
 
             if (bookings != null && bookings.Count() > 0)
             {
-                DateTime utcNow = DateTime.UtcNow;
-                TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-                var now = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
-
-                var nowDate = DateOnly.FromDateTime(now);
 
                 if (booking.BookingDate == nowDate)
                 {
-                    var table = await _dbContext.BilliardTables
+                    return await _dbContext.BilliardTables
                                            .Where(x => x.BilliardTypeId.Equals(booking.BilliardTypeId) && x.StoreId.Equals(booking.StoreId))
                                            .Where(x => !bookings.Equals(x.Id) && x.AreaId.Equals(booking.AreaId))
-                                           .Where(x => x.Status.Equals("Bàn Trống"))
+                                           .Where(x => x.Status.Equals("Bàn Trống") && x.Id != booking.BilliardTableId)
                                            .Include(x => x.Price)
                                            .FirstOrDefaultAsync();
 
-                    if (table != null)
-                    {
-                        return table;
-                    }
-                    return null;
+
                 }
                 else
                 {
-                    var table = await _dbContext.BilliardTables
+                    return await _dbContext.BilliardTables
                        .Where(x => x.BilliardTypeId.Equals(booking.BilliardTypeId) && x.StoreId.Equals(booking.StoreId))
-                       .Where(x => !bookings.Equals(x.Id) && x.AreaId.Equals(booking.AreaId))
+                       .Where(x => !bookings.Equals(x.Id) && x.AreaId.Equals(booking.AreaId) && x.Id != booking.BilliardTableId)
                        .Include(x => x.Price)
                        .FirstOrDefaultAsync();
 
-                    if (table != null)
-                    {
-                        return table;
-                    }
-                    return null;
                 }
 
             }
-
-            return await _dbContext.BilliardTables
+            else
+            {
+                if (booking.BookingDate == nowDate)
+                {
+                    return await _dbContext.BilliardTables
                         .Where(x => x.BilliardTypeId.Equals(booking.BilliardTypeId) && x.StoreId.Equals(booking.StoreId))
-                        .Where(x => x.AreaId.Equals(booking.AreaId))
+                        .Where(x => x.AreaId.Equals(booking.AreaId) && x.Id != booking.BilliardTableId)
+                        .Where(x => x.Status.Equals("Bàn Trống"))
                         .Include(x => x.Price)
                         .FirstOrDefaultAsync();
+                }
+
+                else
+                {
+                    return await _dbContext.BilliardTables
+                        .Where(x => x.BilliardTypeId.Equals(booking.BilliardTypeId) && x.StoreId.Equals(booking.StoreId))
+                        .Where(x => x.AreaId.Equals(booking.AreaId) && x.Id != booking.BilliardTableId && x.Id != booking.BilliardTableId)
+                        .Include(x => x.Price)
+                        .FirstOrDefaultAsync();
+                }
+            }
+
         }
 
         public async Task<Booking?> CheckTableBookingInMonth(Guid tableId, DateTime date, TimeOnly startTime, TimeOnly endTime)
@@ -154,8 +162,8 @@ namespace PoolLab.Infrastructure.Interface
             return await _dbContext.Bookings
                 .Where(x => x.Id == id)
                 .Include(x => x.RecurringBookings)
-                .Include (x => x.BilliardTable)
-                .Include (x => x.Store)
+                .Include(x => x.BilliardTable)
+                .Include(x => x.Store)
                 .FirstOrDefaultAsync();
         }
 
@@ -178,7 +186,7 @@ namespace PoolLab.Infrastructure.Interface
                 .ToListAsync();
         }
 
-        public async Task<Booking?> CheckAccountOrTableBooking(Guid id,DateOnly bookingDate, TimeOnly timeStart, TimeOnly timeEnd)
+        public async Task<Booking?> CheckAccountOrTableBooking(Guid id, DateOnly bookingDate, TimeOnly timeStart, TimeOnly timeEnd)
         {
             return await _dbContext.Bookings
                           .Include(x => x.ConfigTable)
@@ -186,10 +194,10 @@ namespace PoolLab.Infrastructure.Interface
                           ((x.TimeStart.Value.AddMinutes((double)-x.ConfigTable.TimeHold) < timeEnd && x.TimeStart.Value.AddMinutes((double)-x.ConfigTable.TimeHold) >= timeStart) || (x.TimeEnd > timeStart.AddMinutes((double)-x.ConfigTable.TimeHold) && x.TimeEnd <= timeEnd)))
                           .Where(x => x.Status.Equals("Đã Đặt"))
                           .Where(x => x.CustomerId == id || x.BilliardTableId == id)
-                          .FirstOrDefaultAsync();          
+                          .FirstOrDefaultAsync();
         }
 
-        public async Task<List<Booking>?> GetBookingInDate( DateOnly bookingDate, TimeOnly timeStart, TimeOnly timeEnd)
+        public async Task<List<Booking>?> GetBookingInDate(DateOnly bookingDate, TimeOnly timeStart, TimeOnly timeEnd)
         {
             return await _dbContext.Bookings
                           .Where(x => x.BookingDate == bookingDate &&
@@ -201,12 +209,37 @@ namespace PoolLab.Infrastructure.Interface
         public async Task<IEnumerable<Booking>?> GetAllBookingTableOfDate(Guid tableId, DateTime currentDate)
         {
             var currDate = DateOnly.FromDateTime(currentDate);
-            var currTime = TimeOnly.FromDateTime(currentDate);  
+            var currTime = TimeOnly.FromDateTime(currentDate);
 
             return await _dbContext.Bookings
                 .Where(x => x.BilliardTableId == tableId && x.BookingDate == currDate)
                 .Where(x => x.TimeStart >= currTime && x.Status.Equals("Đã Đặt"))
                 .OrderBy(x => x.TimeStart)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Booking>?> GetAllBookingOfTableByIdOrCus(Guid id)
+        {
+            return await _dbContext.Bookings
+                .Where(x => x.BilliardTableId == id || x.CustomerId == id)
+                .Where(x => x.Status.Equals("Đã Đặt"))
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Booking>?> GetAllBookingOfTableInDateByIdOrCus(Guid id, DateOnly date)
+        {
+            return await _dbContext.Bookings
+                .Where(x => x.BilliardTableId == id || x.CustomerId == id)
+                .Where(x => x.Status.Equals("Đã Đặt") && x.BookingDate == date)
+                .OrderBy(x => x.CreatedDate)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Booking>?> GetAllBookingForRepairTable(Guid tableId, DateTime StartDate, DateTime EndDate)
+        {
+
+            return await _dbContext.Bookings
+                .Where(x => x.BilliardTableId == tableId && x.IsRecurring == false && x.Status.Equals("Đã Đặt"))
                 .ToListAsync();
         }
     }

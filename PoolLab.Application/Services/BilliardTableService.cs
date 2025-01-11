@@ -31,8 +31,9 @@ namespace PoolLab.Application.Interface
         private readonly IPaymentService _paymentService;
         private readonly IAccountVoucherService _accountVoucherService;
         private readonly ISignalRNotifier _signalRNotifier;
+        private readonly INotificationService _notificationService;
 
-        public BilliardTableService(IMapper mapper, IUnitOfWork unitOfWork, IQRCodeGenerate qRCodeGenerate, IAzureBlobService azureBlobService, IBidaTypeAreaService bidaTypeAreaService, IConfigTableService configTableService, IBookingService bookingService, IOrderService orderService, IAccountService accountService, IPlaytimeService playtimeService, IPaymentService paymentService, IAccountVoucherService accountVoucherService, ISignalRNotifier signalRNotifier)
+        public BilliardTableService(IMapper mapper, IUnitOfWork unitOfWork, IQRCodeGenerate qRCodeGenerate, IAzureBlobService azureBlobService, IBidaTypeAreaService bidaTypeAreaService, IConfigTableService configTableService, IBookingService bookingService, IOrderService orderService, IAccountService accountService, IPlaytimeService playtimeService, IPaymentService paymentService, IAccountVoucherService accountVoucherService, ISignalRNotifier signalRNotifier, INotificationService notificationService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
@@ -46,7 +47,8 @@ namespace PoolLab.Application.Interface
             _playtimeService = playtimeService;
             _paymentService = paymentService;
             _accountVoucherService = accountVoucherService;
-            _signalRNotifier = signalRNotifier; 
+            _signalRNotifier = signalRNotifier;
+            _notificationService = notificationService;
         }
 
 
@@ -78,6 +80,10 @@ namespace PoolLab.Application.Interface
                 if (table.Status.Equals("Có Khách"))
                 {
                     return "Bàn chơi này đang không trống để phục vụ!";
+                }
+                if (table.Status.Equals("Bảo Trì") || table.Status.Equals("Vô Hiệu"))
+                {
+                    return $"Bàn chơi này đang {table.Status}, không thể kích hoạt!";
                 }
 
                 //Chi nhánh
@@ -171,6 +177,7 @@ namespace PoolLab.Application.Interface
                     orderDTO.StoreId = table.StoreId;
                     orderDTO.PlayTimeId = Guid.Parse(crePlay);
                     orderDTO.Discount = discount;
+                    orderDTO.PaymentMethod = "Qua Ví";
                     var creOrder = await _orderService.AddNewOrder(orderDTO);
                     if (!Guid.TryParse(creOrder, out _))
                     {
@@ -271,6 +278,7 @@ namespace PoolLab.Application.Interface
                                     orderDTO.StoreId = table.StoreId;
                                     orderDTO.PlayTimeId = Guid.Parse(crePlay);
                                     orderDTO.Discount = discount;
+                                    orderDTO.PaymentMethod = "Qua Ví";
                                     var creOrder = await _orderService.AddNewOrder(orderDTO);
                                     if (!Guid.TryParse(creOrder, out _))
                                     {
@@ -646,6 +654,10 @@ namespace PoolLab.Application.Interface
                 {
                     return "Bàn chơi này đang không trống để phục vụ!";
                 }
+                if(table.Status.Equals("Bảo Trì") || table.Status.Equals("Vô Hiệu"))
+                {
+                    return $"Bàn chơi này đang {table.Status}, không thể kích hoạt!";
+                }
 
                 var cus = await _unitOfWork.AccountRepo.GetByIdAsync(getByQR.CustomerID);
                 if (cus == null)
@@ -953,13 +965,101 @@ namespace PoolLab.Application.Interface
                     return _mapper.Map<List<GetBilliardTableDTO>?>(table);
                 }
 
-                return null;
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
 
+        }
+
+        public async Task<string?> InActiveBilliardTable(Guid Id)
+        {
+            try
+            {
+                var table = await _unitOfWork.BilliardTableRepo.GetByIdAsync(Id);
+                if (table == null)
+                {
+                    return "Không tìm thấy bàn chơi này!";
+                }
+
+                var bookings = await _unitOfWork.BookingRepo.GetAllBookingOfTableByIdOrCus(table.Id);
+
+                await _unitOfWork.BeginTransactionAsync();              
+
+                if(bookings != null)
+                {
+                    var cusList = bookings.Select(x => x.CustomerId).Distinct().ToList();
+                    if (cusList.Count == 0)
+                    {
+                        return "Không lấy được danh sách khách hàng!";
+                    }
+
+                    foreach (var booking in bookings.ToList())
+                    {
+                        if(booking.IsRecurring == false)
+                        {
+                            // Hoàn tiền cho khách
+                            var cus = await _unitOfWork.AccountRepo.GetByIdAsync((Guid)booking.CustomerId);
+                            if (cus == null)
+                            {
+                                return "Không tìm thấy khách hàng của lịch đặt này!";
+                            }
+
+                            var balance = cus.Balance + booking.Deposit;
+                            var up = await _accountService.UpdateBalance(cus.Id, (decimal)balance);
+                            if (up != null)
+                            {
+                                return up;
+                            }
+
+                            PaymentBookingDTO paymentBookingDTO = new PaymentBookingDTO();
+                            paymentBookingDTO.PaymentMethod = "Qua Ví";
+                            paymentBookingDTO.Amount = booking.Deposit;
+                            paymentBookingDTO.AccountId = cus.Id;
+                            paymentBookingDTO.PaymentInfo = "Hoàn Tiền";
+                            paymentBookingDTO.TypeCode = 1;
+                            var pay = await _paymentService.CreateTransactionBooking(paymentBookingDTO);
+                            if (pay != null)
+                            {
+                                return pay;
+                            }
+                        }                      
+
+                        // Cập nhật trạng thái booking
+                        UpdateBookingStatusDTO updateBookingStatusDTO = new UpdateBookingStatusDTO();
+                        updateBookingStatusDTO.Status = "Đã Huỷ";
+                        var upBook = await _bookingService.UpdateStatusBooking(booking.Id, updateBookingStatusDTO);
+                        if (upBook != null)
+                        {
+                            return upBook;
+                        }                     
+                    }
+
+                    foreach (var cusId in cusList)
+                    {
+                        CreateNotificationDTO notificationDTO = new CreateNotificationDTO();
+                        notificationDTO.Title = "Thông báo mới từ PoolLab.";
+                        notificationDTO.Descript = await _notificationService.MessageInActiveTableBooking(table.Name, "Vô Hiệu");
+                        notificationDTO.Status = "Đã Gửi";
+                        notificationDTO.CustomerID = cusId;
+                        var noti = await _notificationService.CreateNewNotification(notificationDTO);
+                    }
+                }
+
+                table.Status = "Vô Hiệu";
+                _unitOfWork.BilliardTableRepo.Update(table);
+                var result = await _unitOfWork.SaveAsync();
+
+                await _unitOfWork.CommitTransactionAsync();
+                
+                return null;
+            
+            }catch(Exception ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

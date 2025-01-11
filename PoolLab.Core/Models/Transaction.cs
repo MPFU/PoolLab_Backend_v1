@@ -11,6 +11,8 @@ public partial class Transaction
 
     public Guid? AccountId { get; set; }
 
+    public Guid? TableIssuesId { get; set; }
+
     public Guid? SubId { get; set; }
 
     public DateTime? PaymentDate { get; set; }
@@ -34,4 +36,6 @@ public partial class Transaction
     public virtual Order? Order { get; set; }
 
     public virtual Subscription? Sub { get; set; }
+
+    public virtual TableIssues? TableIssues { get; set; }
 }

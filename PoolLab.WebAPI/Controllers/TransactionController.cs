@@ -11,7 +11,7 @@ namespace PoolLab.WebAPI.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    [Authorize(Roles = "Member, Admin,Super Manager,Manager,Staff")]
+    //[Authorize(Roles = "Member, Admin,Super Manager,Manager,Staff")]
     public class TransactionController : ControllerBase
     {
         private readonly IPaymentService _paymentService;
@@ -27,6 +27,36 @@ namespace PoolLab.WebAPI.Controllers
             try
             {
                 var trans = await _paymentService.GetAllTransaction(filter);
+                if (trans == null || trans.Items.Count() <= 0)
+                {
+                    return NotFound(new FailResponse()
+                    {
+                        Status = NotFound().StatusCode,
+                        Message = "Không tìm thấy !"
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Data = trans
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllOrderTransaction([FromQuery] PaymentOrderFilter filter)
+        {
+            try
+            {
+                var trans = await _paymentService.GetAllOrderTransaction(filter);
                 if (trans == null || trans.Items.Count() <= 0)
                 {
                     return NotFound(new FailResponse()

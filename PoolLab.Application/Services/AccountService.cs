@@ -97,16 +97,15 @@ namespace PoolLab.Application.Interface
                     return "Không tìm thấy chức vụ này !";
                 }              
                 account.RoleId = roleId.Id;
-                if(createAccDTO.RoleName.Equals("Super Manager") || createAccDTO.RoleName.Equals("Admin"))
+
+                if(createAccDTO.RoleName.Equals("Staff") || createAccDTO.RoleName.Equals("Manager"))
                 {
-                    account.StoreId = null;
-                    account.CompanyId = createAccDTO.CompanyId;
+                    if(createAccDTO.StoreId == null) 
+                    {
+                        return $"Chức vụ {createAccDTO.RoleName} cần điền chi nhánh!";
+                    }
                 }
-                else
-                {
-                    account.StoreId = createAccDTO.StoreId;
-                    account.CompanyId = null;
-                }
+                account.StoreId = createAccDTO.StoreId != null ? createAccDTO.StoreId : null;
                
                 await _unitOfWork.AccountRepo.AddAsync(_mapper.Map<Account>(account));
                 var result = await _unitOfWork.SaveAsync() > 0;
@@ -204,10 +203,7 @@ namespace PoolLab.Application.Interface
                 result = result.Where(x => x.RoleId == accountFilter.RoleId);
 
             if (accountFilter.StoreId != null)
-                result = result.Where(x => x.StoreId == accountFilter.StoreId);
-
-            if (accountFilter.CompanyId != null)
-                result = result.Where(x => x.CompanyId == accountFilter.CompanyId);
+                result = result.Where(x => x.StoreId == accountFilter.StoreId);           
 
             if (accountFilter.SubId != null)
                 result = result.Where(x => x.SubId == accountFilter.SubId);

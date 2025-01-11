@@ -176,6 +176,20 @@ namespace PoolLab.Application.Interface
                     return "Không tính được tổng tiền của các sản phẩm!";
                 }
                 order.TotalPrice = TotalPrice1;
+                if(order.TableIssuesId == null || order.FinalPrice == 0)
+                {
+                    order.FinalPrice = TotalPrice1;
+                }
+                else
+                {
+                    var iss = await _unitOfWork.TableIssuesRepo.GetByIdAsync((Guid)order.TableIssuesId);
+                    if (iss == null)
+                    {
+                        return "Không tìm thấy phụ phí!";
+                    }
+
+                    order.FinalPrice += (TotalPrice1 - (order.FinalPrice - iss.EstimatedCost));                                         
+                }
                 _unitOfWork.OrderRepo.Update(order);
                 var result1 = await _unitOfWork.SaveAsync() > 0;
                 if (!result1)

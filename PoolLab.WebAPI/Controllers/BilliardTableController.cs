@@ -505,6 +505,38 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> InActiveTable(Guid id)
+        {
+            try
+            {
+
+                var requestResult = await _billiardTableService.InActiveBilliardTable(id);
+                if (requestResult != null)
+                {
+                    return StatusCode(400, new FailResponse()
+                    {
+                        Status = 400,
+                        Message = requestResult
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Cập nhật thành công."
+                });
+
+            }
+            catch (Exception ex)
+            {
+                return Conflict(new FailResponse()
+                {
+                    Status = Conflict().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTable(Guid id)
         {

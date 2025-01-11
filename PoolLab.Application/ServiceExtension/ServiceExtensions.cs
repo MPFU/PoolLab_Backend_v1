@@ -56,6 +56,9 @@ namespace PoolLab.Application.ServiceExtension
             services.AddScoped<IDashboardService, DashboardService>();
             services.AddScoped<IFirebaseAuthService, FirebaseAuthService>();
             services.AddScoped<ISignalRNotifier, SignalRNotifier>();
+            services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<ITableIssuesService, TableIssuesService>();
+            services.AddScoped<ITableMaintenanceService, TableMaintenanceService>();
 
             services.AddScoped(x => new BlobServiceClient(configuration.GetConnectionString("BlobStorage")));
 

@@ -99,9 +99,6 @@ namespace PoolLab.Application.Interface
             if (!string.IsNullOrEmpty(storeFilter.Name))
                 query = query.Where(x => x.Name.Contains(storeFilter.Name, StringComparison.OrdinalIgnoreCase));
 
-            if (storeFilter.CompanyId != null)
-                query = query.Where(x => x.CompanyId.Equals(storeFilter.CompanyId));
-
             if (!string.IsNullOrEmpty(storeFilter.Status))
                 query = query.Where(x => x.Status.Contains(storeFilter.Status, StringComparison.OrdinalIgnoreCase));
 
@@ -147,6 +144,47 @@ namespace PoolLab.Application.Interface
         public async Task<StoreDTO?> GetStoreById(Guid id)
         {
             return _mapper.Map<StoreDTO>(await _unitOfWork.StoreRepo.GetByIdAsync(id));
+        }
+
+        public async Task<string?> InActiveStore(Guid Id)
+        {
+            try
+            {
+                var store = await _unitOfWork.StoreRepo.GetByIdAsync(Id);
+                if(store == null)
+                {
+                    return "Không tìm thấy chi nhánh này!";
+                }
+
+                store.Status = "Dừng Hoạt Động";
+                _unitOfWork.StoreRepo.Update(store);
+                var result = await _unitOfWork.SaveAsync() > 0;
+                return null;
+            }catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<string?> ReActiveStore(Guid Id)
+        {
+            try
+            {
+                var store = await _unitOfWork.StoreRepo.GetByIdAsync(Id);
+                if (store == null)
+                {
+                    return "Không tìm thấy chi nhánh này!";
+                }
+
+                store.Status = "Hoạt Động";
+                _unitOfWork.StoreRepo.Update(store);
+                var result = await _unitOfWork.SaveAsync() > 0;
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public async Task<string?> UpdateStore(Guid Id, NewStoreDTO newStore)

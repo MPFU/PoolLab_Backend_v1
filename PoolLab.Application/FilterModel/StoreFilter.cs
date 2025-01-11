@@ -13,8 +13,6 @@ namespace PoolLab.Application.FilterModel
 
         public string? Name { get; set; }
 
-        public Guid? CompanyId { get; set; }
-
         public string? Status { get; set; }
     }
 }

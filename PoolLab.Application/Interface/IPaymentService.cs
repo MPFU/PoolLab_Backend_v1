@@ -16,6 +16,8 @@ namespace PoolLab.Application.Interface
 
         Task<PageResult<PaymentDTO>> GetAllTransaction(PaymentFilter paymentFilter);
 
+        Task<PageResult<GetAllOrderTransactionDTO>> GetAllOrderTransaction(PaymentOrderFilter paymentFilter);
+
         Task<string?> CreateTransactionDeposit(PaymentDepositDTO deposiDTO);
 
         Task<string?> UpdateTransactionStatus(Guid Id, string status);

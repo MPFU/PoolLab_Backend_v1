@@ -24,6 +24,8 @@ namespace PoolLab.Application.ModelDTO
 
         public decimal? TotalPrice { get; set; }
 
+        public string? PaymentMethod { get; set; }
+
         public string? Status { get; set; }
     }
 
@@ -42,6 +44,8 @@ namespace PoolLab.Application.ModelDTO
         public string? OrderBy {  get; set; }
 
         public int? Discount { get; set; }
+
+        public string? PaymentMethod { get; set; }
     }
 
     public class GetAllOrderDTO
@@ -65,6 +69,10 @@ namespace PoolLab.Application.ModelDTO
         public decimal? TotalPrice { get; set; }
 
         public decimal? FinalPrice { get; set; }
+
+        public string? OrderBy { get; set; }
+
+        public string? PaymentMethod { get; set; }
 
         public string? Status { get; set; }
     }
@@ -110,6 +118,10 @@ namespace PoolLab.Application.ModelDTO
 
         public decimal? ExcessCash { get; set; }
 
+        public decimal? AdditionalFee { get; set; }
+
+        public string? PaymentMethod { get; set; }
+
         public string? Status { get; set; }
     }
 
@@ -122,6 +134,12 @@ namespace PoolLab.Application.ModelDTO
         public decimal? CustomerPay { get; set; }
 
         public decimal? ExcessCash { get; set; }
+
+        public decimal? FinalPrice { get; set; }
+
+        public decimal? AdditionalFee { get; set; }
+
+        public string? PaymentMethod { get; set; }
 
         public string? Status { get; set; }
     }

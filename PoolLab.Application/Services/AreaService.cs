@@ -91,14 +91,13 @@ namespace PoolLab.Application.Interface
             try
             {
                
-
                 var are = await _unitOfWork.AreaRepo.GetByIdAsync(Id);
                 if(are == null)
                 {
                     return "Không tìm thấy!";
                 }
 
-                if(are.Name != null)
+                if(!string.IsNullOrEmpty(newAreaDTO.Name))
                 {
                     var check = await _unitOfWork.AreaRepo.CheckDuplicate((Guid)newAreaDTO.StoreId, newAreaDTO.Name, Id);
                     if (check)

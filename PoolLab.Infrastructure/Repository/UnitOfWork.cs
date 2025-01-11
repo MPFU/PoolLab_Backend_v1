@@ -40,6 +40,9 @@ namespace PoolLab.Infrastructure.Interface
         private readonly IBidaTypeAreRepo _bidaTypeAreaRepo;
         private readonly IVoucherRepo _voucherRepo;
         private readonly IAccountVoucherRepo _accountVoucherRepo;
+        private readonly INotificationRepo _notificationRepo;
+        private readonly ITableIssuesRepo _tableIssuesRepo;
+        private readonly ITableMaintenanceRepo _tableMaintenanceRepo;
         private IDbContextTransaction _transaction;
 
 
@@ -73,6 +76,9 @@ namespace PoolLab.Infrastructure.Interface
             _bidaTypeAreaRepo = new BidaTypeAreaRepo(_dbContext);
             _accountVoucherRepo = new AccountVoucherRepo(_dbContext);
             _voucherRepo = new VoucherRepo(_dbContext);
+            _tableIssuesRepo = new TableIssuesRepo(_dbContext);
+            _tableMaintenanceRepo = new TableMaintenanceRepo(_dbContext);
+            _notificationRepo = new NotificationRepo(_dbContext);
         }
         public IAccountRepo AccountRepo => _accountRepo;
 
@@ -127,6 +133,12 @@ namespace PoolLab.Infrastructure.Interface
         public IVoucherRepo VoucherRepo => _voucherRepo;
 
         public IAccountVoucherRepo AccountVoucherRepo => _accountVoucherRepo;
+
+        public INotificationRepo NotificationRepo => _notificationRepo;
+
+        public ITableIssuesRepo TableIssuesRepo => _tableIssuesRepo;
+
+        public ITableMaintenanceRepo TableMaintenanceRepo => _tableMaintenanceRepo;
 
         public void Dispose()
         {

@@ -19,12 +19,14 @@ namespace PoolLab.Application.Interface
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IPlaytimeService _laytimeService;
+        private readonly IPaymentService _paymentService;
 
-        public OrderService(IMapper mapper, IUnitOfWork unitOfWork, IPlaytimeService laytimeService)
+        public OrderService(IMapper mapper, IUnitOfWork unitOfWork, IPlaytimeService laytimeService, IPaymentService paymentService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _laytimeService = laytimeService;
+            _paymentService = paymentService;
         }
 
         public async Task<string?> AddNewOrder(AddNewOrderDTO addNewOrderDTO)
@@ -45,6 +47,7 @@ namespace PoolLab.Application.Interface
                 order.CustomerPay = 0;
                 order.ExcessCash = 0 ;
                 order.FinalPrice = 0;
+                order.AdditionalFee = 0;
                 order.Id = Guid.NewGuid();
                 if(addNewOrderDTO.CustomerId == null && String.IsNullOrEmpty(addNewOrderDTO.Username))
                 {
@@ -199,17 +202,32 @@ namespace PoolLab.Application.Interface
                 if (table == null)
                 {
                     return "Không tìm thấy bàn chơi này!";
-                }
+                }             
+
                 order.TotalPrice = updateCusPayDTO.TotalPrice !=null ? updateCusPayDTO.TotalPrice : order.TotalPrice;
                 order.Discount = updateCusPayDTO.Discount != null ? updateCusPayDTO.Discount : order.Discount;
                 order.CustomerPay = updateCusPayDTO.CustomerPay != null ? updateCusPayDTO.CustomerPay : order.CustomerPay;
                 order.ExcessCash = updateCusPayDTO.ExcessCash != null ? updateCusPayDTO.ExcessCash : order.ExcessCash;
+                order.AdditionalFee = updateCusPayDTO.AdditionalFee != null ? updateCusPayDTO.AdditionalFee : order.AdditionalFee;
+                order.PaymentMethod = updateCusPayDTO.PaymentMethod != null ? updateCusPayDTO.PaymentMethod : "Tiền Mặt";
                 order.Status = updateCusPayDTO.Status != null ? updateCusPayDTO.Status : order.Status;
                 _unitOfWork.OrderRepo.Update(order);
                 var result = await _unitOfWork.SaveAsync() > 0;
                 if (!result)
                 {
                     return "Cập nhật hoá đơn thất bại!";
+                }
+
+                PaymentBookingDTO paymentBookingDTO = new PaymentBookingDTO();
+                paymentBookingDTO.PaymentMethod = updateCusPayDTO.PaymentMethod;
+                paymentBookingDTO.Amount = updateCusPayDTO.FinalPrice;
+                paymentBookingDTO.OrderId = order.Id;
+                paymentBookingDTO.PaymentInfo = "Thanh toán hoá đơn";
+                paymentBookingDTO.TypeCode = -1;
+                var pay = await _paymentService.CreateTransactionBooking(paymentBookingDTO);
+                if (pay != null)
+                {
+                    return pay;
                 }
 
                 table.Status = "Bàn Trống";

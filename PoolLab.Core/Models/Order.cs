@@ -19,6 +19,8 @@ public partial class Order
 
     public Guid? PlayTimeId { get; set; }
 
+    public Guid? TableIssuesId {  get; set; }
+
     public DateTime? OrderDate { get; set; }
 
     public string? OrderBy { get; set; }
@@ -33,6 +35,10 @@ public partial class Order
 
     public decimal? ExcessCash { get; set; }
 
+    public decimal? AdditionalFee { get; set; }
+
+    public string? PaymentMethod { get; set; }
+
     public string? Status { get; set; }
 
     public virtual Account? Customer { get; set; }
@@ -42,6 +48,8 @@ public partial class Order
     public virtual BilliardTable? BilliardTable { get; set; }
 
     public virtual PlayTime? PlayTime { get; set; }
+
+    public virtual TableIssues? TableIssues { get; set; }
 
     public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 

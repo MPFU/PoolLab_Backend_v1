@@ -11,7 +11,7 @@ namespace PoolLab.WebAPI.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    [Authorize(Roles = "Member, Admin,Super Manager,Manager,Staff")]
+   // [Authorize(Roles = "Member, Admin,Super Manager,Manager,Staff")]
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;

@@ -26,8 +26,6 @@ namespace PoolLab.Application.ModelDTO
 
         public TimeOnly? TimeEnd { get; set; }
 
-        public Guid? CompanyId { get; set; }
-
         public DateTime? CreatedDate { get; set; }
 
         public DateTime? UpdatedDate { get; set; }

@@ -35,5 +35,7 @@ namespace PoolLab.Application.Interface
         Task<List<GetBilliardTableDTO>?> SearchTableForRecurring(SearchTableRecurringDTO searchDTO);
 
         Task<List<GetBilliardTableDTO>?> SearchTableForBooking(SearchTableBookingDTO searchTable);
+
+        Task<string?> InActiveBilliardTable(Guid Id);
     }
 }

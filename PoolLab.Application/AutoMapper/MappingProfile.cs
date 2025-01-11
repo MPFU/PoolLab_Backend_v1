@@ -171,6 +171,11 @@ namespace PoolLab.Application.AutoMapper
             CreateMap<Transaction, PaymentDTO>()
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Account.UserName))
                 .ReverseMap();
+            CreateMap<Transaction, GetAllOrderTransactionDTO>()
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Account.UserName))
+                .ForMember(dest => dest.OrderCode, opt => opt.MapFrom(src => src.Order.OrderCode))
+                .ForMember(dest => dest.OrderBy, opt => opt.MapFrom(src => src.Order.OrderBy))
+                .ReverseMap();
 
             //BIDATYPEAREA
             CreateMap<NewTypeAreaDTO, BilliardTypeArea>().ReverseMap();
@@ -232,6 +237,29 @@ namespace PoolLab.Application.AutoMapper
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Account.UserName))
                 .ForMember(dest => dest.VoucherName, opt => opt.MapFrom(src => src.Voucher.Name))
                 .ForMember(dest => dest.VouCode, opt => opt.MapFrom(src => src.Voucher.VouCode))
+                .ReverseMap();
+
+            //TABLE ISSUES
+            CreateMap<TableIssuesDTO, TableIssues>().ReverseMap();
+            CreateMap<TableIssues, CreateTableIssuesDTO>().ReverseMap();
+            CreateMap<TableIssues, GetAllTableIssuesDTO>()
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Customer.UserName))
+                .ForMember(dest => dest.BilliardName, opt => opt.MapFrom(src => src.BilliardTable.Name))
+                .ReverseMap();
+
+
+            //NOTIFICATION
+            CreateMap<NotificationDTO,  Notification>().ReverseMap();
+            CreateMap<Notification, CreateNotificationDTO>().ReverseMap();
+            CreateMap<Notification, GetAllNotificationDTO>()
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Customer.UserName))
+                .ReverseMap();
+
+            //TABLE MAINTENANCE
+            CreateMap<TableMaintenanceDTO, TableMaintenance>().ReverseMap();
+            CreateMap<TableMaintenance, GetAllTableMainDTO>()
+                .ForMember(dest => dest.StaffName, opt => opt.MapFrom(src => src.Technician.UserName))
+                .ForMember(dest => dest.TableName, opt => opt.MapFrom(src => src.BilliardTable.Name))
                 .ReverseMap();
         }
     }

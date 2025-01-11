@@ -149,9 +149,9 @@ namespace PoolLab.Application.Interface
                                 }
 
                                 order.TotalPrice = Math.Round((decimal)totalPrice, 0, MidpointRounding.AwayFromZero);
-                                order.CustomerPay = totalPrice;
+                                order.CustomerPay = order.FinalPrice + play.TotalPrice;
                                 order.Discount = change;
-                                order.FinalPrice = totalPrice - change;
+                                order.FinalPrice = (order.FinalPrice + play.TotalPrice) - change;
                                 order.ExcessCash = change;
                             }
                             else
@@ -164,9 +164,9 @@ namespace PoolLab.Application.Interface
                                 {
                                     return upPoint;
                                 }
-                                order.TotalPrice = Math.Round((decimal)totalPrice, 0, MidpointRounding.AwayFromZero);
-                                order.CustomerPay = totalPrice;
-                                order.FinalPrice = totalPrice;
+                                order.TotalPrice = Math.Round((decimal)totalPrice, 0, MidpointRounding.AwayFromZero);                               
+                                order.FinalPrice = order.FinalPrice + play.TotalPrice;
+                                order.CustomerPay = order.FinalPrice;
                             }
                             
                             order.Status = "Hoàn Thành";
@@ -231,10 +231,10 @@ namespace PoolLab.Application.Interface
                                     return upCus1;
                                 }
                                 order.TotalPrice = Math.Round((decimal)totalPrice, 0, MidpointRounding.AwayFromZero);
-                                order.FinalPrice = totalPrice;
-                                order.CustomerPay = principal;
+                                order.CustomerPay = order.FinalPrice + principal;
+                                order.FinalPrice = (order.FinalPrice + priceStop) - change;                               
                                 order.Discount = change;
-                                order.ExcessCash = change + (principal - totalPrice);
+                                order.ExcessCash = change + (principal - priceStop);
                             }
                             else
                             {
@@ -246,10 +246,10 @@ namespace PoolLab.Application.Interface
                                 {
                                     return upPoint;
                                 }
+                                order.CustomerPay = order.FinalPrice + principal;
                                 order.TotalPrice = Math.Round((decimal)totalPrice, 0, MidpointRounding.AwayFromZero);
-                                order.FinalPrice = totalPrice;
-                                order.CustomerPay = principal;
-                                order.ExcessCash += (principal - totalPrice);
+                                order.FinalPrice = order.FinalPrice + priceStop;                              
+                                order.ExcessCash += (principal - priceStop);
                             }
 
                             order.Status = "Hoàn Thành";
@@ -260,7 +260,7 @@ namespace PoolLab.Application.Interface
                                 return "Cập nhật hoá đơn thất bại";
                             }
 
-                            var refund = cus.Balance + (principal - order.FinalPrice);
+                            var refund = cus.Balance + (principal - priceStop);
                             var upCus = await _accountService.UpdateBalance(cus.Id, (decimal)refund);
                             if(upCus != null)
                             {
@@ -273,7 +273,7 @@ namespace PoolLab.Application.Interface
                             payment.PaymentMethod = "Qua Ví";
                             payment.PaymentInfo = "Hoàn Tiền Dư";
                             payment.TypeCode = 1;
-                            payment.Amount = (principal - order.FinalPrice) + order.Discount ;
+                            payment.Amount = order.ExcessCash ;
                             var pay = await _paymentService.CreateTransactionBooking(payment);
                             if(pay != null)
                             {
@@ -340,7 +340,7 @@ namespace PoolLab.Application.Interface
                     }
 
                     order.TotalPrice = order.TotalPrice + play.TotalPrice;
-                    order.FinalPrice = order.TotalPrice;
+                    order.FinalPrice = order.TotalPrice + play.TotalPrice;
                     order.Status = "Đang Thanh Toán";
                     _unitOfWork.OrderRepo.Update(order);
                     var upOrder = await _unitOfWork.SaveAsync() > 0;

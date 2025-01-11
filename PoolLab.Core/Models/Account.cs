@@ -35,15 +35,11 @@ public partial class Account
 
     public Guid? SubId { get; set; }
 
-    public Guid? CompanyId { get; set; }
-
     public DateTime? JoinDate { get; set; }
 
     public string? Status { get; set; }
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
-
-    public virtual Company? Company { get; set; }
 
     public virtual ICollection<Event> Events { get; set; } = new List<Event>();
 
@@ -64,4 +60,11 @@ public partial class Account
     public virtual ICollection<AccountVoucher> AccountVouchers { get; set; } = new List<AccountVoucher>();
 
     public virtual ICollection<RegisteredCourse> RegisteredCourses { get; set; } = new List<RegisteredCourse>();
+
+    public virtual ICollection<TableIssues> TableIssues { get; set; } = new List<TableIssues>();
+
+    public virtual ICollection<TableMaintenance> TableMaintenances { get; set; } = new List<TableMaintenance>();
+
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
 }

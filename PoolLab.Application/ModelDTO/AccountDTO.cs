@@ -39,8 +39,6 @@ namespace PoolLab.Application.ModelDTO
 
         public Guid? SubId { get; set; }
 
-        public Guid? CompanyId { get; set; }
-
         public DateTime? JoinDate { get; set; }
 
         public string? Status { get; set; }
@@ -90,9 +88,6 @@ namespace PoolLab.Application.ModelDTO
 
         public Guid? StoreId { get; set; }
 
-        public Guid? CompanyId { get; set; }
-
-
     }
 
     public class UpdateAccDTO
@@ -138,7 +133,6 @@ namespace PoolLab.Application.ModelDTO
 
         public Guid? StoreId { get; set; }
 
-        public Guid? CompanyId { get; set; }
     }
 
     public class LoginAccDTO
@@ -179,8 +173,6 @@ namespace PoolLab.Application.ModelDTO
         public int? Tier { get; set; }
 
         public Guid? SubId { get; set; }
-
-        public Guid? CompanyId { get; set; }
 
         public DateTime? JoinDate { get; set; }
 

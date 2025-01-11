@@ -14,6 +14,8 @@ namespace PoolLab.Application.ModelDTO
 
         public Guid? AccountId { get; set; }
 
+        public Guid? TableIssuesId { get; set; }
+
         public string? Username { get; set; }
 
         public Guid? SubId { get; set; }
@@ -40,6 +42,8 @@ namespace PoolLab.Application.ModelDTO
         public Guid? AccountId { get; set; }
 
         public Guid? OrderId { get; set; }
+
+        public Guid? TableIssuesId { get; set; }
 
         public decimal? Amount { get; set; }
 
@@ -73,5 +77,36 @@ namespace PoolLab.Application.ModelDTO
         {
             
         }
+    }
+
+    public class GetAllOrderTransactionDTO
+    {
+        public Guid Id { get; set; }
+
+        public Guid? OrderId { get; set; }
+
+        public Guid? AccountId { get; set; }
+
+        public string? Username { get; set; }
+
+        public string? OrderCode { get; set; }
+
+        public string? OrderBy { get; set; }
+
+        public DateTime? PaymentDate { get; set; }
+
+        public decimal? Amount { get; set; }
+
+        public string? PaymentMethod { get; set; }
+
+        public string? PaymentInfo { get; set; }
+
+        public int? PaymentCode { get; set; }
+
+        public int? TypeCode { get; set; }
+
+        public string? Message { get; set; }
+
+        public string? Status { get; set; }
     }
 }

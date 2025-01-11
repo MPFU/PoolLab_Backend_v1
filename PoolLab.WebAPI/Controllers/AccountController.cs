@@ -12,7 +12,7 @@ namespace PoolLab.WebAPI.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    [Authorize(Roles = "Member, Admin,Super Manager,Manager,Staff")]
+   // [Authorize(Roles = "Member, Admin,Super Manager,Manager,Staff")]
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;

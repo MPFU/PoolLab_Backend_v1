@@ -41,6 +41,10 @@ public partial class BilliardTable
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 
+    public virtual ICollection<TableIssues> TableIssues { get; set; } = new List<TableIssues>();
+
+    public virtual ICollection<TableMaintenance> TableMaintenances { get; set; } = new List<TableMaintenance>();
+
     public virtual BilliardPrice? Price { get; set; }
 
     public virtual Store? Store { get; set; }

@@ -186,7 +186,65 @@ namespace PoolLab.WebAPI.Controllers
             }
         }
 
-        
+        [HttpPut("{id}")]
+        public async Task<IActionResult> InActiveStore(Guid id)
+        {
+            try
+            {
+                var newStore = await _storeService.InActiveStore(id);
+                if (newStore != null)
+                {
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = newStore
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Cập nhật thành công!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> ReActiveStore(Guid id)
+        {
+            try
+            {
+                var newStore = await _storeService.ReActiveStore(id);
+                if (newStore != null)
+                {
+                    return BadRequest(new FailResponse()
+                    {
+                        Status = BadRequest().StatusCode,
+                        Message = newStore
+                    });
+                }
+                return Ok(new SucceededRespone()
+                {
+                    Status = Ok().StatusCode,
+                    Message = "Cập nhật thành công!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new FailResponse()
+                {
+                    Status = BadRequest().StatusCode,
+                    Message = ex.Message
+                });
+            }
+        }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStore(Guid id)

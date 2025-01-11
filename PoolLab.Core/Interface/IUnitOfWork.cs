@@ -35,6 +35,9 @@ namespace PoolLab.Core.Interface
         IBidaTypeAreRepo BidaTypeAreaRepo { get; }
         IVoucherRepo VoucherRepo { get; }
         IAccountVoucherRepo AccountVoucherRepo { get; }
+        INotificationRepo NotificationRepo { get; }
+        ITableIssuesRepo TableIssuesRepo { get; }
+        ITableMaintenanceRepo TableMaintenanceRepo { get; }
 
 
         Task BeginTransactionAsync();

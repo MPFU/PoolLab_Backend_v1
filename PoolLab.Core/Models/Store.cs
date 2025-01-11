@@ -23,8 +23,6 @@ public partial class Store
 
     public TimeOnly? TimeEnd { get; set; }
 
-    public Guid? CompanyId { get; set; }
-
     public DateTime? CreatedDate { get; set; }
 
     public DateTime? UpdatedDate { get; set; }
@@ -34,8 +32,6 @@ public partial class Store
     public virtual ICollection<Account> Accounts { get; set; } = new List<Account>();
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
-
-    public virtual Company? Company { get; set; }
 
     public virtual ICollection<Course> Courses { get; set; } = new List<Course>();
 
@@ -48,6 +44,10 @@ public partial class Store
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
     public virtual ICollection<BilliardTypeArea> BilliardTypeAreas { get; set; } = new List<BilliardTypeArea>();
+
+    public virtual ICollection<TableIssues> TableIssues { get; set; } = new List<TableIssues>();
+
+    public virtual ICollection<TableMaintenance> TableMaintenances { get; set; } = new List<TableMaintenance>();
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 }

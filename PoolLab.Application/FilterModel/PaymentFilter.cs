@@ -22,4 +22,21 @@ namespace PoolLab.Application.FilterModel
 
         public string? Status { get; set; }
     }
+
+    public class PaymentOrderFilter : FilterOption<Transaction>
+    {
+        public string? Username { get; set; }
+
+        public string? OrderCode { get; set; }
+
+        public string? OrderBy { get; set; }
+
+        public int? TypeCode { get; set; }
+
+        public Guid? OrderId { get; set; }
+
+        public Guid? AccountId { get; set; }
+
+        public string? Status { get; set; }
+    }
 }

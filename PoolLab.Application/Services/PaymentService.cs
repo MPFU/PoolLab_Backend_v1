@@ -130,6 +130,67 @@ namespace PoolLab.Application.Interface
             };
         }
 
+        public async Task<PageResult<GetAllOrderTransactionDTO>> GetAllOrderTransaction(PaymentOrderFilter paymentFilter)
+        {
+            var tranList = _mapper.Map<IEnumerable<GetAllOrderTransactionDTO>>(await _unitOfWork.PaymentRepo.GetAllOrderTransaction());
+            IQueryable<GetAllOrderTransactionDTO> query = tranList.AsQueryable();
+
+            //Filter
+            if (!string.IsNullOrEmpty(paymentFilter.Username))
+                query = query.Where(x => x.Username.Contains(paymentFilter.Username, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(paymentFilter.OrderCode))
+                query = query.Where(x => x.OrderCode.Contains(paymentFilter.OrderCode, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(paymentFilter.OrderBy))
+                query = query.Where(x => x.OrderBy.Contains(paymentFilter.OrderBy, StringComparison.OrdinalIgnoreCase));
+
+            if (paymentFilter.OrderId != null)
+                query = query.Where(x => x.OrderId.Equals(paymentFilter.OrderId));
+
+            if (paymentFilter.AccountId != null)
+                query = query.Where(x => x.AccountId.Equals(paymentFilter.AccountId));
+
+            if (paymentFilter.TypeCode != null)
+                query = query.Where(x => x.TypeCode == paymentFilter.TypeCode);
+
+            if (!string.IsNullOrEmpty(paymentFilter.Status))
+                query = query.Where(x => x.Status.Contains(paymentFilter.Status, StringComparison.OrdinalIgnoreCase));
+
+            //Sorting
+            if (!string.IsNullOrEmpty(paymentFilter.SortBy))
+            {
+                switch (paymentFilter.SortBy)
+                {
+                    case "paymentDate":
+                        query = paymentFilter.SortAscending ?
+                            query.OrderBy(x => x.PaymentDate) :
+                            query.OrderByDescending(x => x.PaymentDate);
+                        break;
+                    case "amount":
+                        query = paymentFilter.SortAscending ?
+                            query.OrderBy(x => x.Amount) :
+                            query.OrderByDescending(x => x.Amount);
+                        break;
+                }
+            }
+
+            //Paging
+            var pageItems = query
+                .Skip((paymentFilter.PageNumber - 1) * paymentFilter.PageSize)
+                .Take(paymentFilter.PageSize)
+                .ToList();
+
+            return new PageResult<GetAllOrderTransactionDTO>
+            {
+                Items = pageItems,
+                PageNumber = paymentFilter.PageNumber,
+                PageSize = paymentFilter.PageSize,
+                TotalItem = query.Count(),
+                TotalPages = (int)Math.Ceiling((decimal)query.Count() / (decimal)paymentFilter.PageSize)
+            };
+        }
+
         public async Task<string?> UpdateTransactionStatus(Guid Id, string status)
         {
             try
